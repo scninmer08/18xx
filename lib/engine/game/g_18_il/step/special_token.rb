@@ -4,7 +4,7 @@ require_relative '../../../step/special_token'
 
 module Engine
   module Game
-    module G18IL2
+    module G18IL
       module Step
         class SpecialToken < Engine::Step::SpecialToken
           def process_place_token(action)

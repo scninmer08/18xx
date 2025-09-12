@@ -36,13 +36,13 @@ module Engine
             choices = []
             choices << ["Sell for #{@game.format_currency(price)}"]
             if current_entity.cash >= price && @game.ic.num_market_shares.positive?
-              choices << ["Exchange for #{@game.ic.name} share for #{@game.format_currency(price)}"]
+              choices << ["Pay #{@game.format_currency(price)} for #{@game.ic.name} share"]
             end
             choices
           end
 
           def choice_name
-            'Option Cube Decision'
+            "Option Cube Decision for #{current_entity.name}"
           end
 
           def process_choose(action)

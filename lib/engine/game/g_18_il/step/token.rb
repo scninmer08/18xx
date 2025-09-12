@@ -12,7 +12,7 @@ module Engine
           ACTIONS = %w[place_token pass].freeze
 
           def actions(entity)
-            return [] if @game.last_set_triggered
+            return [] if @game.last_set
             return [] unless entity == current_entity
             return [] unless can_place_token?(entity)
             return [] if entity == @game.ic && @game.ic_in_receivership?
@@ -128,7 +128,13 @@ module Engine
                 replaceable
               end
 
-              raise GameError, 'No permit token slot available until phase color change' unless found_replaceable_token
+              unless found_replaceable_token
+                if @game.phase.tiles.include?(:gray)
+                  raise GameError, "#{entity.name} cannot lay token - no token slots available on #{hex&.id}"
+                end
+
+                raise GameError, 'No permit token slot available until phase color change'
+              end
 
               if city.available_slots
                 city.place_token(entity, token, free: true, check_tokenable: check_tokenable)

@@ -16,9 +16,9 @@ module Engine
             price = action.price
 
             # Check if the train is actually buyable in the current situation
-            if entity.cash < price
-              raise GameError, "#{entity.name} has #{format_currency(entity.cash)} and "\
-                               "cannot spend #{format_currency(price)}"
+            if entity.cash < price && !entity.trains.empty?
+              raise GameError, "#{entity.name} has #{@game.format_currency(entity.cash)} and "\
+                               "cannot spend #{@game.format_currency(price)}"
             end
             raise GameError, 'Must pay face value' if must_pay_face_value?(train, entity, price)
             raise GameError, 'An entity cannot buy a train from itself' if train.owner == entity
@@ -46,6 +46,7 @@ module Engine
 
             @game.buy_train(entity, train, price)
             @game.phase.buying_train!(entity, train, train.owner)
+            @game.emr_active = nil
           end
         end
       end

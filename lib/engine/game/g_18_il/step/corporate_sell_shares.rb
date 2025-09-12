@@ -46,8 +46,7 @@ module Engine
               str << "#{@game.rush_delivery&.name} allows the corporation to buy one train from the Depot "\
                      'prior to running trains.'
             end
-            str << 'If emergency money raising, corporation must first sell shares that it owns of other corporations'\
-                   ' at half value.'
+            str << 'If emergency money raising, corporation must first sell shares of IC.'
             str << 'Pass if buying a train from another corporation:'
             str
           end

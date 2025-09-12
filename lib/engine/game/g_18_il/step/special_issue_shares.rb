@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'corporate_issue_buy_shares'
+require_relative 'issue_shares'
 
 module Engine
   module Game
     module G18IL
       module Step
-        class SpecialIssueShares < CorporateIssueBuyShares
+        class SpecialIssueShares < IssueShares
           ACTIONS = %w[sell_shares].freeze
 
           def description
@@ -15,7 +15,7 @@ module Engine
 
           def actions(entity)
             actions = []
-            return actions if @game.last_set_triggered
+            return actions if @game.last_set
             return actions unless entity.corporation?
             return actions unless entity == current_entity
 
@@ -25,9 +25,9 @@ module Engine
             actions
           end
 
-          def visible_corporations
-            [current_entity]
-          end
+          # def visible_corporations
+          #   [current_entity]
+          # end
 
           def active_entities
             return [] unless @game.share_premium&.owner == @round.current_operator
@@ -36,7 +36,7 @@ module Engine
           end
 
           def pass_description
-            'Pass (Special Issue)'
+            'Pass (Share Premium Issue)'
           end
 
           def help
@@ -59,7 +59,7 @@ module Engine
 
           def process_sell_shares(action)
             @game.sp_used = action.entity
-            action.entity.ipo_shares.last.buyable = true
+            @game.reserved_share.buyable = true if @game.reserved_share
             old_price = action.bundle.corporation.share_price.price
             @game.sell_shares_and_change_price(action.bundle, allow_president_change: false, swap: nil, movement: :left_share)
             new_price = action.bundle.corporation.share_price.price

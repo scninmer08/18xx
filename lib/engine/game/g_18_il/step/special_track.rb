@@ -44,6 +44,7 @@ module Engine
                 when :green
                   # checks for both IC Line connections when laying green
                   raise GameError, 'Tile must complete IC Line' if @game.ic_line_connections(hex) < 2
+
                   # disallows Engineering Master corp from upgrading two incomplete IC Line hexes
                   if @round.num_laid_track > 1 && @round.laid_hexes.first.tile.color == :green &&
                     @game.class::IC_LINE_HEXES.include?(@round.laid_hexes.first)
@@ -59,7 +60,7 @@ module Engine
               end
 
               # closes GTL if Chicago is upgraded to brown
-              if !@game.optional_rules&.include?(:intro_game) && tile.name == 'CHI3' && !@game.goodrich_transit_line.closed?
+              if !@game.intro_game? && tile.name == 'CHI3' && !@game.goodrich_transit_line.closed?
                 company = @game.goodrich_transit_line
                 @log << "#{company.name} (#{company.owner.name}) closes"
                 company.close!
@@ -94,7 +95,7 @@ module Engine
               company.remove_ability(ability)
             else
               @round.teleported = company
-              @round.teleport_tokener = tokener
+              @round.teleport_markerer = tokener
             end
           end
         end

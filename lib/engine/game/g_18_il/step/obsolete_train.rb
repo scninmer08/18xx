@@ -4,7 +4,7 @@ require_relative '../../../step/base'
 
 module Engine
   module Game
-    module G18IL2
+    module G18IL
       module Step
         class ObsoleteTrain < Engine::Step::Base
           ACTIONS = %w[choose pass].freeze

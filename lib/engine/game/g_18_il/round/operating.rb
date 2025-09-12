@@ -4,7 +4,7 @@ require_relative '../../../round/operating'
 
 module Engine
   module Game
-    module G18IL2
+    module G18IL
       module Round
         class Operating < Engine::Round::Operating
           def setup

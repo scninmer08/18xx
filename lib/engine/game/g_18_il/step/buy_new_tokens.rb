@@ -80,13 +80,12 @@ module Engine
           end
 
           def price(num)
-            return 0 if num.zero?
+            return 0 if num.zero? || (!@game.intro_game? && pending_entity == @game.station_subsidy.owner)
 
-            price = pending_first_price + ((num - 1) * pending_price)
-            if !@game.optional_rules.include?(:intro_game) && pending_entity == @game.station_subsidy.owner
-              (price = num < 5 ? 0 : 40)
-            end
-            price
+            pending_first_price + ((num - 1) * pending_price)
+            # if !@game.intro_game? && pending_entity == @game.station_subsidy.owner
+            #   (price = num < 5 ? 0 : 40)
+            # end
           end
 
           def choices

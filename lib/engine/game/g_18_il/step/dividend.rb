@@ -21,7 +21,7 @@ module Engine
           end
 
           def actions(entity)
-            return [] if @game.last_set_triggered
+            return [] if @game.last_set
 
             super
           end
@@ -30,7 +30,7 @@ module Engine
             return [:withhold] if (current_entity == @game.ic && @game.ic_in_receivership?) ||
                                    !current_entity.loans.empty? || @game.train_borrowed
 
-            return [:payout] if @game.last_set_triggered
+            return [:payout] if @game.last_set
 
             DIVIDEND_TYPES
           end
@@ -55,14 +55,14 @@ module Engine
             if payout[:corporation].positive?
               @log << if @game.train_borrowed
                         "#{entity.name} withholds #{@game.format_currency(payout[:corporation])} "\
-                          "(#{@game.format_currency(payout[:corporation])} paid to bank as lease payment)"
+                          "(#{@game.format_currency(payout[:corporation])} paid to bank as a lease payment)"
                       else
                         "#{entity.name} withholds #{@game.format_currency(payout[:corporation])}"
                       end
             elsif payout[:per_share].zero?
               @log << "#{entity.name} does not run"
             end
-            @log << "#{entity.name} earns #{@game.subsidy_name} of #{@game.format_currency(subsidy)}" if subsidy.positive?
+            @log << "#{entity.name} earns a #{@game.subsidy_name} of #{@game.format_currency(subsidy)}" if subsidy.positive?
             @game.train_borrowed = nil
             return unless (borrowed_train = @game.borrowed_trains[current_entity])
 
@@ -108,7 +108,7 @@ module Engine
           end
 
           def skip!
-            return super unless @game.last_set_triggered
+            return super unless @game.last_set
 
             revenue = @game.routes_revenue(routes)
             process_dividend(Action::Dividend.new(

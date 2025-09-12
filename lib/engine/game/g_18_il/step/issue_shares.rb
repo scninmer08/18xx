@@ -4,7 +4,7 @@ require_relative '../../../step/issue_shares'
 
 module Engine
   module Game
-    module G18IL2
+    module G18IL
       module Step
         class IssueShares < Engine::Step::IssueShares
           def actions(entity)

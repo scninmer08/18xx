@@ -135,71 +135,85 @@ module Engine
               text_color: 'white',
               meta: { type: :share },
             },
+            {
+              name: 'IC Share',
+              sym: 'IC4',
+              value: 0,
+              revenue: 0,
+              desc: 'Ordinary Share (10%) of IC',
+              corporation: 'IC',
+              color: '#006A14',
+              text_color: 'white',
+              meta: { type: :share },
+            },
+            {
+              name: 'IC Share',
+              sym: 'IC5',
+              value: 0,
+              revenue: 0,
+              desc: 'Ordinary Share (10%) of IC',
+              corporation: 'IC',
+              color: '#006A14',
+              text_color: 'white',
+              meta: { type: :share },
+            },
           ]
-          return companies if @optional_rules&.include?(:intro_game)
+          return companies if intro_game?
 
           companies.concat([
             {
               name: 'Share Premium',
               value: 0,
               revenue: 0,
-              desc: 'When issuing a share during the Issue a Share step, receive double the current '\
-                    'share price from the bank to the corporation treasury. When this corporation is a '\
-                    '10-share corporation, one of its treasury shares is reserved. This reservation is '\
-                    'removed when the ability is used, which closes the company.',
+              desc: 'When the corporation issues a share during the “Issue a Share” step, it receives double the current '\
+                    'share price from the bank. This company closes after use. If the corporation starts as or converts to a '\
+                    'ten-share corporation, one of its treasury shares is marked as reserved. This share cannot be purchased '\
+                    'while the company is open. When the ability is used, this reserve share is issued.',
               sym: 'SP',
               meta: { type: :private, class: :A },
               abilities: [
-                {
-                  type: 'description',
-                  owner_type: 'corporation',
-                  count: 1,
-                  closed_when_used_up: true,
-                  when: 'issue_share',
-                },
+                { type: 'description', owner_type: 'corporation', count: 1, closed_when_used_up: true, when: 'issue_share' },
               ],
             },
             {
-              name: 'Station Subsidy',
+              name: 'U.S. Mail Line',
               value: 0,
               revenue: 0,
-              desc: 'This company starts with four subsidies. When starting or converting a '\
-                    'corporation, one, two, three, or four subsidies are used in lieu of payment '\
-                    'for one, two, three or four station tokens, respectively. A corporation may '\
-                    'use the ability to gain five station tokens at a total cost of $40.',
-              sym: 'SS',
+              desc: 'When running trains, the corporation earns $10 from the bank for each city visited by its trains. '\
+                    'Cities count multiple times if visited by multiple trains.',
+              sym: 'USML',
               meta: { type: :private, class: :A },
               abilities: [
-                {
-                  type: 'description',
-                  desc_detail: 'Station Subsidy',
-                  hexes: [],
-                  owner_type: 'corporation',
-                  count: 4,
-                  closed_when_used_up: true,
-                },
+                { type: 'description' },
               ],
             },
             {
-              name: 'Steamboat',
+              name: 'Train Subsidy',
               value: 0,
               revenue: 0,
-              desc: 'At any time during the tile-laying step of the corporation’s operating '\
-                    'turn, place either the “St. Paul Harbor” tile at B1 or the “Port of Memphis” '\
-                    'tile at D23. It does not have to be connected to a station marker and does '\
-                    'not count as a tile lay. The corporation receives a port marker. Steamboat '\
-                    'additionally grants the corporation a $20 bonus per port.',
-              sym: 'SMBT',
+              desc: 'When buying trains from the bank, the corporation receives a 25% discount on all purchases this turn. '\
+                    'This company closes after use.',
+              sym: 'TS',
               meta: { type: :private, class: :A },
               abilities: [
                 {
-                  type: 'tile_lay',
-                  hexes: %w[B1 D23],
-                  tiles: %w[SPH POM],
-                  when: 'track',
-                  free: true,
+                  type: 'train_discount',
+                  discount: {
+                    '2' => 0.25,
+                    '3' => 0.25,
+                    '4' => 0.25,
+                    '3P' => 0.25,
+                    '4+2P' => 0.25,
+                    '5+1P' => 0.25,
+                    '6' => 0.25,
+                    'D' => 0.25,
+                  },
                   owner_type: 'corporation',
-                  count: 1,
+                  use_across_ors: false,
+                  trains: %w[2 3 4 3P 4+2P 5+1P 6 D],
+                  count: 99,
+                  closed_when_used_up: true,
+                  when: 'buy_train',
                 },
               ],
             },
@@ -208,8 +222,8 @@ module Engine
               sym: 'ES',
               value: 0,
               revenue: 0,
-              desc: 'Receive an additional station marker. Once this ability is used, '\
-                    'the company closes.',
+              desc: 'When the corporation starts, it receives one additional free station marker. This '\
+                    'company closes after use.',
               color: nil,
               meta: { type: :private, class: :A },
               abilities: [
@@ -224,19 +238,21 @@ module Engine
               ],
             },
             {
-              name: 'U.S. Mail Line',
+              name: 'Station Subsidy',
               value: 0,
               revenue: 0,
-              desc: 'When running trains, receive $10 multiplied by the number of cities and offboards '\
-                    'each train visits. This amount is paid from the bank to the corporation\'s treasury. At '\
-                    'the beginning of its turn, the corporation may choose to close this company in exchange '\
-                    'for a mine marker.',
-              sym: 'USML',
+              desc: 'Whenever the corporation gains station markers from starting or converting, it receives them for '\
+                    'free (instead of paying $40 each).',
+              sym: 'SS',
               meta: { type: :private, class: :A },
               abilities: [
                 {
                   type: 'description',
-
+                  desc_detail: 'Station Subsidy',
+                  hexes: [],
+                  owner_type: 'corporation',
+                  count: 4,
+                  closed_when_used_up: true,
                 },
               ],
             },
@@ -244,10 +260,9 @@ module Engine
               name: 'Goodrich Transit Line',
               value: 0,
               revenue: 0,
-              desc: 'Place an available station marker in Chicago (H3) in the indicated GTL '\
-                    'station slot. The corporation receives a port marker. Once this ability is '\
-                    'used, the company closes. If this company is still open when Chicago is '\
-                    'upgraded with a brown tile, it closes immediately.',
+              desc: 'An available station marker is placed from the corporation in Chicago (H3) in the GTL slot. The '\
+                    'corporation gains a port marker for free. This company closes after use. It closes immediately '\
+                    'if it remains open when Chicago upgrades to a brown tile.',
               sym: 'GTL',
               meta: { type: :private, class: :A },
               abilities: [
@@ -268,33 +283,26 @@ module Engine
               ],
             },
             {
-              name: 'Train Subsidy',
+              name: 'Union Stock Yards',
               value: 0,
               revenue: 0,
-              desc: 'Receive a 25% discount on non-permanent trains and a 20% discount '\
-                    'on permanent trains during a single train-buying step. Once this ability '\
-                    'is used, the company closes.',
-              sym: 'TS',
+              desc: 'During its station placement step, the corporation may place a station marker in any connected '\
+                    'city except Chicago (H3) or St. Louis (C18). This marker is non-blocking and does not use a city '\
+                    'slot. This company closes after use.',
+              sym: 'USY',
               meta: { type: :private, class: :A },
               abilities: [
                 {
-                  type: 'train_discount',
-                  discount: {
-                    '2' => 0.25,
-                    '3' => 0.25,
-                    '4' => 0.25,
-                    '3P' => 0.25,
-                    '4+2P' => 0.2,
-                    '5+1P' => 0.2,
-                    '6' => 0.2,
-                    'D' => 0.2,
-                  },
+                  type: 'token',
+                  when: 'token',
                   owner_type: 'corporation',
-                  use_across_ors: false,
-                  trains: %w[2 3 4 3P 4+2P 5+1P 6 D],
-                  count: 99,
+                  connected: true,
+                  from_owner: true,
+                  extra_slot: true,
+                  special_only: true,
                   closed_when_used_up: true,
-                  when: 'buy_train',
+                  price: 0,
+                  hexes: %w[B11 C6 C8 D15 E2 E8 E12 F3 F9 F11 G4 G6 G16 H21 I6],
                 },
               ],
             },
@@ -302,35 +310,27 @@ module Engine
               name: 'Rush Delivery',
               value: 0,
               revenue: 0,
-              desc: 'Buy one train from the bank prior to the Run Trains step during this '\
-                    'operating round. The corporation may use emergency money raising if it does '\
-                    'not own a train. Once this ability is used, the private company closes.',
+              desc: 'Before the “Run Trains” step, the corporation may buy one train from the bank. Emergency money '\
+                    'raising may be used if it has no train. This company closes after use.',
               sym: 'RD',
               meta: { type: :private, class: :A },
               abilities: [
-                {
-                  type: 'train_buy',
-                  owner_type: 'corporation',
-                  count: 1,
-                  when: 'buy_train',
-                },
+                { type: 'train_buy', owner_type: 'corporation', count: 1, when: 'buy_train' },
               ],
             },
             {
               name: 'Chicago-Virden Coal Co.',
               value: 0,
               revenue: 0,
-              desc: 'During the tile-laying step of the corporation’s operating turn, lay or upgrade '\
-                    'in a mine hex (except Galena) with the #M1 tile, paying any terrain costs. It must be '\
-                    'connected to one of the corporation’s existing station markers but does not count as a '\
-                    'tile lay. The corporation receives a mine marker. Once this ability is used, the '\
-                    'company closes.',
+              desc: 'During its tile-laying step, the corporation may lay or upgrade a town hex/tile (except Galena) '\
+                    'with the #838 tile, paying any terrain costs. It must connect to one of its station markers, but '\
+                    'this action does not count as the tile lay. This company closes after use.',
               sym: 'CVCC',
               meta: { type: :private, class: :B },
               abilities: [
                 {
                   type: 'tile_lay',
-                  tiles: %w[M1],
+                  tiles: %w[838],
                   hexes: MINES,
                   when: 'track',
                   owner_type: 'corporation',
@@ -342,11 +342,12 @@ module Engine
               ],
             },
             {
-              name: 'Diverse Cargo',
+              name: 'Planned Obsolescence',
               value: 0,
               revenue: 0,
-              desc: 'The corporation receives either a mine or port marker. Once this ability is used, '\
-                    'the private company closes.',
+              desc: 'When a rusting event occurs, the corporation may delay the rusting of one of its trains (except '\
+                    'the “Rogers”). The train is removed from play at the end of its next “Run Trains” step. The company '\
+                    'closes after use.',
               sym: 'DC',
               meta: { type: :private, class: :B },
             },
@@ -354,10 +355,11 @@ module Engine
               name: 'Central IL Boom',
               value: 0,
               revenue: 0,
-              desc: 'In phase D, upgrade Peoria or Springfield using the matching gray tile. '\
-                    'It does not have to be connected to a station marker, does not count as a tile '\
-                    'lay, and may be upgraded regardless of the current city color. The unused tile '\
-                    'is removed from the game. Once this ability is used, the company closes.',
+              desc: 'In Phase D, during the tile-laying step, the corporation may upgrade Peoria (E8) '\
+                    'or Springfield (E12) with '\
+                    'its gray tile. This upgrade does not require a station connection, does not count as a tile lay, '\
+                    'and may be done regardless of the city’s current color. The unused tile is removed from the game. '\
+                    'This company closes after use.',
               sym: 'CIB',
               meta: { type: :private, class: :B },
               abilities: [
@@ -380,34 +382,43 @@ module Engine
               name: 'Frink, Walker, & Co.',
               value: 0,
               revenue: 0,
-              desc: 'During the tile-laying step of the corporation operating turn, place the G tile '\
-                    'in Galena for free, ignoring terrain costs. It does not have to be connected to a '\
-                    'station marker and does not count as a tile lay. The corporation receives a mine '\
-                    'marker. Once this ability is used, the private company closes. At the beginning of '\
-                    'its turn, the corporation may choose to close this company in exchange for a mine marker.',
+              desc: 'During its tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, '\
+                    'ignoring terrain costs. This does not require a station connection and does not count as the tile lay. '\
+                    'Whenever any other corporation runs one or more trains to Galena (C2), it receives a $20 subsidy from '\
+                    'the bank. This effect applies even if the corporation is unopened.',
               sym: 'FWC',
               meta: { type: :private, class: :B },
               abilities: [
-              {
-                type: 'tile_lay',
-                hexes: ['C2'],
-                tiles: ['G1'],
-                when: 'track',
-                free: true,
-                owner_type: 'corporation',
-                count: 1,
-                closed_when_used_up: true,
-              },
-            ],
+                {
+                  type: 'tile_lay',
+                  hexes: ['C2'],
+                  tiles: ['G1'],
+                  when: 'track',
+                  free: true,
+                  owner_type: 'corporation',
+                  count: 1,
+                  closed_when_used_up: false,
+                },
+              ],
+            },
+            {
+              name: 'Efficient Engineering',
+              value: 0,
+              revenue: 0,
+              desc: 'When the corporation performs two tile actions in a turn, the second '\
+                    'action costs $10 instead of $20 (terrain costs still apply).',
+              sym: 'EE',
+              meta: { type: :private, class: :B },
+              abilities: [
+                { type: 'description' },
+              ],
             },
             {
               name: 'Engineering Mastery',
               value: 0,
               revenue: 0,
-              desc: 'During the tile-laying step of the corporation’s operating turn, upgrade two tiles '\
-                    '(instead of two lays or one lay and one upgrade), paying a $30 fee (instead of $20) '\
-                    'and any terrain costs. This may not be used to upgrade two incomplete IC Line hexes '\
-                    'in one turn.',
+              desc: 'During its tile-laying step, the corporation may upgrade two tiles (instead of the usual two lays '\
+                    'or lay + upgrade) by paying $30 instead of $20 (terrain costs still apply).',
               sym: 'EM',
               meta: { type: :private, class: :B },
             },
@@ -415,10 +426,9 @@ module Engine
               name: 'Advanced Track',
               value: 0,
               revenue: 0,
-              desc: 'During the tile-laying step of its operating turn, the owning corporation may lay or upgrade an '\
-                    'additional tile to which it has a route for free (paying terrain costs as normal). This ability may be '\
-                    'used to lay or upgrade a tile already acted upon during the same turn. '\
-                    'Once this ability has been used twice, the private company closes.',
+              desc: 'During the corporation’s tile-laying step, the corporation may lay or upgrade one additional tile '\
+                    'for free (terrain costs still apply). This can include a tile already acted upon that turn. This ability '\
+                    'may only be used once per turn. This company closes after its second use.',
               sym: 'AT',
               meta: { type: :private, class: :B },
               abilities: [
@@ -438,41 +448,17 @@ module Engine
               ],
             },
             {
-              name: 'Lincoln Funeral Car',
-              value: 0,
-              revenue: 0,
-              desc: 'During the “Run Trains” step of the corporation’s operating turn, one of the corporation’s '\
-                    'trains earns an additional $20/$40/$60 for each of the following cities in its route '\
-                    'during a green/brown/gray phase, respectively: Chicago (H3), Joliet (G6), '\
-                    'Bloomington (F9), and Springfield (E12). Once this ability is used, the company closes.',
-              sym: 'LFC',
-              meta: { type: :private, class: :B },
-              abilities: [
-                  {
-                    type: 'hex_bonus',
-                    when: 'route',
-                    owner_type: 'corporation',
-                    hexes: %w[H3 G6 F9 E12],
-                    amount: 20,
-                    count: 1,
-                  },
-                ],
-            },
-            {
               name: 'Illinois Steel Bridge Co.',
               value: 0,
               revenue: 0,
-              desc: 'Receive a $20 discount when laying a tile in a hex containing a river or a lake.',
+              desc: 'The corporation ignores terrain costs for rivers and lakes. Each time it lays a yellow tile on a '\
+                    'lake or across a river, it earns $10 from the bank.',
               sym: 'ISBC',
               meta: { type: :private, class: :B },
               abilities: [
-                  {
-                    type: 'tile_discount',
-                    terrain: 'water',
-                    owner_type: 'corporation',
-                    discount: 20,
-                  },
-                ],
+                { type: 'tile_discount', terrain: :water, owner_type: 'corporation', discount: 20 },
+                { type: 'tile_income', terrain: :water, income: 10, owner_type: 'corporation', owner_only: true },
+              ],
             },
           ])
           companies

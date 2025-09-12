@@ -28,7 +28,7 @@ module Engine
                 corporation_sizes: [2, 5, 10],
               },
               {
-                name: '4',
+                name: '4A',
                 on: '4',
                 train_limit: 3,
                 tiles: %i[yellow green],
@@ -36,7 +36,7 @@ module Engine
                 corporation_sizes: [5, 10],
               },
               {
-                name: '4+2P',
+                name: '4B',
                 on: '4+2P',
                 train_limit: 2,
                 tiles: %i[yellow green brown],

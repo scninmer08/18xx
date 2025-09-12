@@ -7,17 +7,18 @@ module Engine
     module G18IL
       module Step
         class BuyTrain < Engine::Step::BuyTrain
-          def setup
-            @ic_bought_train = nil
-            super
-          end
-
           def round_state
             { bought_trains: [] }
           end
 
           def actions(entity)
-            return [] if @game.last_set_triggered
+            return [] if @game.last_set
+            # IC in receivership: once it has bought, it's done
+            if entity == @game.ic && @game.ic_in_receivership? &&
+               @round.respond_to?(:bought_trains) && @round.bought_trains.include?(entity)
+              return []
+            end
+
             return ['sell_shares'] if entity == current_entity&.player && !@game.other_train_pass
             return [] if entity != current_entity
             return %w[buy_train sell_shares] if must_sell_shares?(entity)
@@ -37,8 +38,20 @@ module Engine
           end
 
           def must_buy_train?(entity)
-            return (entity.cash > @game.depot.min_depot_price) if entity == @game.ic
+            if entity == @game.ic
+              # If IC already bought once this OR, the must-buy is lifted.
+              return false if @round.respond_to?(:bought_trains) && @round.bought_trains.include?(entity)
 
+              # Never force a buy if IC is already at its train limit
+              return false if entity.trains.size >= @game.train_limit(entity)
+
+              return false if @game.other_train_pass
+
+              # Must buy iff there's at least one buyable train and IC can afford the min depot price
+              return entity.cash >= @game.depot.min_depot_price && !buyable_trains(entity).empty?
+            end
+
+            # For everyone else: only must-buy if trainless
             entity.trains.empty?
           end
 
@@ -51,12 +64,6 @@ module Engine
 
           def must_issue_before_ebuy?(corporation)
             return false if @game.other_train_pass
-
-            super
-          end
-
-          def can_buy_train?(entity)
-            return false if @ic_bought_train
 
             super
           end
@@ -75,7 +82,7 @@ module Engine
 
           def pass!
             super
-            return if @game.optional_rules.include?(:intro_game)
+            return if @game.intro_game?
 
             company = @game.train_subsidy
             return if company.ability_uses.first == 99
@@ -113,17 +120,25 @@ module Engine
             end
           end
 
-          def train_variant_helper(train, _entity)
-            train.variants.values
+          def train_variant_helper(train, entity)
+            return train.variants.values if entity != @game.ic || !@game.ic_in_receivership?
+
+            [train.variants.values.min_by { |v| v[:price] || train.price }]
           end
 
           def buyable_trains(entity)
+            return [@depot.min_depot_train].compact if entity == @game.ic && @game.ic_in_receivership?
+
             depot_trains = @depot.depot_trains
             depot_trains = [@depot.min_depot_train] if entity.cash < @depot.min_depot_price
             depot_trains = [] if @game.other_train_pass
+
             other_trains = other_trains(entity)
             other_trains.reject! { |t| t.owner == @game.ic } if @game.ic_in_receivership?
-            other_trains = [] if entity.cash.zero? || @game.emr_active? || entity == @game.ic || @game.phase.name == '2'
+            other_trains = [] if entity.cash.zero? || @game.emr_active?
+
+            return depot_trains if @game.last_set_pending
+
             depot_trains + other_trains
           end
 
@@ -142,23 +157,25 @@ module Engine
 
           def process_buy_train(action)
             check_spend(action)
-            check_ic_last_train(action.train)
             buy_train_action(action)
             @round.bought_trains << action.entity if @round.respond_to?(:bought_trains)
-            @game.ic_owns_train if action.entity == @game.ic
+            @game.ic_owns_train! if action.entity == @game.ic
+
+            if action.entity == @game.ic && @game.ic_in_receivership?
+              pass!
+              return
+            end
+
             pass! unless can_buy_train?(action.entity)
           end
 
           def buy_train_action(action, entity = nil, borrow_from: nil)
-            @ic_bought_train = true if action.entity == @game.ic
-
             entity ||= action.entity
             train = action.train
             train.variant = action.variant
             price = action.price
             exchange = action.exchange
 
-            # Check if the train is actually buyable in the current situation
             if !buyable_exchangeable_train_variants(train, entity, exchange).include?(train.variant) ||
                 !(@game.depot.available(entity).include?(train) || buyable_trains(entity).include?(train))
               raise GameError, "Not a buyable train: #{train.id}"
@@ -172,22 +189,29 @@ module Engine
             player = entity.owner
             if remaining.positive? && must_buy_train?(entity)
               check_for_cheapest_train(train)
-
               raise GameError, 'Cannot buy for more than cost' if price > train.price
+              if price > entity.cash && train != @depot.min_depot_train
+                raise GameError, "#{entity.name} cannot spend #{@game.format_currency(price)}"
+              end
 
-              player = entity.owner
+              if player&.player?
+                if player.cash >= remaining
+                  player.spend(remaining, entity)
+                  @log << "#{player.name} contributes #{@game.format_currency(remaining)}"
+                else
+                  if player.cash.positive?
+                    amt = [player.cash, remaining].min
+                    player.spend(amt, entity)
+                    @log << "#{player.name} contributes #{@game.format_currency(amt)}"
+                  end
+                  raise GameError, 'Must sell shares before buying train' if sellable_shares?(player)
 
-              if player.cash < remaining
-                raise GameError, 'Must sell shares before buying train' if sellable_shares?(player)
-
-                try_take_loan(entity, price)
+                  try_take_loan(entity, price)
+                end
               else
-                player.spend(remaining, entity)
-                @log << "#{player.name} contributes #{@game.format_currency(remaining)}"
+                try_take_loan(entity, price)
               end
             end
-
-            check_for_cheapest_train(train) if entity == @game.ic && !exchange
 
             if exchange
               verb = "exchanges a #{exchange.name} for"
@@ -200,16 +224,8 @@ module Engine
                     "#{@game.format_currency(price)} from #{train.owner.name}"
 
             @game.buy_train(entity, train, price)
-            train.buyable = false if entity == @game.ic && !train.rusts_on
             @game.phase.buying_train!(entity, train, train.owner)
             @game.emr_active = nil
-            @game.train_bought_this_or = true
-          end
-
-          def check_ic_last_train(train)
-            return if train.owner != @game.ic || !@game.ic.trains.one?
-
-            raise GameError, "Cannot buy IC's only train"
           end
 
           def swap_sell(_player, _corporation, _bundle, _pool_share); end

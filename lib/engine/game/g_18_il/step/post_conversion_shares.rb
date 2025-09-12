@@ -14,16 +14,15 @@ module Engine
             @game.players.each(&:unpass!)
             @acted_players = []
             @conversion_order = nil
-            @old_order = @game.totem_order.dup
           end
 
           def actions(entity)
             return [] if !entity.player? || !@round.converted
 
             actions = []
-            actions << 'buy_shares' if can_buy_any?(entity)
+            actions << 'buy_shares'
             actions << 'sell_shares' if can_sell?(entity, nil)
-            actions << 'pass' if actions.any?
+            actions << 'pass' if can_buy_any?(entity) || can_sell?(entity, nil)
             actions
           end
 
@@ -36,6 +35,7 @@ module Engine
           def can_gain?(entity, bundle, exchange: false)
             return if !bundle || !entity
             return false if bundle.owner.player? && !@game.can_gain_from_player?(entity, bundle)
+            return false if corporation.shares.all? { |s| !s.buyable }
 
             corporation = bundle.corporation
 
@@ -43,7 +43,15 @@ module Engine
           end
 
           def log_pass(entity)
-            @log << "#{entity.name} declines to buy shares"
+            @log << if can_sell?(entity, nil) && can_buy_any?(entity)
+                      "#{entity.name} declines to buy/sell shares"
+                    elsif can_sell?(entity, nil)
+                      "#{entity.name} declines to sell shares"
+                    elsif can_buy_any?(entity)
+                      "#{entity.name} declines to buy shares"
+                    else
+                      "#{entity.name} has no valid actions and passes"
+                    end
           end
 
           def visible_corporations
@@ -114,29 +122,25 @@ module Engine
           def active_entities
             return [] unless corporation
 
-            @conversion_order ||= [corporation.owner, *@game.totem_order.reject { |p| p == corporation.owner }]
-            [@conversion_order.find { |p| p.active? && (can_buy_any?(p) || can_sell?(p, nil)) }].compact
+            players_in_order = @game.players.rotate(@game.players.index(corporation.owner))
+            eligible = players_in_order.find { |p| p.active? && (can_buy_any?(p) || can_sell?(p, nil)) }
+            eligible ? [eligible] : []
           end
 
           def post_convert_pass_step!
             return unless @round.converted
 
-            # add non-president players that acted to the back of the totem line
-            @acted_players.each { |p| @game.totem_order << @game.totem_order.delete(p) }
-            unless @old_order == @game.totem_order
-              @log << "New conversion priority order: #{@game.totem_order.map(&:name).join(', ')}"
-            end
             corp = @round.converted
 
             token_counts = {
-              10 => [3, 3],
+              10 => [2, 2],
               5 => [1, 1],
             }
 
             min, max = token_counts[corp.total_shares] || [0, 0]
 
             @log << "#{corp.name} must buy #{min} token#{min == 1 ? '' : 's'}"
-            price = 40
+            price = @game.class::TOKEN_COST
             @round.buy_tokens << { entity: corp, type: :convert, first_price: price, price: price, min: min, max: max }
           end
         end
