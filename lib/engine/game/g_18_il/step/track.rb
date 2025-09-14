@@ -28,13 +28,13 @@ module Engine
               blocked =
                 (hex_name == 'H7' && tile_name == 'K31') ||
                 (%w[G10 F17 E22].include?(hex_name) && %w[C31 C32].include?(tile_name))
-              raise GameError, "Cannot upgrade tile in #{hex.location_name} (#{hex_name}) until Illinois Central has started" if blocked
+              if blocked
+                raise GameError,
+                      "Cannot upgrade tile in #{hex.location_name} (#{hex_name}) until Illinois Central has started"
+              end
             end
 
             lay_tile_action(action)
-
-            tile = hex.tile
-            city = tile.cities.first
 
             ic_line_tile(action) if @game.ic_line_hex?(hex)
 
@@ -114,7 +114,7 @@ module Engine
                             "and teleports to #{hex.name} (#{hex.location_name})"
                   end
                 else
-                  raise GameError, "Track laid must be connected to one of #{spender.id}'s stations" if ability.reachable &&
+                  raise GameError, "Track laid must be connected to one of #{spender.id}'s tokens" if ability.reachable &&
                     hex.name != spender.coordinates &&
                     !@game.loading &&
                     !graph.reachable_hexes(spender)[hex]
@@ -211,7 +211,7 @@ module Engine
 
           def ic_line_tile(action)
             @game.ic_line_improvement(action)
-            
+
             hex = action.hex
             tile = hex.tile
             city = tile.cities.first

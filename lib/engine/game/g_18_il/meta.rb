@@ -15,10 +15,8 @@ module Engine
         GAME_DESIGNER = 'Scott Ninmer'
         GAME_PUBLISHER = :self_published
         GAME_LOCATION = 'Illinois, USA'
-        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/dqc83ftj130orlrimipkw/18IL_Rulebook_v0.8.2.pdf?rlkey=2lhawem5504x9o3h3xfg858my&dl=0'
-        GAME_INFO_URL = ''
-        # GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
-        # TODO: make wiki entry once in alpha
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/trlhkdpujpu4w4m34g66i/18IL_Rulebook_v0.8.4.pdf?rlkey=c8xnalp4h7212hyvba96lpza6&dl=0'
+        GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
         PLAYER_RANGE = [2, 6].freeze
 
         OPTIONAL_RULES = [
@@ -51,7 +49,7 @@ module Engine
             short_name: '+2 3-Trains',
             desc: 'Adds two additional 3-trains to the train roster.',
           },
-            { sym: :_sep2, short_name: '', desc: '' },
+          { sym: :_sep2, short_name: '', desc: '' },
           {
             sym: :one_extra_four_train,
             short_name: '+1 4-/3P Train',
@@ -62,7 +60,7 @@ module Engine
             short_name: '+2 4-/3P Trains',
             desc: 'Adds two additional 4-/3P trains to the train roster.',
           },
-            { sym: :_sep3, short_name: '', desc: '' },
+          { sym: :_sep3, short_name: '', desc: '' },
           {
             sym: :one_extra_four_plus_two_p_train,
             short_name: '+1 4+2P Train',
@@ -73,7 +71,7 @@ module Engine
             short_name: '+2 4+2P Trains',
             desc: 'Adds two additional 4+2P trains to the train roster.',
           },
-            { sym: :_sep4, short_name: '', desc: '' },
+          { sym: :_sep4, short_name: '', desc: '' },
           {
             sym: :one_extra_five_plus_one_p_train,
             short_name: '+1 5+1P Train',
@@ -84,7 +82,7 @@ module Engine
             short_name: '+2 5+1P Trains',
             desc: 'Adds two additional 5+1P trains to the train roster.',
           },
-            { sym: :_sep5, short_name: '', desc: '' },
+          { sym: :_sep5, short_name: '', desc: '' },
           {
             sym: :one_extra_six_train,
             short_name: '+1 6-Train',
@@ -96,8 +94,6 @@ module Engine
             desc: 'Adds two additional 6-trains to the train roster.',
           },
         ].freeze
-
-
       end
     end
   end

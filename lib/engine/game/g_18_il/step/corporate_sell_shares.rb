@@ -13,7 +13,7 @@ module Engine
           end
 
           def setup
-            @game.other_train_pass = nil
+            @game.will_buy_other_train = nil
             @acted = nil
             super
           end
@@ -52,7 +52,9 @@ module Engine
           end
 
           def process_pass(entity)
-            @game.other_train_pass = true
+            # will_buy_other_train flag is set to true if corporation indicates that they are buying
+            # from another corporation and will not EMR for a train
+            @game.will_buy_other_train = true
             super
           end
 

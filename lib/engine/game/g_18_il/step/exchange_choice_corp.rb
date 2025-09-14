@@ -54,8 +54,18 @@ module Engine
               @game.option_exchange(corp)
             end
 
-            @game.exchange_choice_corp = nil
-            @game.exchange_choice_corps.delete_at(0)
+            # Advance/refresh the queue
+            @game.exchange_choice_corps.shift
+            @game.exchange_choice_corp = @game.exchange_choice_corps.first
+
+            # auto-resolve any remaining corps that can no longer exchange
+            @game.resolve_auto_one_cube_sales!
+
+            if @game.exchange_choice_corps.empty?
+              @game.finalize_ic_formation_if_ready!
+            else
+              @round.goto_entity!(@game.exchange_choice_corp)
+            end
           end
         end
       end

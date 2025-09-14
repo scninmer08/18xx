@@ -79,7 +79,7 @@ module Engine
             shares_to_add = ic.shares.count { |s| !s.president && s.owner == ic }
             if @game.ic_in_receivership?
               @companies += ic_presidents_share
-             # shares_to_add -= 2
+              # shares_to_add -= 2
             end
             @companies += ic_shares.take(shares_to_add) if shares_to_add.positive?
           end

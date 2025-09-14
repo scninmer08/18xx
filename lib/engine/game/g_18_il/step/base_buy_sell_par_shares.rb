@@ -237,7 +237,7 @@ module Engine
             super
             company = @game.company_by_id(action.corporation.name)
             if !@game.intro_game? && @game.extra_station&.owner == action.corporation
-              @log << "#{action.corporation.name} gains an extra station"
+              @log << "#{action.corporation.name} gains an extra token"
               @log << "#{@game.extra_station.name} (#{action.corporation.name}) closes"
               @game.extra_station.close!
 

@@ -19,17 +19,18 @@ module Engine
               return []
             end
 
-            return ['sell_shares'] if entity == current_entity&.player && !@game.other_train_pass
+            return ['sell_shares'] if entity == current_entity&.player && !@game.will_buy_other_train
             return [] if entity != current_entity
             return %w[buy_train sell_shares] if must_sell_shares?(entity)
             return %w[buy_train] if must_buy_train?(entity)
+            return %w[buy_train] if entity == @game.ic && @game.ic_in_receivership? && can_exchange_for_d?(entity)
             return %w[buy_train pass] if can_buy_train?(entity)
 
             []
           end
 
           def must_sell_shares?(corporation)
-            return false if @game.other_train_pass
+            return false if @game.will_buy_other_train
             return false if corporation.cash > @game.depot.min_depot_price
             return false unless must_buy_train?(corporation)
             return false unless @game.emergency_issuable_cash(corporation) < @game.depot.min_depot_price
@@ -37,15 +38,21 @@ module Engine
             must_issue_before_ebuy?(corporation)
           end
 
+          def can_exchange_for_d?(entity)
+            @game.discountable_trains_for(entity).any? do |_owned_train, depot_train, _variant, price|
+              depot_train.name == 'D' && buying_power(entity) >= price
+            end
+          end
+
           def must_buy_train?(entity)
             if entity == @game.ic
-              # If IC already bought once this OR, the must-buy is lifted.
+              # If IC already bought once this OR, the must-buy is lifted
               return false if @round.respond_to?(:bought_trains) && @round.bought_trains.include?(entity)
 
               # Never force a buy if IC is already at its train limit
               return false if entity.trains.size >= @game.train_limit(entity)
 
-              return false if @game.other_train_pass
+              return false if @game.will_buy_other_train
 
               # Must buy iff there's at least one buyable train and IC can afford the min depot price
               return entity.cash >= @game.depot.min_depot_price && !buyable_trains(entity).empty?
@@ -57,13 +64,13 @@ module Engine
 
           def ebuy_president_can_contribute?(corporation)
             return false unless @game.emergency_issuable_cash(corporation) < @game.depot.min_depot_price
-            return false if @game.other_train_pass
+            return false if @game.will_buy_other_train
 
             !must_issue_before_ebuy?(corporation)
           end
 
           def must_issue_before_ebuy?(corporation)
-            return false if @game.other_train_pass
+            return false if @game.will_buy_other_train
 
             super
           end
@@ -131,7 +138,7 @@ module Engine
 
             depot_trains = @depot.depot_trains
             depot_trains = [@depot.min_depot_train] if entity.cash < @depot.min_depot_price
-            depot_trains = [] if @game.other_train_pass
+            depot_trains = [] if @game.will_buy_other_train
 
             other_trains = other_trains(entity)
             other_trains.reject! { |t| t.owner == @game.ic } if @game.ic_in_receivership?
@@ -143,7 +150,7 @@ module Engine
           end
 
           def process_sell_shares(action)
-            raise GameError, 'Cannot sell shares when buying from another corporation' if @game.other_train_pass
+            raise GameError, 'Cannot sell shares when buying from another corporation' if @game.will_buy_other_train
 
             @game.emr_active = true
             return super unless action.entity.is_a?(Corporation)
@@ -238,7 +245,7 @@ module Engine
 
           def must_take_loan?(corporation)
             return false if sellable_shares?(corporation.owner)
-            return false if @game.other_train_pass
+            return false if @game.will_buy_other_train
 
             price = @game.depot.min_depot_price
             (@game.buying_power(corporation) + @game.buying_power(corporation.owner)) < price

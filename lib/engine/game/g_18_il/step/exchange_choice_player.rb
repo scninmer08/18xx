@@ -53,7 +53,12 @@ module Engine
             end
 
             @game.exchange_choice_player = nil
+
+            # Continue the merge flow
             @game.merge_corporation_part_two
+
+            # If formation was pending, and there are no more choices, finish now
+            @game.finalize_ic_formation_if_ready!
           end
         end
       end

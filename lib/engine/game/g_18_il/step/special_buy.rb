@@ -13,9 +13,8 @@ module Engine
             return [] if entity != current_entity
             return [] if entity.cash < 40
             return [] if @game.last_set
-            return [] if @game.owns_port_marker?(entity)
             return [] if @round.active_step.is_a?(G18IL::Step::BuyTrain)
-            return [@port_marker] if @game.loading
+            return [@port_marker] if @game.loading || !@game.owns_port_marker?(entity)
 
             []
           end

@@ -28,7 +28,7 @@ module Engine
 
         attr_accessor :stl_nodes, :blocking_token, :exchange_choice_player, :exchange_choice_corp,
                       :exchange_choice_corps, :sp_used, :borrowed_trains, :train_borrowed, :closed_corporations,
-                      :other_train_pass, :corporate_buy, :emr_active, :pending_rusting_event, :last_set_pending,
+                      :will_buy_other_train, :corporate_buy, :emr_active, :pending_rusting_event, :last_set_pending,
                       :lots, :lot_proxies
 
         attr_reader :merged_corporation, :last_set, :ic_line_completed_hexes, :insolvent_corporations, :reserved_share
@@ -288,7 +288,7 @@ module Engine
                     end
 
             lays
-          elsif efficient_engineering&.owner == entity
+          elsif efficient_construction&.owner == entity
             [
               { lay: true, upgrade: true, cost: 0 },
               { lay: true, upgrade: :not_if_upgraded, cost: 10, cannot_reuse_same_hex: true },
@@ -358,8 +358,7 @@ module Engine
           index_corp = floated_corps.sort.find { |c| c.share_price.price < ic.share_price.price } if floated_corps.size > 1
 
           ic.owner = index_corp ? index_corp.owner : @players.min_by { rand }
-          @log << "#{ic.name} is in receivership and will be operated "\
-                  "by a random player (#{ic.owner.name})"
+          @log << "#{ic.name} is in receivership and will be operated by a random player (#{ic.owner.name})"
         end
 
         def initial_auction_companies
@@ -499,7 +498,7 @@ module Engine
         end
 
         def two_player_share_limit?
-         # optional_rules&.include?(:two_player_share_limit) && two_player?
+          # optional_rules&.include?(:two_player_share_limit) && two_player?
           two_player?
         end
 
@@ -575,13 +574,13 @@ module Engine
             when 'Rogers (1+1)'
               help << "The 'Rogers' train may only run a route from Springfield to Jacksonville."
             when '3P'
-              help << "A 3P train can visit three cities, doubling their value. It may not visit red areas."
+              help << 'A 3P train can visit three cities, doubling their value. It may not visit red areas.'
             when '4+2P'
-              help << "A 4+2P train can visit six cities or red areas, doubling the value of two cities."
+              help << 'A 4+2P train can visit six cities or red areas, doubling the value of two cities.'
             when '5+1P'
-              help << "A 5+1P train can visit six cities or red areas, doubling the value of one city."
+              help << 'A 5+1P train can visit six cities or red areas, doubling the value of one city.'
             when 'D'
-              help << "A D train can visit an unlimited number of stops."
+              help << 'A D train can visit an unlimited number of stops.'
             end
           end
 
@@ -667,11 +666,11 @@ module Engine
                                   (@optional_rules.include?(:two_extra_three_trains) ? 2 : 0))
           add_optional_train('4',  (@optional_rules.include?(:one_extra_four_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_four_trains) ? 2 : 0))
-          add_optional_train('4+2P',(@optional_rules.include?(:one_extra_four_plus_two_p_train) ? 1 : 0) +
+          add_optional_train('4+2P', (@optional_rules.include?(:one_extra_four_plus_two_p_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_four_plus_two_p_trains) ? 2 : 0))
-          add_optional_train('5+1P',(@optional_rules.include?(:one_extra_five_plus_one_p_train) ? 1 : 0) +
+          add_optional_train('5+1P', (@optional_rules.include?(:one_extra_five_plus_one_p_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_five_plus_one_p_trains) ? 2 : 0))
-          add_optional_train('6',  (@optional_rules.include?(:one_extra_six_train) ? 1 : 0) +
+          add_optional_train('6', (@optional_rules.include?(:one_extra_six_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_six_trains) ? 2 : 0))
         end
 
@@ -691,9 +690,9 @@ module Engine
           else
             roster_order = self.class::TRAINS.map { |t| t[:name] }
             target_pos   = roster_order.index(type) || roster_order.length
-            insert_base = @depot.upcoming.index { |t|
+            insert_base = @depot.upcoming.index do |t|
               (roster_order.index(t.name) || roster_order.length) > target_pos
-            } || @depot.upcoming.length
+            end || @depot.upcoming.length
           end
 
           count.times do |i|
@@ -705,7 +704,6 @@ module Engine
           # but keep this if your engine requires it:
           update_cache(:trains)
         end
-
 
         def emr_active?
           @emr_active
@@ -825,7 +823,6 @@ module Engine
 
         def close_corporation(corporation)
           @mergeable_candidates&.delete(corporation)
-          @option_cubes.delete(corporation) if (@option_cubes[corporation] || 0).positive?
 
           @closed_corporations << corporation
           @log << "#{corporation.name} closes"
@@ -1141,7 +1138,7 @@ module Engine
         end
 
         def emergency_issuable_cash(corporation)
-          return 0 if corporation.trains.any? || @other_train_pass
+          return 0 if corporation.trains.any? || @will_buy_other_train
 
           emergency_issuable_bundles(corporation).max_by(&:num_shares)&.price || 0
         end
@@ -1345,7 +1342,7 @@ module Engine
 
         def check_stl(visits)
           return if !stl_hex?(visits.first) && !stl_hex?(visits.last)
-          raise GameError, 'Train cannot visit St. Louis without a permit token' unless stl_permit?(current_entity)
+          raise GameError, 'Train cannot visit St. Louis without a token' unless stl_permit?(current_entity)
         end
 
         def check_three_p(route, visits)
@@ -1574,20 +1571,23 @@ module Engine
 
         def event_ic_formation!
           @log << '-- Event: Illinois Central Formation --'
-
+          @merged_min_entity_index = nil
           @mergeable_candidates = mergeable_corporations
-
           @log << if @mergeable_candidates.any?
                     present_mergeable_candidates(@mergeable_candidates).to_s
                   else
-                    'IC forms with no merger'
+          'IC forms with no merger'
                   end
 
-          ic_setup
+          # Mark formation in-progress
+          @ic_formation_pending   = true
+          @ic_formation_completed = false
 
+          ic_setup
           option_cube_exchange
 
-          post_ic_formation if @mergeable_candidates.empty?
+          # Let the finalizer decide whether to finish now or later
+          finalize_ic_formation_if_ready!
         end
 
         def ic_setup
@@ -1638,9 +1638,41 @@ module Engine
             @log << "#{corp.name} exchanges #{cube_phrase} for #{share_phrase} of #{ic.name}"
           end
 
+          # If any closed corp has an option cube remaining, remove it
+          @corporations.reject(&:ipoed).each do |corp|
+            if @option_cubes.delete(corp)
+              @bank.spend(40, corp)
+              @log << "#{corp.name} (closed) sells 1 option cube for #{format_currency(40)}"
+            end
+          end
+
           # Corps with exactly 1 cube left choose: receive $40 or pay $40 for a share
-          @exchange_choice_corps = @corporations.select { |corp| @option_cubes[corp] == 1 }.sort
-          @exchange_choice_corp  = @exchange_choice_corps.first
+          @exchange_choice_corps = @corporations
+            .select { |corp| @option_cubes[corp] == 1 }
+            .sort_by { |c| -c.share_price.price }
+          @exchange_choice_corp = @exchange_choice_corps.first
+
+          # auto-resolve one-cube corps that can't exchange
+          resolve_auto_one_cube_sales!
+        end
+
+        def resolve_auto_one_cube_sales!
+          return unless @exchange_choice_corps&.any?
+
+          cost = ic.share_price.price / 2
+          # If there are no market shares OR corp can't afford the exchange, auto-sell
+          auto_sell = @exchange_choice_corps.select do |corp|
+            ic.num_market_shares.zero? || corp.cash < cost
+          end
+
+          auto_sell.each { |corp| option_sell(corp) }
+
+          # Remove auto-sold corps from the choice queue and set the next decider
+          @exchange_choice_corps -= auto_sell
+          @exchange_choice_corp = @exchange_choice_corps.first
+
+          # If that emptied the queue, try to finish formation now
+          finalize_ic_formation_if_ready! if @exchange_choice_corps.empty?
         end
 
         def option_exchange(corp)
@@ -1668,7 +1700,7 @@ module Engine
         def decline_merge(corporation)
           @log << "#{corporation.name} declines to merge"
           @mergeable_candidates.delete(corporation)
-          post_ic_formation if @mergeable_candidates.empty?
+          finalize_ic_formation_if_ready! if @mergeable_candidates.empty?
         end
 
         def merge_decider
@@ -1709,6 +1741,9 @@ module Engine
           @merged_corporation = corporation
           @log << "-- #{corporation.name} merges into #{ic.name} --"
 
+          idx = @round.entities.index(corporation)
+          @merged_min_entity_index = [@merged_min_entity_index, idx].compact.min
+
           price = corporation.share_price.price
           @merge_share_prices << price
 
@@ -1748,6 +1783,12 @@ module Engine
           @log << "#{player.name} sells the president's share of #{@merged_corporation.name} for #{format_currency(refund)}"
         end
 
+        def no_outstanding_non_president_shares?
+          market = @merge_market_share_count.to_i
+          player = (@merge_player_share_bundles || {}).values.sum { |b| b.shares.size }
+          (market + player).zero?
+        end
+
         def merge_corporation_part_two
           corporation = @merged_corporation
           price       = corporation.share_price.price
@@ -1764,41 +1805,45 @@ module Engine
             corporation.cash += ic_sale
           end
 
-          # Can the corporation redeem at half price?
-          sufficient = corporation.cash >= @total_refund
-
-          if sufficient
-            @log << "#{corporation.name} will redeem outstanding shares at half price"
+          if no_outstanding_non_president_shares?
+            @log << "#{corporation.name} has no outstanding non-president shares to redeem"
           else
-            @log << "#{corporation.name} lacks sufficient funds to redeem outstanding shares at half price. "\
-                    "Its treasury (#{format_currency(corporation.cash)}) is returned to the bank"
-            @log << 'The bank guarantees redemption of shares held by players other than the president at full value'
-            corporation.spend(corporation.cash, @bank) if corporation.cash.positive?
-          end
-
-          # Redeem market shares
-          if corporation.cash.positive? && @merge_market_share_count.positive?
-            market_amount = @merge_market_share_count * half_price
-            corporation.spend(market_amount, @bank)
-          end
-          # Redeem player shares
-          (@merge_player_share_bundles || {}).each do |player, bundle|
-            share_count = bundle.shares.size
-            next if share_count.zero?
+            sufficient = corporation.cash >= @total_refund
 
             if sufficient
-              amount = share_count * half_price
-              corporation.spend(amount, player)
-              @log << "#{player.name} receives #{format_currency(amount)} from #{corporation.name}"
-            elsif player != @merge_president_player
-              amount = share_count * price
-              @bank.spend(amount, player)
-              @log << "#{player.name} receives #{format_currency(amount)} from the bank"
+              @log << "#{corporation.name} will redeem outstanding shares at half price"
+            else
+              @log << "#{corporation.name} lacks sufficient funds to redeem outstanding shares at half price. "\
+                      "Its treasury (#{format_currency(corporation.cash)}) is returned to the bank"
+              @log << 'The bank guarantees redemption of shares held by players other than the president at full value'
+              corporation.spend(corporation.cash, @bank) if corporation.cash.positive?
             end
-          end
-          @log << "The bank receives #{format_currency(market_amount)} from #{corporation.name}" if market_amount
 
-          # Replace the IC-Line station with an IC marker
+            # Redeem market shares
+            if corporation.cash.positive? && @merge_market_share_count.to_i.positive?
+              market_amount = @merge_market_share_count * half_price
+              corporation.spend(market_amount, @bank)
+            end
+
+            # Redeem player shares
+            (@merge_player_share_bundles || {}).each do |player, bundle|
+              share_count = bundle.shares.size
+              next if share_count.zero?
+
+              if sufficient
+                amount = share_count * half_price
+                corporation.spend(amount, player)
+                @log << "#{player.name} receives #{format_currency(amount)} from #{corporation.name}"
+              elsif player != @merge_president_player
+                amount = share_count * price
+                @bank.spend(amount, player)
+                @log << "#{player.name} receives #{format_currency(amount)} from the bank"
+              end
+            end
+
+            @log << "The bank receives #{format_currency(market_amount)} from #{corporation.name}" if market_amount
+          end
+          # Replace the IC-Line token with an IC token
           ic.tokens << Token.new(ic, price: 0)
           ic_tokens = ic.tokens.reject(&:city)
           corporation_token = corporation.tokens.find { |t| IC_LINE_HEXES.include?(t&.hex&.id) }
@@ -1807,7 +1852,7 @@ module Engine
           # Transfer any remaining cash to IC
           if corporation.cash.positive?
             amt = corporation.cash
-            @log << "#{ic.name} receives the #{corporation.name} treasury of #{format_currency(amt)}"
+            @log << "#{ic.name} receives #{format_currency(amt)} from #{corporation.name}"
             corporation.spend(amt, ic)
           end
 
@@ -1823,7 +1868,9 @@ module Engine
             @log << "#{ic.name} receives #{list_with_and(names)} from #{corporation.name}"
           end
 
-          post_ic_formation if @mergeable_candidates.empty?
+          close_corporation(corporation)
+
+          finalize_ic_formation_if_ready! if @mergeable_candidates.empty?
         end
 
         def replace_ic_token(corporation, corporation_token, ic_tokens)
@@ -1892,6 +1939,17 @@ module Engine
           order < idx if order && idx
         end
 
+        def finalize_ic_formation_if_ready!
+          return unless @ic_formation_pending
+          return if @mergeable_candidates&.any?
+          return if @exchange_choice_corps&.any?
+          return if @exchange_choice_player
+
+          post_ic_formation
+          @ic_formation_pending = false
+          @log << '-- Event: Illinois Central Formation complete --'
+        end
+
         def post_ic_formation
           ic_reserve_tokens
 
@@ -1917,58 +1975,72 @@ module Engine
           add_ic_receivership_ability
           if ic_in_receivership?
             @log << "#{ic.name} enters receivership (it has no president)"
-            ic_price = ic.share_price&.price
-            live = @round.entities.select { |c| c.corporation? && c.share_price && !c.closed? }
-            index_corp = live.sort.find { |c| c.share_price.price < ic_price } || live.min_by { |c| c.share_price.price }
+
+            queue = @round.entities
+            live_in_queue = queue.select { |e| e.corporation? && e.ipoed }
+            trigger_idx = queue.index(@ic_trigger_entity)
+
+            index_corp =
+              if trigger_idx && live_in_queue.any?
+                prev = (trigger_idx - 1).downto(0).map { |i| queue[i] }
+                        .find { |e| e.corporation? && e.ipoed }
+                prev || live_in_queue.last
+              end
+
+            index_corp ||= operating_order.find { |c| c.corporation? && c.ipoed }
+
             ic.owner = index_corp ? index_corp.owner : @players.min_by { rand }
+
             @log << "While in receivership, #{ic.name} will be operated by a random player (#{ic.owner.name})"
           else
             add_ic_operating_ability
           end
 
-          earliest_index = @merged_corps.empty? ? 99 : @merged_corps.map { |n| @round.entities.index(n) }.min
-          current_corp_index = @round.entities.index(@ic_trigger_entity)
-
-          if current_corp_index < earliest_index || @round.entities.empty?
-            @log << if @merged_corps.empty?
-                      'IC will operate for the first time in this operating round (no corporations merged)'
-                    else
-                      'IC will operate for the first time in this operating round (no merged corporations '\
-                        'have operated in this round)'
-                    end
-            ic_price = ic.share_price&.price
-            live = @round.entities.select { |c| c.corporation? && c.share_price && !c.closed? }
-            index_corp = live.sort.find { |c| c.share_price.price < ic_price }
-            index = @round.entities.find_index(index_corp)
-            if index.nil?
-              @round.entities << ic
-            else
-              trigger_price = @ic_trigger_entity.share_price&.price || 0
-              if ic.share_price.price > trigger_price
-                @round.entities.insert(current_corp_index + 1, ic)
-              else
-                @round.entities.insert(index, ic)
-              end
-            end
+          if @round.entities.empty?
+            @log << 'IC will operate for the first time in this operating round (no corporations merged)'
+            @round.entities << ic
           else
-            @log << 'IC will operate for the first time in the next operating round (a merged corporation has already operated)'
+            entities_size = @round.entities.size
+
+            # +∞ if none recorded/remaining
+            merged_idxs = (@merged_corps || []).map { |c| @round.entities.index(c) }.compact
+            earliest_index = @merged_min_entity_index || (merged_idxs.min unless merged_idxs.empty?) || entities_size
+
+            # −∞ if trigger corp no longer present (merged/closed)
+            current_corp_index = @round.entities.index(@ic_trigger_entity) || -1
+
+            if current_corp_index < earliest_index
+              @log << if (@merged_corps || []).empty?
+                        'IC will operate for the first time in this operating round (no corporations merged)'
+                      else
+                        'IC will operate for the first time in this operating round (no merged corporations '\
+                          'have operated in this round)'
+                      end
+
+              ic_price = ic.share_price&.price
+              live = @round.entities.select { |c| c.corporation? && c.share_price && !c.closed? }
+              index_corp = live.sort.find { |c| c.share_price.price < ic_price }
+              index = @round.entities.find_index(index_corp)
+
+              if index.nil?
+                @round.entities << ic
+              else
+                trigger_price = @ic_trigger_entity&.share_price&.price || 0
+                if ic.share_price.price > trigger_price
+                  @round.entities.insert((current_corp_index == -1 ? index : current_corp_index) + 1, ic)
+                else
+                  @round.entities.insert(index, ic)
+                end
+              end
+            else
+              @log << 'IC will operate for the first time in the next operating round (a merged corporation has already operated)'
+            end
           end
 
           ic.floatable = true
-          ic.floated = true
-          ic.ipoed = true
-
-          @merged_corps.each do |c|
-            close_corporation(c)
-          end
-
-          @ic_formation_pending = false
-          @log << '-- Event: Illinois Central Formation complete --'
-
-          return unless @round.entities.empty?
-
-          @round.entities << ic
-          next_round!
+          ic.floated   = true
+          ic.ipoed     = true
+          ic.trains.sort_by!(&:price)
         end
 
         def add_ic_operating_ability

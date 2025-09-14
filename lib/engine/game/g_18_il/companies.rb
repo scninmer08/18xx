@@ -179,7 +179,7 @@ module Engine
               name: 'U.S. Mail Line',
               value: 0,
               revenue: 0,
-              desc: 'When running trains, the corporation earns $10 from the bank for each city visited by its trains. '\
+              desc: 'When running trains, the corporation earns $10 from the bank for each city it visits. '\
                     'Cities count multiple times if visited by multiple trains.',
               sym: 'USML',
               meta: { type: :private, class: :A },
@@ -222,7 +222,7 @@ module Engine
               sym: 'ES',
               value: 0,
               revenue: 0,
-              desc: 'When the corporation starts, it receives one additional free station marker. This '\
+              desc: 'When the corporation starts, it receives one additional free token. This '\
                     'company closes after use.',
               color: nil,
               meta: { type: :private, class: :A },
@@ -241,7 +241,7 @@ module Engine
               name: 'Station Subsidy',
               value: 0,
               revenue: 0,
-              desc: 'Whenever the corporation gains station markers from starting or converting, it receives them for '\
+              desc: 'Whenever the corporation gains tokens from starting or converting, it receives them for '\
                     'free (instead of paying $40 each).',
               sym: 'SS',
               meta: { type: :private, class: :A },
@@ -260,8 +260,9 @@ module Engine
               name: 'Goodrich Transit Line',
               value: 0,
               revenue: 0,
-              desc: 'An available station marker is placed from the corporation in Chicago (H3) in the GTL slot. The '\
-                    'corporation gains a port marker for free. This company closes after use. It closes immediately '\
+              desc: "An available token is placed from the corporation's charter in Chicago (H3) "\
+                    'in the GTL slot. This does not count as a token action. The corporation '\
+                    'gains a port marker for free. This company closes after use. It closes immediately '\
                     'if it remains open when Chicago upgrades to a brown tile.',
               sym: 'GTL',
               meta: { type: :private, class: :A },
@@ -286,9 +287,9 @@ module Engine
               name: 'Union Stock Yards',
               value: 0,
               revenue: 0,
-              desc: 'During its station placement step, the corporation may place a station marker in any connected '\
+              desc: 'During its token placement step, the corporation may place a token in any connected '\
                     'city except Chicago (H3) or St. Louis (C18). This marker is non-blocking and does not use a city '\
-                    'slot. This company closes after use.',
+                    'slot. This counts as its token placement for the turn. This company closes after use.',
               sym: 'USY',
               meta: { type: :private, class: :A },
               abilities: [
@@ -323,7 +324,7 @@ module Engine
               value: 0,
               revenue: 0,
               desc: 'During its tile-laying step, the corporation may lay or upgrade a town hex/tile (except Galena) '\
-                    'with the #838 tile, paying any terrain costs. It must connect to one of its station markers, but '\
+                    'with the #838 tile, paying any terrain costs. It must connect to one of its tokens, but '\
                     'this action does not count as the tile lay. This company closes after use.',
               sym: 'CVCC',
               meta: { type: :private, class: :B },
@@ -357,7 +358,7 @@ module Engine
               revenue: 0,
               desc: 'In Phase D, during the tile-laying step, the corporation may upgrade Peoria (E8) '\
                     'or Springfield (E12) with '\
-                    'its gray tile. This upgrade does not require a station connection, does not count as a tile lay, '\
+                    'its gray tile. This upgrade does not require a token connection, does not count as a tile lay, '\
                     'and may be done regardless of the city’s current color. The unused tile is removed from the game. '\
                     'This company closes after use.',
               sym: 'CIB',
@@ -383,7 +384,7 @@ module Engine
               value: 0,
               revenue: 0,
               desc: 'During its tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, '\
-                    'ignoring terrain costs. This does not require a station connection and does not count as the tile lay. '\
+                    'ignoring terrain costs. This does not require a token connection and does not count as the tile lay. '\
                     'Whenever any other corporation runs one or more trains to Galena (C2), it receives a $20 subsidy from '\
                     'the bank. This effect applies even if the corporation is unopened.',
               sym: 'FWC',
@@ -402,7 +403,7 @@ module Engine
               ],
             },
             {
-              name: 'Efficient Engineering',
+              name: 'Efficient Construction',
               value: 0,
               revenue: 0,
               desc: 'When the corporation performs two tile actions in a turn, the second '\

@@ -12,7 +12,7 @@ module Engine
 
           def actions(entity)
             return [] if @game.last_set
-            return [] if @game.other_train_pass == true
+            return [] if @game.will_buy_other_train == true
             return [] unless entity == current_entity
             return [] if entity.cash < @depot.min_depot_price && entity.trains.any?
 
@@ -33,7 +33,7 @@ module Engine
           end
 
           def must_sell_shares?(corporation)
-            return false if @game.other_train_pass
+            return false if @game.will_buy_other_train
             return false if corporation.cash > @game.depot.min_depot_price
             return false unless @game.emergency_issuable_cash(corporation) < @game.depot.min_depot_price
 
