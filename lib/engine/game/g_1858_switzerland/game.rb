@@ -16,6 +16,8 @@ module Engine
         include Map
         include Tiles
 
+        attr_reader :robot
+
         GRAPH_CLASS = G1858Switzerland::Graph
         CURRENCY_FORMAT_STR = '%ssfr'
 
@@ -39,6 +41,10 @@ module Engine
           ],
         ).freeze
         EVENTS_TEXT = G1858::Trains::EVENTS_TEXT.merge(
+          'sbb_starts' => [
+            'SBB starts',
+            'The SBB starts operating',
+          ],
           'blue_privates_available' => [
             'Blue privates can start',
             'The third set of private companies becomes available',
@@ -55,13 +61,18 @@ module Engine
           ],
         ).freeze
 
+        ROBOT_MINOR_TILE_LAYS = [{ lay: true, upgrade: false }].freeze
+        ROBOT_MAJOR_TILE_LAYS = [{ lay: true, upgrade: true }].freeze
+
         def game_phases
-          phases = super
-          _phase2, _phase3, phase4, phase5, phase6 = phases
-          phase4[:status] = %w[all_privates narrow_gauge]
-          phase5[:status] = %w[blue_privates public_companies dual_gauge]
-          phase6[:tiles] = %i[yellow green brown gray]
-          phases
+          unless @game_phases
+            @game_phases = super.map(&:dup)
+            _phase2, _phase3, phase4, phase5, phase6 = @game_phases
+            phase4[:status] = %w[all_privates narrow_gauge]
+            phase5[:status] = %w[blue_privates public_companies dual_gauge]
+            phase6[:tiles] = %i[yellow green brown gray]
+          end
+          @game_phases
         end
 
         def timeline
@@ -69,6 +80,14 @@ module Engine
                        '4H/2M trains rust when the second 6E/5M/5D train is bought.',
                        '6H/3M trains are wounded when the second 6E/5M/5D train is bought.',
                        '6H/3M trains rust when the fourth 6E/5M/5D train is bought.']
+        end
+
+        def event_sbb_starts!
+          @log << '-- The SBB starts operating --'
+          sbb.owner = @robot
+          sbb.floatable = true
+          sbb.floated = true
+          @round.entities << sbb
         end
 
         def event_blue_privates_available!
@@ -101,15 +120,25 @@ module Engine
         GREY_TRAINS = %w[6E 5M 5D].freeze
 
         def game_trains
-          trains = super
-          _train_2h, _train_4h, train_6h, _train_5e, train_6e, train_5d = trains
-          train_6h.delete(:obsolete_on) # Wounded on second grey train, handled in code
-          train_6h[:events] = [{ 'type' => 'blue_privates_available' }]
-          train_6e[:events] = [{ 'type' => 'privates_close2' }]
-          train_6e[:price] = 700
-          train_6e[:variants][0][:price] = 600
-          train_5d[:available_on] = '6'
-          trains
+          unless @game_trains
+            # Need to make a deep copy of 1858's train definitions.
+            # https://github.com/tobymao/18xx/issues/11372 was caused by
+            # modifying the definitions without a deep copy. If a game of 1858
+            # is loaded on the server after a game of 1858 Switzerland then it
+            # is was seeing the version of the definitions after these
+            # modifications, causing errors as 1858 does not have a method for
+            # handling the `blue_privates_available` event.
+            @game_trains = super.map(&:dup)
+            train_2h, _train_4h, train_6h, _train_5e, train_6e, train_5d = @game_trains
+            train_2h[:events] = [{ 'type' => 'sbb_starts' }] if robot?
+            train_6h.delete(:obsolete_on) # Wounded on second grey train, handled in code
+            train_6h[:events] = [{ 'type' => 'blue_privates_available' }]
+            train_6e[:events] = [{ 'type' => 'privates_close2' }]
+            train_6e[:price] = 700
+            train_6e[:variants][0][:price] = 600
+            train_5d[:available_on] = '6'
+          end
+          @game_trains
         end
 
         def num_trains(train)
@@ -125,6 +154,32 @@ module Engine
           @phase4_train_trigger = PHASE4_TRAINS_RUST
         end
 
+        def init_starting_cash(players, bank)
+          return super unless robot?
+
+          # This method is called before the robot player is added to `players`.
+          # The robot does not receive any cash, but the amount received by the
+          # human players is reduced to the starting cash for a three-player
+          # game.
+          cash = self.class::STARTING_CASH[players.size + 1]
+          players.each do |player|
+            bank.spend(cash, player)
+          end
+        end
+
+        def game_cert_limit
+          return super unless robot?
+
+          # This method is called before the robot player is added to `players`.
+          # The certificate limit is reduced to account for the extra player.
+          self.class::CERT_LIMIT.transform_keys { |player_count| player_count - 1 }
+        end
+
+        def game_corporations
+          excluded = robot? ? 'RhB' : 'SBB'
+          super.reject { |corp| corp[:sym] == excluded }
+        end
+
         def maybe_rust_wounded_trains!(grey_trains_bought, purchased_train)
           obsolete_trains!(%w[6H 3M], purchased_train) if grey_trains_bought == PHASE4_TRAINS_OBSOLETE
           rust_wounded_trains!(%w[4H 2M], purchased_train) if grey_trains_bought == PHASE3_TRAINS_RUST
@@ -137,12 +192,57 @@ module Engine
           rust_trains!(purchased_train, purchased_train.owner)
         end
 
+        def stock_round
+          Engine::Round::Stock.new(self, [
+            G1858::Step::Exchange,
+            G1858::Step::ExchangeApproval,
+            G1858::Step::HomeToken,
+            G1858Switzerland::Step::BuySellParShares,
+          ])
+        end
+
+        def operating_round(round_num = 1)
+          @round_num = round_num
+          Engine::Round::Operating.new(self, [
+            G1858Switzerland::Step::Track,
+            G1858Switzerland::Step::Token,
+            G1858Switzerland::Step::Route,
+            G1858Switzerland::Step::Dividend,
+            G1858Switzerland::Step::DiscardTrain,
+            G1858Switzerland::Step::BuyTrain,
+            G1858Switzerland::Step::IssueShares,
+          ], round_num: round_num)
+        end
+
         def closure_round(round_num)
           G1858Switzerland::Round::Closure.new(self, [
             G1858::Step::ExchangeApproval,
             G1858::Step::HomeToken,
             G1858::Step::PrivateClosure,
           ], round_num: round_num)
+        end
+
+        def reorder_players(order = nil, log_player_order: false, silent: false)
+          super
+          return unless robot?
+
+          # The robot player is always last in priority order.
+          @players.delete(@robot)
+          @players << @robot
+        end
+
+        def operating_order
+          return super unless robot?
+
+          super.sort_by { |entity| entity == sbb ? 1 : 0 }
+        end
+
+        def companies_to_payout(ignore: [])
+          @companies.select do |company|
+            company.owner &&
+              company.owner != @robot &&
+              !ignore.include?(company.id)
+          end
         end
 
         BONUS_HEXES = {
@@ -158,25 +258,24 @@ module Engine
           super + north_south_bonus(route, stops) + east_west_bonus(route, stops)
         end
 
-        def private_colors_available(phase)
+        def private_batches_available(phase)
           if phase.status.include?('yellow_privates')
-            %i[yellow]
+            %i[private_batch1]
           elsif phase.status.include?('green_privates')
-            %i[yellow green]
+            %i[private_batch1 private_batch2]
           elsif phase.status.include?('all_privates')
-            %i[yellow green lightblue]
+            %i[private_batch1 private_batch2 private_batch3]
           elsif phase.status.include?('blue_privates')
-            %i[lightblue]
+            %i[private_batch3]
           else
             []
           end
         end
 
-        MOUNTAIN_RAILWAY_TILE = 'X28'
-        MOUNTAIN_RAILWAY_ASSIGNMENT = '+40'
-        MOUNTAIN_RAILWAY_BONUS = 40
         ASSIGNMENT_TOKENS = {
-          MOUNTAIN_RAILWAY_ASSIGNMENT => '/icons/1858_switzerland/mountain.svg',
+          '+20' => '/icons/1858_switzerland/mountain.svg',
+          '+30' => '/icons/1858_switzerland/mountain.svg',
+          '+40' => '/icons/1858_switzerland/mountain.svg',
         }.freeze
 
         def submit_revenue_str(routes, _show_subsidy)
@@ -194,14 +293,18 @@ module Engine
 
         def mountain_bonus(entity, routes)
           return 0 if routes.empty?
+          return 0 unless mountain_railway_built?(entity)
 
-          mountain_railway_built?(entity) ? MOUNTAIN_RAILWAY_BONUS : 0
+          entity.assignments.sum do |assignment, _|
+            mr = MOUNTAIN_RAILWAYS.values.find { |r| r[:assignment] == assignment }
+            mr ? mr[:bonus] : 0
+          end
         end
 
         def all_potential_upgrades(tile, tile_manifest: false, selected_company: nil)
           return super unless mountain_hex?(tile)
 
-          super + Array(@tiles.find { |t| t.name == MOUNTAIN_RAILWAY_TILE })
+          super + tiles.select { |t| mountain_railway_tile?(t) }
         end
 
         def upgrades_to?(from, to, special, selected_company: nil)
@@ -210,17 +313,39 @@ module Engine
           return valid if mountain_railway_built?(current_entity)
           return valid unless mountain_hex?(from)
 
-          valid || to.name == MOUNTAIN_RAILWAY_TILE
+          valid || mountain_railway_tile?(to)
+        end
+
+        def tile_cost_with_discount(tile, hex, entity, _spender, cost)
+          tile_cost = super
+          return tile_cost unless mountain_railway_tile?(tile)
+
+          # When building a mountain railway you pay a cost for the tile, not
+          # for the hex's terrain.
+          mr_cost = MOUNTAIN_RAILWAYS[tile.name][:cost]
+          @log << "#{entity.id} building a mountain railway in " \
+                  "#{hex.coordinates} costs #{format_currency(mr_cost)}."
+          tile_cost - 120 + mr_cost
         end
 
         def after_lay_tile(_hex, tile, entity)
-          return unless tile.name == MOUNTAIN_RAILWAY_TILE
+          if mountain_railway_tile?(tile)
+            entity.assign!(MOUNTAIN_RAILWAYS[tile.name][:assignment])
+          elsif robot_owner?(entity) && home_route_complete?(entity)
+            private_nationalised(entity)
+          end
+        end
 
-          entity.assign!(MOUNTAIN_RAILWAY_ASSIGNMENT)
+        def setup_preround
+          super
+          return unless robot?
+
+          @robot = Player.new(-1, 'Robot')
+          @players << @robot
         end
 
         # This method is called to remove some private railways from 1858 when
-        # there are two players. This does not happen in 18CH.
+        # there are two players. This does not happen in 1858 Switzerland.
         def setup_unbuyable_privates; end
 
         def gotthard
@@ -248,7 +373,97 @@ module Engine
             (operator == gb_minor && gauge == :broad)
         end
 
+        def corporation_private_connected?(corporation, minor)
+          # Private railway companies cannot be exchanged for shares of SBB.
+          return false if corporation.type == :national
+
+          super
+        end
+
+        def robot_owner?(entity)
+          return false unless robot?
+          return false if !entity.corporation? && !entity.minor?
+
+          entity.owner == @robot
+        end
+
+        def acting_for_player(player)
+          return player unless player == @robot
+
+          acting_for_robot(current_entity)
+        end
+
+        # Finds the player who should take track actions for robot-owned
+        # private railways and public companies.
+        def acting_for_robot(operator)
+          player_index =
+            if operator.corporation?
+              # SBB is operated by the priority holder in the first round of an
+              # OR set, and the other player in the second.
+              @round.round_num - 1
+            else
+              # The players take turns operate the robot's private railway
+              # companies, starting with the priority deal holder.
+              minor_index = @round.entities
+                                  .select { |e| e.minor? && e.owner == @robot }
+                                  .index(operator)
+              minor_index % human_players.size
+            end
+          human_players[player_index]
+        end
+
+        def tile_lays(entity)
+          return super unless robot_owner?(entity)
+
+          entity.corporation? ? ROBOT_MAJOR_TILE_LAYS : ROBOT_MINOR_TILE_LAYS
+        end
+
+        def can_par?(corporation, parrer)
+          return false if corporation == sbb
+
+          super
+        end
+
+        def close_company(company)
+          # Bit of a hack to avoid rewriting the method in G1858::Game.
+          # This avoids the SBB being paid for any of their companies.
+          company.owner = @bank if company.owner == sbb
+
+          super
+        end
+
+        def buy_train(entity, train, price)
+          super(entity, train, price.zero? ? :free : price)
+        end
+
+        # Checks whether tiles have been laid in all the hexes of a private
+        # railway company.
+        def home_route_complete?(entity)
+          return false unless entity.minor?
+
+          entity.coordinates.none? { |coord| hex_by_id(coord).tile.color == :white }
+        end
+
         private
+
+        MOUNTAIN_RAILWAYS = {
+          'X28' => { tile: 'X28', assignment: '+20', bonus: 20, cost: 60 },
+          'X29' => { tile: 'X29', assignment: '+30', bonus: 30, cost: 90 },
+          'X30' => { tile: 'X30', assignment: '+40', bonus: 40, cost: 120 },
+        }.freeze
+
+        def sbb
+          @sbb ||= corporation_by_id('SBB')
+        end
+
+        # Is this game using the rules for the two-player robot variant?
+        def robot?
+          @optional_rules.include?(:robot)
+        end
+
+        def human_players
+          @players.reject { |player| player == @robot }
+        end
 
         def hexes_by_id(coordinates)
           coordinates.map { |coord| hex_by_id(coord) }
@@ -283,10 +498,33 @@ module Engine
           tile.color == :white && tile.upgrades.any? { |u| u.cost == 120 }
         end
 
+        def mountain_railway_tile?(tile)
+          @mr_tiles ||= MOUNTAIN_RAILWAYS.keys
+          @mr_tiles.include?(tile.name)
+        end
+
         def mountain_railway_built?(entity)
           return false unless entity.corporation?
 
-          entity.assignments.key?(MOUNTAIN_RAILWAY_ASSIGNMENT)
+          @mr_assignments ||= MOUNTAIN_RAILWAYS.map { |_, mr| mr[:assignment] }
+          entity.assignments.keys.intersect?(@mr_assignments)
+        end
+
+        # Called when a private railway company owned by the robot has finished
+        # laying track in all its home hexes. This closes the private railway
+        # and, if possible, places a SBB token in one of its home cities.
+        def private_nationalised(minor)
+          @log << "#{minor.id} has built all its reserved hexes and is " \
+                  "acquired by #{sbb.id}."
+          company = private_company(minor)
+          @robot.companies.delete(company)
+          company.owner = sbb
+          city = @cities.find { |c| c.reserved_by?(company) }
+          if city&.tokenable?(sbb, free: true)
+            @log << "#{sbb.id} places a token in #{city.tile.hex.location_name}."
+            city.place_token(sbb, sbb.next_token, free: true)
+          end
+          close_private(minor)
         end
       end
     end

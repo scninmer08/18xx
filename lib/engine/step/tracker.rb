@@ -262,7 +262,12 @@ module Engine
             cities.size > 1 &&
             !(tokens = cities.flat_map(&:tokens).compact).empty?
           tokens.each do |token|
-            actor = entity.company? ? entity.owner : entity
+            actor = case @game.class::TOKEN_PLACEMENT_ON_TILE_LAY_ENTITY
+                    when :current_operator
+                      entity.company? ? entity.owner : entity
+                    when :owner
+                      token.corporation
+                    end
             @round.pending_tokens << {
               entity: actor,
               hexes: [action.hex],
@@ -421,7 +426,8 @@ module Engine
         all_new_exits_valid = new_exits.all? { |edge| hex.neighbors[edge] }
         return false unless all_new_exits_valid
 
-        entity_reaches_a_new_exit = !(new_exits & hex_neighbors(entity, hex)).empty?
+        neighbors = hex_neighbors(entity, hex) || []
+        entity_reaches_a_new_exit = !(new_exits & neighbors).empty?
         return false unless entity_reaches_a_new_exit
 
         return false unless old_paths_maintained?(hex, tile)

@@ -34,16 +34,17 @@ module Engine
         SELL_BUY_ORDER = :sell_buy
         TILE_RESERVATION_BLOCKS_OTHERS = :always
         CURRENCY_FORMAT_STR = '%skr'
-        EBUY_SELL_MORE_THAN_NEEDED = true
+        EBUY_SELL_MORE_THAN_NEEDED = false
         CAPITALIZATION = :incremental
         MUST_BUY_TRAIN = :always
-        POOL_SHARE_DROP = :none
+        POOL_SHARE_DROP = :left_block
         SELL_AFTER = :p_any_operate
         SELL_MOVEMENT = :left_block
         HOME_TOKEN_TIMING = :float
-
-        EBUY_DEPOT_TRAIN_MUST_BE_CHEAPEST = false
+        EBUY_PRES_SWAP = false
+        EBUY_DEPOT_TRAIN_MUST_BE_CHEAPEST = true
         MUST_EMERGENCY_ISSUE_BEFORE_EBUY = true
+        SOLD_OUT_INCREASE = true
 
         BANKRUPTCY_ENDS_GAME_AFTER = :one
 
@@ -52,6 +53,8 @@ module Engine
         CLOSED_CORP_RESERVATIONS_REMOVED = false
 
         GAME_END_CHECK = { bankrupt: :immediate, custom: :one_more_full_or_set }.freeze
+
+        DEPOT_CLASS = G18Norway::Depot
 
         CERT_LIMIT = {
           3 => { 0 => 12, 1 => 12, 2 => 12, 3 => 15, 4 => 15, 5 => 17, 6 => 17, 7 => 19, 8 => 19 },
@@ -74,6 +77,11 @@ module Engine
           pays_bonus_3: 'Triple jump if dividend ≥ 3X',
           only_president: 'Move left only when president sells'
         )
+
+        STATUS_TEXT = Base::STATUS_TEXT.merge(
+          'nr_one_or' => ['NR after first OR', 'Nationalization Round only after first Operating Round'],
+          'nr_each_or' => ['NR after each OR', 'Nationalization Round after each Operating Round'],
+        ).freeze
 
         ASSIGNMENT_TOKENS = {
           'MOUNTAIN_SMALL' => '/icons/hill.svg',
@@ -132,15 +140,15 @@ module Engine
           'Treasury'
         end
 
-        MOUNTAIN_BIG_HEXES = %w[E21 G21 H22 F26 E27 E29 D30].freeze
-        MOUNTAIN_SMALL_HEXES = %w[G19 E23 D26 D28 F28 G27 H28].freeze
-        HARBOR_HEXES = %w[G15 A25 C17 A31 B36].freeze
+        MOUNTAIN_BIG_HEXES = %w[F21 H21 I22 G26 F27 F29 E30].freeze
+        MOUNTAIN_SMALL_HEXES = %w[H19 F23 E26 E28 G28 H27 I28].freeze
+        HARBOR_HEXES = %w[H13 A26 D15 A32 E36].freeze
         CITY_HARBOR_MAP = {
-          'G17' => 'G15',
-          'B26' => 'A25',
-          'D18' => 'C17',
-          'B32' => 'A31',
-          'C35' => 'B36',
+          'H17' => 'H13',
+          'C26' => 'A26',
+          'E18' => 'D15',
+          'C32' => 'A32',
+          'D35' => 'E36',
         }.freeze
 
         def switcher
@@ -154,6 +162,19 @@ module Engine
         EXTRA_TILE_LAYS = [{ lay: true, upgrade: true }, { lay: :not_if_upgraded, upgrade: false }].freeze
 
         def setup
+          setup_company_price_up_to_one_and_half_face
+
+          %w[P2 P3 P4].each do |prefix|
+            suffix = 'B'
+            suffix = rand.even? ? 'A' : 'B' if @optional_rules.include?(:random_private_companies)
+            suffix = 'A' if @optional_rules.include?(:private_b_companies)
+
+            @companies.select { |c| c.id.start_with?(prefix + suffix) }.each do |company|
+              company.close!
+              @round.active_step.companies.delete(company)
+            end
+          end
+
           MOUNTAIN_BIG_HEXES.each { |hex| hex_by_id(hex).assign!('MOUNTAIN_BIG') }
           MOUNTAIN_SMALL_HEXES.each { |hex| hex_by_id(hex).assign!('MOUNTAIN_SMALL') }
           corporation_by_id('H').add_ability(Engine::Ability::Base.new(
@@ -163,7 +184,7 @@ module Engine
 
           corporation_by_id('R').add_ability(Engine::Ability::Base.new(
             type: 'free_tunnel',
-            description: 'Free tunnel'
+            description: 'May build tunnels for free'
           ))
 
           corporation_by_id('V').add_ability(Engine::Ability::Base.new(
@@ -178,7 +199,7 @@ module Engine
 
           corporation_by_id('S').add_ability(Engine::Ability::Base.new(
             type: 'extra_tile_lay',
-            description: 'May lay two yellow',
+            description: 'May lay two yellow until Oslo is connected',
           ))
 
           corporation_by_id('J').add_ability(Engine::Ability::Base.new(
@@ -188,7 +209,7 @@ module Engine
 
           corporation_by_id('B').add_ability(Engine::Ability::Base.new(
             type: 'ignore_mandatory_train',
-            description: 'Not mandatory to own a train',
+            description: 'Not mandatory to own a train unil Phase 5',
           ))
 
           @corporations.each do |corporation|
@@ -210,22 +231,30 @@ module Engine
           update_cert_limit
 
           # Allow to build against Mjosa
-          hex_by_id('H26').neighbors[1] = hex_by_id('G27')
-          hex_by_id('H26').neighbors[5] = hex_by_id('I27')
-          hex_by_id('G27').neighbors[4] = hex_by_id('H26')
-          hex_by_id('I27').neighbors[2] = hex_by_id('H26')
+          hex_by_id('I26').neighbors[1] = hex_by_id('H27')
+          hex_by_id('I26').neighbors[5] = hex_by_id('J27')
+          hex_by_id('H27').neighbors[4] = hex_by_id('I26')
+          hex_by_id('J27').neighbors[2] = hex_by_id('I26')
         end
 
-        def p4
-          @p4 ||= company_by_id('P4')
+        def p4a
+          @p4a ||= company_by_id('P4A')
         end
 
         def thunes_mekaniske
-          @thunes_mekaniske ||= company_by_id('P2')
+          @thunes_mekaniske ||= company_by_id('P2A')
         end
 
         def owns_thunes_mekaniske?(owner)
           thunes_mekaniske.owner == owner
+        end
+
+        def hvite_svan
+          @hvite_svan ||= company_by_id('P2B')
+        end
+
+        def owns_hvite_svan?(owner)
+          hvite_svan.owner == owner
         end
 
         def big_mountain?(hex)
@@ -241,7 +270,7 @@ module Engine
         end
 
         def mjosa
-          @mjosa ||= hex_by_id('H26')
+          @mjosa ||= hex_by_id('I26')
         end
 
         def route_cost(route)
@@ -249,7 +278,7 @@ module Engine
           mult = 2
           mult = 1 if @phase.tiles.include?(:green)
           mult = 0 if @phase.tiles.include?(:brown)
-          cost += 5 * mult if route.all_hexes.include?(mjosa)
+          cost += 5 * mult if !owns_hvite_svan?(route.train.owner) && route.all_hexes.include?(mjosa)
 
           # P2 Thunes mekaniske verksted do not need to pay maintainance
           return cost if owns_thunes_mekaniske?(route.train.owner)
@@ -287,6 +316,15 @@ module Engine
           revenue
         end
 
+        def stock_round
+          G18Norway::Round::Stock.new(self, [
+            Engine::Step::DiscardTrain,
+            Engine::Step::Exchange,
+            Engine::Step::SpecialTrack,
+            G18Norway::Step::BuySellParShares,
+          ])
+        end
+
         def operating_round(round_num)
           Engine::Round::Operating.new(self, [
             Engine::Step::Bankrupt,
@@ -311,20 +349,34 @@ module Engine
           train.track_type == :narrow
         end
 
-        def cheapest_train_price
+        def cheapest_train
           depot_trains = depot.depot_trains.reject { |train| ship?(train) }
-          train = depot_trains.min_by(&:price)
-          train.price
+          depot_trains.min_by(&:price)
+        end
+
+        def cheapest_train_price(corporation)
+          ability = abilities(corporation, :train_discount, time: 'buying_train')
+          cheapest_train.min_price(ability: ability)
         end
 
         def can_go_bankrupt?(player, corporation)
-          total_emr_buying_power(player, corporation) < cheapest_train_price
+          total_emr_buying_power(player, corporation) < cheapest_train_price(corporation)
         end
 
         def new_nationalization_round(round_num)
           G18Norway::Round::Nationalization.new(self, [
               G18Norway::Step::NationalizeCorporation,
               ], round_num: round_num)
+        end
+
+        def nationalize_corporation(entity, number_of_shares)
+          value = convert(entity, number_of_shares)
+          @log << "#{entity.name} nationalized and receives #{format_currency(value)}"
+          update_cert_limit
+        end
+
+        def float_corporation(corporation)
+          nationalize_corporation(corporation, 1) if custom_end_game_reached?
         end
 
         def next_round!
@@ -334,6 +386,7 @@ module Engine
               if @round.round_num < @operating_rounds
                 new_operating_round(@round.round_num + 1)
               else
+                @turn += 1
                 or_set_finished
                 new_stock_round
               end
@@ -344,22 +397,31 @@ module Engine
             when Engine::Round::Operating
               if @round.round_num < @operating_rounds
                 or_round_finished
+                if @phase.status.include?('nr_each_or') || @phase.status.include?('nr_one_or')
+                  new_nationalization_round(@round.round_num)
+                else
+                  new_operating_round(@round.round_num + 1)
+                end
+              elsif @phase.status.include?('nr_each_or')
+                or_round_finished
                 new_nationalization_round(@round.round_num)
               else
                 @turn += 1
                 or_round_finished
-                if @phase.tiles.include?(:green)
-                  new_nationalization_round(@round.round_num)
-                else
-                  or_set_finished
-                  new_stock_round
-                end
+                or_set_finished
+                new_stock_round
               end
             when init_round.class
               init_round_finished
               reorder_players
               new_stock_round
             end
+        end
+
+        def payout_companies(ignore: [])
+          return if @round.is_a?(G18Norway::Round::Nationalization)
+
+          super(ignore: @phase.name.to_i == 2 ? ignore + ['P3B'] : ignore)
         end
 
         def add_new_share(share)
@@ -409,7 +471,7 @@ module Engine
         end
 
         def oslo
-          @oslo ||= hex_by_id('G29')
+          @oslo ||= hex_by_id('H29')
         end
 
         def init_graph
@@ -453,20 +515,19 @@ module Engine
           harbor_token?(city, entity)
         end
 
-        def connected?(a, b, corporation)
+        def connected?(a, b, corporation, train)
           return true if a.connects_to?(b, corporation)
 
           [a.a, a.b].each do |part|
             next unless b.nodes.include?(part)
             next unless part.city?
-
-            return harbor_token?(part, corporation)
+            return harbor_token?(part, corporation) if ship?(train)
           end
           false
         end
 
         def check_connected(route, corporation)
-          return if route.ordered_paths.each_cons(2).all? { |a, b| connected?(a, b, corporation) }
+          return if route.ordered_paths.each_cons(2).all? { |a, b| connected?(a, b, corporation, route.train) }
 
           return super unless @round.train_upgrade_assignments[route.train]
 
@@ -489,7 +550,11 @@ module Engine
           return if token
 
           visited = route.visited_stops
-          token = visited.find { |stop| harbor_token?(stop, route.corporation) }
+          token = if ship?(route.train)
+                    visited.find { |stop| harbor_token?(stop, route.corporation) || stop.tokened_by?(route.corporation) }
+                  else
+                    visited.find { |stop| stop.tokened_by?(route.corporation) }
+                  end
 
           raise NoToken, 'Route must contain token' unless token
         end
@@ -597,7 +662,7 @@ module Engine
 
           available = @depot.available_upcoming_trains.reject { |train| ship?(train) }
           return [] unless (train = available.min_by(&:price))
-          return [] if corp.cash >= train.price
+          return [] if corp.cash >= cheapest_train_price(corp)
 
           bundles = bundles_for_corporation(corp, corp)
 
@@ -636,10 +701,72 @@ module Engine
           self.class::SELL_MOVEMENT
         end
 
+        def setup_company_price_up_to_one_and_half_face
+          @companies.each do |company|
+            company.min_price = (company.value * 0.5)
+            company.max_price = (company.value * 1.5)
+          end
+        end
+
         def check_sale_timing(entity, bundle)
           return false if @turn <= 1 && !@round.operating?
 
           super(entity, bundle)
+        end
+
+        def sell_shares_and_change_price(bundle, allow_president_change: true, swap: nil, movement: nil)
+          corporation = bundle.corporation
+
+          # Check if selling would make NSB president
+          if bundle.shares.any?(&:president) &&
+             corporation.share_holders[nsb] >= bundle.presidents_share.percent &&
+             corporation.player_share_holders.reject do |p, _|
+               p == bundle.owner || p == nsb
+             end.values.max.to_i < bundle.presidents_share.percent
+            raise GameError, 'Cannot sell shares as NSB would become president'
+          end
+
+          super
+        end
+
+        def after_phase_change(name)
+          super
+          # Only proceed if we're in phase 5
+          return unless name.to_i == 5
+
+          # Find P3B company and get its owner
+          p4b_company = @companies.find { |c| c.id == 'P4B' }
+          return unless p4b_company&.owner&.corporation?
+
+          corporation = p4b_company.owner
+
+          # Get L1 hex (which is currently an offboard hex)
+          l1_hex = hex_by_id('L1')
+          return unless l1_hex
+
+          # Create a new city tile to replace the offboard tile
+          new_tile = Tile.from_code(
+            'BODØ',
+            'red',
+            'city=revenue:green_0|brown_180,slots:1;path=a:0,b:_0',
+            reservation_blocks: self.class::TILE_RESERVATION_BLOCKS_OTHERS,
+            unlimited: false,
+            hidden: false
+          )
+          return unless new_tile
+
+          # Replace the tile on the hex
+          l1_hex.lay(new_tile)
+
+          # Create a new token for the corporation
+          token = Token.new(corporation)
+          corporation.tokens << token
+
+          # Place the token in the city (first city on the tile)
+          city = l1_hex.tile.cities.first
+          city.place_token(corporation, token, free: true, extra_slot: false)
+          @graph.clear
+          @log << "#{corporation.name} places a token in #{l1_hex.name} due to P4B ownership"
         end
       end
     end

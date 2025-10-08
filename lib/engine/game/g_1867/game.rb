@@ -379,7 +379,7 @@ module Engine
                                               convert_range: 'Price range to convert minor to major',
                                               max_price: 'Maximum price for a minor').freeze
         STOCKMARKET_COLORS = Base::STOCKMARKET_COLORS.merge(par_1: :orange, par_2: :green, convert_range: :blue).freeze
-        CORPORATION_SIZES = { 2 => :small, 5 => :medium, 10 => :large }.freeze
+        CORPORATION_SIZES = { 2 => :small, 10 => :large }.freeze
         # A token is reserved for Montreal is reserved for nationalization
         NATIONAL_RESERVATIONS = ['L12'].freeze
         GREEN_CORPORATIONS = %w[BBG LPS QLS SLA TGB THB].freeze
@@ -391,7 +391,7 @@ module Engine
 
         # Minors are done as corporations with a size of 2
 
-        attr_reader :trainless_major
+        attr_reader :trainless_major, :national
 
         def ipo_name(_entity = nil)
           'Treasury'
@@ -577,7 +577,9 @@ module Engine
           end
         end
 
-        def nationalization_transfer_assets(corporation); end
+        def nationalization_transfer_assets(corporation)
+          corporation.spend(corporation.cash, @bank) if corporation.cash.positive?
+        end
 
         def nationalize!(corporation)
           return if !corporation.floated? || !@corporations.include?(corporation)
@@ -654,6 +656,14 @@ module Engine
           end
         end
 
+        def reset_corporation(corporation)
+          corp = super
+          # When a major is restarted it defaults to a 60% ownership limit.
+          # This is wrong for the two-player variants.
+          corp.max_ownership_percent = 70 if @players.size == 2
+          corp
+        end
+
         def place_639_token(tile)
           return unless @national_reservations.any?
           return if tile.cities.any? { |c| c.tokened_by?(@national) }
@@ -701,7 +711,7 @@ module Engine
         end
 
         def corporation_size(entity)
-          # For display purposes is a corporation small, medium or large
+          # For displaying if a corporation is a minor or major corporation
           CORPORATION_SIZES[entity.total_shares]
         end
 
@@ -810,6 +820,14 @@ module Engine
           @game_end_check = super || @game_end_check
         end
 
+        # The merger process can result in the new major having just two
+        # tokens. This gives them their third token if that has happened.
+        def fix_token_count!(corporation)
+          return if corporation.tokens.size == 3
+
+          corporation.tokens << Engine::Token.new(corporation, price: 40)
+        end
+
         private
 
         def new_auction_round
@@ -822,7 +840,7 @@ module Engine
           G1867::Round::Stock.new(self, [
             G1867::Step::MajorTrainless,
             Engine::Step::DiscardTrain,
-            Engine::Step::HomeToken,
+            G1867::Step::HomeToken,
             G1867::Step::BuySellParShares,
           ])
         end

@@ -138,7 +138,7 @@ module Engine
         SELL_AFTER = :p_any_operate
         SELL_BUY_ORDER = :sell_buy
         SELL_MOVEMENT = :left_block_pres
-        EBUY_OTHER_VALUE = false
+        EBUY_FROM_OTHERS = :never
         EBUY_DEPOT_TRAIN_MUST_BE_CHEAPEST = false
         MUST_EMERGENCY_ISSUE_BEFORE_EBUY = true
         HOME_TOKEN_TIMING = :float
@@ -271,11 +271,6 @@ module Engine
         def setup
           @turn = setup_turn
           @second_tokens_in_green = {}
-
-          # When creating a game the game will not have enough to start
-          unless (player_count = @players.size).between?(*self.class::PLAYER_RANGE)
-            raise GameError, "#{self.class::GAME_TITLE} does not support #{player_count} players"
-          end
 
           if first_edition?
             remove_icons(self.class::BOOMTOWN_HEXES, self.class::ABILITY_ICONS['BT'])

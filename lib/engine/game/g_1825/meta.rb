@@ -8,7 +8,7 @@ module Engine
       module Meta
         include Game::Meta
 
-        DEV_STAGE = :beta
+        DEV_STAGE = :production
 
         GAME_DESIGNER = 'Francis Tresham'
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/1825'
@@ -25,7 +25,7 @@ module Engine
           {
             sym: :unit_2,
             short_name: 'Unit 2',
-            players: [2, 3],
+            players: [2, 3, 4],
           },
           {
             sym: :unit_3,

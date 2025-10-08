@@ -15,6 +15,17 @@ module Engine
         include G1822CA::Map
         include G1822CA::Trains
 
+        CERT_LIMIT = { 2 => 40, 3 => 26, 4 => 20, 5 => 16, 6 => 13, 7 => 11 }.freeze
+        STARTING_CASH = { 2 => 1000, 3 => 700, 4 => 525, 5 => 420, 6 => 350, 7 => 300 }.freeze
+        BIDDING_TOKENS = {
+          '2': 7,
+          '3': 6,
+          '4': 5,
+          '5': 4,
+          '6': 3,
+          '7': 3,
+        }.freeze
+
         DOUBLE_HEX = %w[G13 I15 AB22 AG13 AH10].freeze
 
         BIDDING_BOX_START_MINOR = 'M6'
@@ -341,7 +352,7 @@ module Engine
           Engine::Round::Operating.new(self, [
             G1822CA::Step::PendingToken,
             G1822::Step::FirstTurnHousekeeping,
-            Engine::Step::AcquireCompany,
+            G1822::Step::AcquireCompany,
             G1822CA::Step::DiscardTrain,
             G1822CA::Step::AssignSawmill,
             G1822::Step::SpecialChoose,
@@ -393,53 +404,38 @@ module Engine
         end
 
         def mail_contract_bonus(entity, routes)
-          mail_contracts = entity.companies.count { |c| self.class::PRIVATE_MAIL_CONTRACTS.include?(c.id) }
+          # "Large Mail Contract" is the same as the standard 1822 family "Mail Contract"
+          large_bonuses = super
+
+          large_contracts = large_bonuses.size
           small_contracts = entity.companies.count { |c| self.class::PRIVATE_SMALL_MAIL_CONTRACTS.include?(c.id) }
-          all_contracts = mail_contracts + small_contracts
+          all_contracts = large_contracts + small_contracts
           return [] unless all_contracts.positive?
-
-          mail_bonuses =
-            if mail_contracts.positive?
-              bonuses = routes.map do |r|
-                stops = r.visited_stops
-                next if stops.size < 2
-
-                first = stops.first.route_base_revenue(r.phase, r.train)
-                last = stops.last.route_base_revenue(r.phase, r.train)
-                { route: r, subsidy: (first + last) / 2 }
-              end
-              bonuses.compact.sort_by { |v| -v[:subsidy] }.take(mail_contracts)
-            else
-              []
-            end
 
           small_bonuses =
             if small_contracts.positive?
               subsidy = small_mail_subsidy
-
               routes.map do |r|
-                next if r.visited_stops.size < 2
-
                 { route: r, subsidy: subsidy }
               end.compact.take(small_contracts)
             else
               []
             end
 
-          if routes.size >= all_contracts || mail_bonuses.empty? || small_bonuses.empty?
-            mail_bonuses + small_bonuses
+          if routes.size >= all_contracts || large_bonuses.empty? || small_bonuses.empty?
+            large_bonuses + small_bonuses
           else
-            mail_index = 0
+            large_index = 0
             small_index = 0
             routes.map do
-              mail = mail_bonuses[mail_index] || { subsidy: 0 }
+              large = large_bonuses[large_index] || { subsidy: 0 }
               small = small_bonuses[small_index] || { subsidy: 0 }
-              if small[:subsidy] > mail[:subsidy]
+              if small[:subsidy] > large[:subsidy]
                 small_index += 1
                 small
               else
-                mail_index += 1
-                mail
+                large_index += 1
+                large
               end
             end
           end
@@ -468,6 +464,12 @@ module Engine
           end
 
           help
+        end
+
+        def train_help_mail_contracts
+          'Large mail contract(s) gives a subsidy equal to one half of the base value of the start and end '\
+            'stations from one of the trains operated. Doubled values (for E trains or destination tokens) '\
+            'do not count. L-trains cannot use large mail contracts.'
         end
 
         def revenue_for(route, stops)
@@ -505,6 +507,8 @@ module Engine
           return unless (sawmill_stop = route.visited_stops.find { |s| s.hex == @sawmill_hex })
 
           entity = route.train.owner
+          return if train_type(route.train) == :etrain && !sawmill_stop.tokened_by?(entity)
+
           sawmill_dest = sawmill_stop.city? &&
                          sawmill_stop.tokens.find { |t| t && t.type == :destination && t.corporation == entity } &&
                          (dest = destination_bonus(route.routes)) &&

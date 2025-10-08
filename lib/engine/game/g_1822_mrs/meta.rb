@@ -26,10 +26,32 @@ module Engine
 
         OPTIONAL_RULES = [
           {
+            sym: :starter,
+            short_name: 'Starter',
+            desc: 'Play with P1, P2, and P5-P14. Intended for those with no experience with 1822.',
+          },
+          {
             sym: :advanced,
             short_name: 'Advanced',
-            desc: 'Play with P1-12 and M14 will start in minor bid box 1.',
+            desc: 'Play with P1-12. M14 starts in minor bid box 1.',
           },
+          {
+            sym: :sw_peninsula,
+            short_name: 'Southwest Peninsula',
+            desc: 'Replace two random minor companies with M22 and M23, whose '\
+                  'home tokens will be placed in Southwest England (D39).',
+            players: [2],
+          },
+          {
+            sym: :tax_haven_multiple,
+            short_name: 'Tax Haven Variant',
+            desc: 'P16 (Tax Haven) can use the cash it accumulates to buy 1 share per SR. Cannot '\
+                  'own multiple shares of one corporation.',
+          },
+        ].freeze
+
+        MUTEX_RULES = [
+          %i[starter advanced],
         ].freeze
       end
     end

@@ -380,10 +380,6 @@ module Engine
           @border_paths = nil
         end
 
-        def clear_token_graph_for_entity(entity)
-          clear_graph_for_entity(entity)
-        end
-
         def event_phase4_regions!
           modify_regions(2, false)
           modify_regions(4, true)
@@ -2570,7 +2566,6 @@ module Engine
 
         def corp_minimum_to_retain(owner, corp, active)
           return 0 if can_sell_any_amount?(owner, corp, active)
-          return 0 if historical?(corp)
 
           corp.player_share_holders.reject { |s_h, _| s_h == owner }.values.max || 0
         end

@@ -22,7 +22,16 @@ module Engine
         GAME_ISSUE_LABEL = '1822'
         GAME_IS_VARIANT_OF = G1822::Meta
 
-        PLAYER_RANGE = [3, 7].freeze
+        PLAYER_RANGE = [2, 7].freeze
+
+        OPTIONAL_RULES = [
+          {
+            sym: :tax_haven_multiple,
+            short_name: 'Tax Haven Variant',
+            desc: 'P16 (Tax Haven) can use the cash it accumulates to buy 1 share per SR. Cannot '\
+                  'own multiple shares of one corporation.',
+          },
+        ].freeze
       end
     end
   end

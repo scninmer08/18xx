@@ -28,6 +28,7 @@ module Engine
 
         SELL_BUY_ORDER = :sell_buy
         SELL_MOVEMENT = :down_block
+        MUST_SELL_IN_BLOCKS = true
         POOL_SHARE_DROP = :left_block
         NEXT_SR_PLAYER_ORDER = :most_cash
         EBUY_PRES_SWAP = false
@@ -396,7 +397,7 @@ module Engine
             next unless corp.destination_coordinates
 
             hex_by_id(corp.destination_coordinates).remove_assignment!(corp)
-            corp.remove_ability(corp.abilities.find { |a| a.description.start_with?('Destination') })
+            corp.remove_ability(corp.abilities.find { |a| a.description&.start_with?('Destination') })
           end
         end
 
@@ -527,8 +528,9 @@ module Engine
           if (president_shares = president.shares_of(sbb)).none? { |share| share.percent == 10 }
             ten_percent_share = @share_pool.shares_of(sbb).find { |share| share.percent == 10 } ||
                                   president_priority_order[-1].shares_of(sbb).find { |share| share.percent == 10 }
+            share_owner = ten_percent_share.owner
             @share_pool.transfer_shares(ShareBundle.new([ten_percent_share]), president, allow_president_change: false)
-            @share_pool.transfer_shares(ShareBundle.new(president_shares.take(2)), share.owner, allow_president_change: false)
+            @share_pool.transfer_shares(ShareBundle.new(president_shares.take(2)), share_owner, allow_president_change: false)
           end
 
           # Make sure president has the presidents cert
@@ -749,6 +751,7 @@ module Engine
             update_tile_lists(tile, hex.tile)
             hex.lay(tile)
           end
+          clear_graph
 
           @log << "#{company.name} closes"
           company.close!
@@ -770,7 +773,10 @@ module Engine
         end
 
         def destinated?(entity)
-          home_node = entity.tokens.first&.city
+          return false unless entity.coordinates
+          return false unless entity.floated?
+
+          home_node = hex_by_id(entity.coordinates).tile.cities.find { |c| c.tokened_by?(entity) || c.reserved_by?(entity) }
           destination_hex = hex_by_id(entity.destination_coordinates)
           return false if !home_node || !destination_hex
           return false unless destination_hex.assigned?(entity)

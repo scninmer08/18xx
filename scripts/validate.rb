@@ -19,8 +19,16 @@ class Validate
     File.write(filename, JSON.pretty_generate(data))
   end
 
+  def parsed
+    @parsed ||= JSON.parse(File.read(filename))
+  end
+
   def data
-    @data ||= JSON.parse(File.read(filename))
+    @data ||= parsed.reject { |k, v| k == 'summary' }
+  end
+
+  def summary
+    @summary ||= parsed['summary']
   end
 
   def ids
@@ -53,6 +61,40 @@ class Validate
         _errors
       end
   end
+
+  def error_counts_by_title
+    error_ids_by_title.transform_values(&:size)
+  end
+
+  def ids_to_act_on
+    @ids_to_act_on ||=
+      begin
+        _ids_to_act_on = {'archive' => [], 'pin' => []}
+        error_ids_by_title.each do |title, ids|
+          key = {
+            prealpha: 'archive',
+            alpha: 'archive',
+            beta: 'pin',
+            production: 'pin',
+          }[Engine.meta_by_title(title)::DEV_STAGE]
+          _ids_to_act_on[key].concat(ids)
+        end
+        _ids_to_act_on.transform_values!(&:sort!)
+      end
+  end
+
+  def ids_to_pin
+    ids_to_act_on['pin']
+  end
+
+  def ids_to_archive
+    ids_to_act_on['archive']
+  end
+
+  def pin_and_archive!(pin_version)
+    pin_games(pin_version, ids_to_pin)
+    archive_games(ids_to_archive)
+  end
 end
 
 $count = 0
@@ -61,7 +103,12 @@ $total_time = 0
 
 def run_game(game, actions = nil, strict: false, silent: false)
   actions ||= game.actions.map(&:to_h)
-  data={'id':game.id, 'title': game.title, 'status':game.status}
+  data = {
+    'id' => game.id,
+    'title' => game.title,
+    'optional_rules' => game.settings['optional_rules'],
+    'status' => game.status
+  }
 
   puts "running game #{game.id}" unless silent
 
@@ -97,22 +144,33 @@ def run_game(game, actions = nil, strict: false, silent: false)
   data
 end
 
-def validate_all(*titles, game_ids: nil, strict: false, status: %w[active finished], filename: 'validate.json', silent: false)
+def validate_all(*titles, families: true, game_ids: nil, strict: false, status: %w[active finished], filename: 'validate.json', silent: false)
   $count = 0
   $total = 0
   $total_time = 0
   page = []
   data = {}
 
+  titles =
+    if families
+      titles.flat_map do |title|
+        titles_for_game_family(title)
+      end.uniq.sort
+    else
+      titles.sort
+    end
+
   where_args = {Sequel.pg_jsonb_op(:settings).has_key?('pin') => false, status: status}
-  where_args[:title] = titles if titles.any?
+  where_args[:title] = titles unless titles.empty?
   where_args[:id] = game_ids if game_ids
+
+  puts "Finding game IDS for #{where_args}"
 
   DB[:games].order(:id).where(**where_args).select(:id).paged_each(rows_per_fetch: 100) do |game|
     page << game
     if page.size >= 100
       where_args2 = {id: page.map { |p| p[:id] }}
-      where_args2[:title] = titles if titles.any?
+      where_args2[:title] = titles unless titles.empty?
       games = Game.eager(:user, :players, :actions).where(**where_args2).all
       _ = games.each do |game|
         data[game.id]=run_game(game, strict: strict, silent: silent)
@@ -122,7 +180,7 @@ def validate_all(*titles, game_ids: nil, strict: false, status: %w[active finish
   end
 
   where_args3 = {id: page.map { |p| p[:id] }}
-  where_args3[:title] = titles if titles.any?
+  where_args3[:title] = titles unless titles.empty?
 
   games = Game.eager(:user, :players, :actions).where(**where_args3).all
   _ = games.each do |game|
@@ -204,4 +262,37 @@ def pin_games(pin_version, game_ids)
     end
     data.save
   end
+end
+
+def archive_games(game_ids)
+  game_ids.each do |id|
+    Game[id].archive!
+  end
+end
+
+# returns Array<String> for all titles related to this one via DEPENDS_ON and
+# GAME_VARIANTS connections
+def titles_for_game_family(title)
+  titles = Set.new
+
+  meta = Engine.meta_by_title(title)
+  top = meta
+  top = Engine.meta_by_title(top::DEPENDS_ON) until top::DEPENDS_ON.nil?
+
+  dependent_metas = Engine::GAME_METAS.group_by { |m| m::DEPENDS_ON }
+  metas = [top, *dependent_metas[top.title]]
+
+  until metas.empty?
+    meta = metas.pop
+    title = meta.title
+    next if titles.include?(title)
+
+    titles.add(title)
+    meta::GAME_VARIANTS.each do |variant|
+      metas << Engine.meta_by_title(variant[:title])
+    end
+    metas.concat(dependent_metas[title] || [])
+  end
+
+  titles.sort
 end

@@ -29,7 +29,7 @@ module Engine
         CAPITALIZATION = :full
 
         MUST_SELL_IN_BLOCKS = false
-        EBUY_OTHER_VALUE = false
+        EBUY_FROM_OTHERS = :never
 
         MARKET = [
           %w[60 65 70 75 80p 90p 100 110 120 130 140 150 165 180 200e],
@@ -724,8 +724,13 @@ module Engine
             return unless action.hex.id == 'F5'
             return if p2_company.closed? || action.entity == p2_company
 
-            p2_company.remove_ability(p2_company.all_abilities.first)
-            @log << "#{p2_company.name} loses the ability to lay F5"
+            # Remove p2 ability to lay F5, but if someone else already
+            # have built there the ability has already been lost
+            p2_ability = p2_company.all_abilities.first
+            return if p2_ability.nil?
+
+            p2_company.remove_ability(p2_ability)
+            @log << "#{p2_company.name} loses the ability to lay tile 470 in F5"
           end
         end
 

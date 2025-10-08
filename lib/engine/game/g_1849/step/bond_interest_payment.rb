@@ -12,6 +12,14 @@ module Engine
             []
           end
 
+          def log_skip(entity)
+            super if @game.bonds?
+          end
+
+          def log_pass(entity)
+            super if @game.bonds?
+          end
+
           def skip!
             pass!
             entity = current_entity

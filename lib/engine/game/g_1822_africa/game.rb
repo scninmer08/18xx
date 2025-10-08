@@ -393,6 +393,10 @@ module Engine
           },
         ].freeze
 
+        TRAIN_AUTOROUTE_GROUPS = [
+          %w[E/5 E/6],
+        ].freeze
+
         UPGRADE_COST_L_TO_2 = 70
 
         @bidbox_cache = []
@@ -518,7 +522,7 @@ module Engine
           Engine::Round::Operating.new(self, [
             G1822::Step::PendingToken,
             G1822::Step::FirstTurnHousekeeping,
-            Engine::Step::AcquireCompany,
+            G1822::Step::AcquireCompany,
             G1822::Step::DiscardTrain,
             G1822::Step::SpecialChoose,
             G1822Africa::Step::LayGameReserve,

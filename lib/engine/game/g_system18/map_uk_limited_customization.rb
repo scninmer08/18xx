@@ -72,10 +72,6 @@ module Engine
         end
         # rubocop:enable Layout/LineLength
 
-        def map_uk_limited_game_companies
-          []
-        end
-
         # DGN GFN PHX KKN SPX
         def map_uk_limited_game_corporations(corps)
           corps.each_with_index do |c, idx|
@@ -137,7 +133,6 @@ module Engine
 
         def map_uk_limited_or_round_finished
           @uk_or_count += 1
-          return if @phase.name == 'D'
           return unless [3, 4, 5].include?(@uk_or_count)
 
           rust_event = "OR#{@uk_or_count}"
