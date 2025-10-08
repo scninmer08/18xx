@@ -4,6 +4,7 @@ module Engine
   module Game
     module G18IL
       module Map
+        LAYOUT = :flat
         LOCATION_NAMES = {
           'A10' => 'Omaha +80 E/W',
           'B3' => 'Sioux City +80 E/W',

@@ -68,7 +68,6 @@ module Engine
           end
 
           def can_sell?(entity, bundle)
-            bundle.shares.each { |s| return false if @game.corporate_buy&.shares&.include?(s) }
             return unless bundle
             return false if entity != bundle.owner
 

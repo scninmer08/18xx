@@ -4,7 +4,6 @@ module Engine
   module Game
     module G18IL
       module Tiles
-        LAYOUT = :flat
         TILE_TYPE = :lawson
         TILES = {
           '5' => 4,

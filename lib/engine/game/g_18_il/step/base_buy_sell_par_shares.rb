@@ -192,16 +192,17 @@ module Engine
           end
 
           def process_buy_shares(action)
-            entity = action.entity
-            bundle = action.bundle
+            entity      = action.entity
+            bundle      = action.bundle
             corporation = bundle.corporation
-            ic = @game.ic
+            ic          = @game.ic
 
             if entity.player?
               @round.players_bought[entity][corporation] += bundle.percent
               @round.bought_from_ipo = true if bundle.owner.corporation? && bundle.owner == corporation
               track_action(action, corporation)
               @round.reserve_bought[entity][corporation].concat(bundle.shares) if reserve_bundle?(corporation, bundle.owner)
+
               buy_shares(action.purchase_for || entity, bundle,
                          swap: action.swap, borrow_from: action.borrow_from,
                          allow_president_change: allow_president_change?(corporation),
@@ -211,14 +212,14 @@ module Engine
                 ic_shares = entity.shares_of(ic)[0, 2]
                 ic_shares.each { |share| share.buyable = false }
 
-                bundle = ShareBundle.new(ic_shares)
-                @game.share_pool.transfer_shares(bundle, ic)
+                @game.share_pool.transfer_shares(ShareBundle.new(ic_shares), ic)
                 ic.presidents_share.buyable = true
-                bundle = ShareBundle.new(ic.presidents_share)
-                @game.share_pool.transfer_shares(bundle, entity)
-              end
-              @game.add_ic_operating_ability if corporation == ic && !@game.ic_in_receivership?
+                @game.share_pool.transfer_shares(ShareBundle.new(ic.presidents_share), entity)
 
+                @game.sync_ic_operating_state!
+              end
+
+              @game.sync_ic_operating_state! if corporation == ic
             else
               buy_shares(entity, bundle)
               track_action(action, corporation, false)

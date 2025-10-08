@@ -39,7 +39,8 @@ module Engine
                   # checks for one IC Line connection when laying yellow
                   raise GameError, 'Tile must overlay at least one dashed path' if @game.ic_line_connections(hex) < 1
 
-                  @log << "#{action.entity.owner.name} receives a #{@game.format_currency(20)} subsidy for IC Line improvement"
+                  @log << "#{action.entity.owner.name} receives a #{@game.format_currency(20)} subsidy from the bank "\
+                          '(IC Line improvement)'
                   action.entity.owner.cash += 20
                 when :green
                   # checks for both IC Line connections when laying green

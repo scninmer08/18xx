@@ -26,10 +26,9 @@ module Engine
         include Phases
         include CitiesPlusTownsRouteDistanceStr
 
-        attr_accessor :stl_nodes, :blocking_token, :exchange_choice_player, :exchange_choice_corp,
-                      :exchange_choice_corps, :sp_used, :borrowed_trains, :train_borrowed, :closed_corporations,
-                      :will_buy_other_train, :corporate_buy, :emr_active, :pending_rusting_event, :last_set_pending,
-                      :lots, :lot_proxies
+        attr_accessor :stl_nodes, :exchange_choice_player, :exchange_choice_corp, :exchange_choice_corps, :sp_used,
+                      :borrowed_trains, :train_borrowed, :closed_corporations, :will_buy_other_train, :emr_active,
+                      :pending_rusting_event, :last_set_pending, :lots, :lot_proxies
 
         attr_reader :merged_corporation, :last_set, :ic_line_completed_hexes, :insolvent_corporations, :reserved_share
 
@@ -48,7 +47,13 @@ module Engine
         ).freeze
 
         STATUS_TEXT = Base::STATUS_TEXT.merge(
-          'pullman_strike' => ['Pullman Strike (after end of next OR)', '4+2P and 5+1P trains are downgraded to 4- and 5-trains'],
+          'pullman_strike' => ['Pullman Strike (end of next OR)',
+                               '4+2C and 5+1C trains are downgraded to 4- and 5-trains, respectively'],
+          'blocking_tokens' => ['Blocking Tokens (end of next OR)',
+                                'Unopened corporations are removed from the game and blocking tokens are placed in their '\
+                                'home locations'],
+          'cert_limit_change' => ['Cert Limit Change (end of next OR)',
+                                  'Cert limit is reduced by 1 for each unopened corporation that is removed'],
         )
 
         POOL_SHARE_DROP = :down_share
@@ -132,7 +137,7 @@ module Engine
         )
         BORROW_TRAIN_ABILITY = Ability::BorrowTrain.new(
           type: 'borrow_train',
-          train_types: %w[2 3 4 4+2P 5+1P 6 D],
+          train_types: %w[2 3 4 4+2C 5+1C 6 D],
           description: 'Must borrow train',
           desc_detail: 'While trainless, IC must borrow the cheapest-available train from the Depot when running trains.'
         )
@@ -163,8 +168,8 @@ module Engine
         )
         STOCK_PURCHASE_ABILITY = Ability::Description.new(
           type: 'description',
-          description: 'Modified stock purchase',
-          desc_detail: 'IC treasury shares are only available for purchase in concession rounds.'
+          description: 'Treasury shares available in CRs',
+          desc_detail: 'IC treasury shares are only available during concession rounds.'
         )
         FORMATION_ABILITY = Ability::Description.new(
           type: 'description',
@@ -248,7 +253,7 @@ module Engine
             G18IL::Round::Operating.new(self, [
               Engine::Step::Exchange,
               G18IL::Step::SpecialTrack,
-              G18IL::Step::SpecialToken,
+              Engine::Step::SpecialToken,
               Engine::Step::HomeToken,
               G18IL::Step::ObsoleteTrain,
               G18IL::Step::ExchangeChoiceCorp,
@@ -258,7 +263,6 @@ module Engine
               G18IL::Step::Conversion,
               G18IL::Step::PostConversionShares,
               G18IL::Step::BuyNewTokens,
-              G18IL::Step::SpecialIssueShares,
               G18IL::Step::IssueShares,
               G18IL::Step::SpecialBuy,
               G18IL::Step::Track,
@@ -273,6 +277,36 @@ module Engine
               [G18IL::Step::BuyCompany, { blocks: true }],
             ], round_num: round_num)
           end
+        end
+
+        def entity_can_use_company?(_entity, company)
+          step = @round&.active_step
+          return false unless step
+
+          # Central IL Boom only in Phase D
+          return false if company.sym == 'CIB' && @phase.name != 'D'
+
+          # Goodrich Transit Line: usable throughout the owning corp's OR turn
+          if company.sym == 'GTL' &&
+            @round.is_a?(Engine::Round::Operating) &&
+            @round.current_operator == company.owner
+            return true
+          end
+
+          step_name = step.class.name
+
+          return step_name.include?('Track') if abilities(company, :tile_lay)
+
+          return step_name.include?('Token') if abilities(company, :token)
+
+          if abilities(company, :purchase_train) || abilities(company, :train_buy) ||
+            abilities(company, :train_limit) || abilities(company, :train_discount)
+            return step_name.include?('BuyTrain')
+          end
+
+          return step_name.include?('Track') if abilities(company, :choose_ability)
+
+          true
         end
 
         def tile_lays(entity)
@@ -291,7 +325,7 @@ module Engine
           elsif efficient_construction&.owner == entity
             [
               { lay: true, upgrade: true, cost: 0 },
-              { lay: true, upgrade: :not_if_upgraded, cost: 10, cannot_reuse_same_hex: true },
+              { lay: true, upgrade: :not_if_upgraded, cost: 0, cannot_reuse_same_hex: true },
             ]
           else
             super
@@ -350,15 +384,7 @@ module Engine
 
         def finish_stock_round
           return_concessions!
-
-          return if !ic_in_receivership? || !ic_formation_triggered?
-
-          floated_corps = @corporations.select(&:floated)
-
-          index_corp = floated_corps.sort.find { |c| c.share_price.price < ic.share_price.price } if floated_corps.size > 1
-
-          ic.owner = index_corp ? index_corp.owner : @players.min_by { rand }
-          @log << "#{ic.name} is in receivership and will be operated by a random player (#{ic.owner.name})"
+          assign_ic_operator! if ic_in_receivership? && ic_formation_triggered?
         end
 
         def initial_auction_companies
@@ -376,7 +402,6 @@ module Engine
           a = corp.companies[0]
           b = corp.companies[1]
 
-          # Build initial string
           parts = []
           parts << a.name.to_s if a
           parts << ' | ' if a && b
@@ -468,7 +493,6 @@ module Engine
 
         # Create the corporation that places blocking tokens in St. Louis
         def create_blocking_corp
-          # Initialize the blocking corporation with its logos and tokens
           @stl_blocking_corp = Corporation.new(
             sym: 'STLBC', name: 'stl_blocking_corp', logo: BLOCKING_LOGOS[0],
             simple_logo: BLOCKING_LOGOS[0], tokens: [0]
@@ -497,9 +521,8 @@ module Engine
           optional_rules&.include?(:lots_variant) && two_player?
         end
 
-        def two_player_share_limit?
-          # optional_rules&.include?(:two_player_share_limit) && two_player?
-          two_player?
+        def town_cannot_end_route?
+          optional_rules&.include?(:town_cannot_end_route)
         end
 
         # Set up corporations for auction lot formation in the regular game
@@ -573,12 +596,12 @@ module Engine
             case t&.name
             when 'Rogers (1+1)'
               help << "The 'Rogers' train may only run a route from Springfield to Jacksonville."
-            when '3P'
-              help << 'A 3P train can visit three cities, doubling their value. It may not visit red areas.'
-            when '4+2P'
-              help << 'A 4+2P train can visit six cities or red areas, doubling the value of two cities.'
-            when '5+1P'
-              help << 'A 5+1P train can visit six cities or red areas, doubling the value of one city.'
+            when '0+3C'
+              help << 'A 0+3C train can visit three cities, doubling their value. It may not visit red areas.'
+            when '4+2C'
+              help << 'A 4+2C train can visit six cities or red areas, doubling the value of two cities.'
+            when '5+1C'
+              help << 'A 5+1C train can visit six cities or red areas, doubling the value of one city.'
             when 'D'
               help << 'A D train can visit an unlimited number of stops.'
             end
@@ -599,7 +622,6 @@ module Engine
           ic.add_ability(self.class::FORMATION_ABILITY)
           ic.owner = nil
           @corporation_debts = Hash.new { |h, k| h[k] = 0 }
-          # @train_bought_this_or = false
           @insolvent_corporations = []
           @last_set_pending = nil
           @last_set = nil
@@ -621,6 +643,7 @@ module Engine
           train = @depot.upcoming[0]
           train.buyable = false
           buy_train(nc, train, :free)
+          #  train.obsolete = true
 
           @corporations.select { |corp| corp.type == :two_share }.each { |c| c.max_ownership_percent = 100 }
 
@@ -633,17 +656,8 @@ module Engine
             hex_by_id(h).tile.nodes.find { |n| n.offboard? && n.groups.include?('STL') }
           end
 
-          if intro_game?
-            # Removes 838 tile and G1 tile
-            @all_tiles.each { |tile| tile.hide if tile.name == 'G1' || tile.name == '838' }
-          else
-            # Deletes gray Springfield and Peoria tiles
-            @gray_boom_tiles = []
-            @gray_boom_tiles.concat(tiles.select { |tile| tile.name == 'P4' || tile.name == 'S4' })
-            tiles.delete_if { |tile| tile.name == 'P4' || tile.name == 'S4' }
-          end
-
-          #   apply_cbot_for!(chicago_board_of_trade&.owner) unless intro_game?
+          # Removes 838 tile and G1 tile
+          @all_tiles.each { |tile| tile.hide if tile.name == 'G1' || tile.name == '838' } if intro_game?
         end
 
         def ipo_name(_entity = nil)
@@ -661,14 +675,15 @@ module Engine
         def setup_optional_rules
           return unless @optional_rules
 
-          # If players could check both “one extra” and “two extra”, combine them safely:
           add_optional_train('3',  (@optional_rules.include?(:one_extra_three_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_three_trains) ? 2 : 0))
           add_optional_train('4',  (@optional_rules.include?(:one_extra_four_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_four_trains) ? 2 : 0))
-          add_optional_train('4+2P', (@optional_rules.include?(:one_extra_four_plus_two_p_train) ? 1 : 0) +
+          add_optional_train('5', (@optional_rules.include?(:one_five_train) ? 1 : 0) +
+                                (@optional_rules.include?(:two_five_trains) ? 2 : 0))
+          add_optional_train('4+2C', (@optional_rules.include?(:one_extra_four_plus_two_p_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_four_plus_two_p_trains) ? 2 : 0))
-          add_optional_train('5+1P', (@optional_rules.include?(:one_extra_five_plus_one_p_train) ? 1 : 0) +
+          add_optional_train('5+1C', (@optional_rules.include?(:one_extra_five_plus_one_p_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_five_plus_one_p_trains) ? 2 : 0))
           add_optional_train('6', (@optional_rules.include?(:one_extra_six_train) ? 1 : 0) +
                                   (@optional_rules.include?(:two_extra_six_trains) ? 2 : 0))
@@ -680,10 +695,8 @@ module Engine
           proto = self.class::TRAINS.find { |e| e[:name] == type }
           raise GameError, "Unknown train type: #{type}" unless proto
 
-          # how many of this type already exist (for the stack index shown as e.g. 3(3))
           base_stack_index = @depot.trains.count { |t| t.name == type }
 
-          # where to insert in upcoming: after the last of this type, else by roster order
           last_same_idx = @depot.upcoming.rindex { |t| t.name == type }
           if last_same_idx
             insert_base = last_same_idx + 1
@@ -700,8 +713,6 @@ module Engine
             @depot.insert_train(new_train, insert_base + i)
           end
 
-          # Usually not needed because Depot#insert_train clears its cache,
-          # but keep this if your engine requires it:
           update_cache(:trains)
         end
 
@@ -886,10 +897,11 @@ module Engine
           corporation.share_holders[corporation] = 100
           corporation.owner = nil
 
-          # flip all of the corporation's tokens on the map; remove Union Stock Yards token
+          # flip all of the corporation's tokens on the map; remove Union Stock Yards token back to its charter
           corporation.tokens.each do |token|
             next unless token.used
 
+            # this removes the USY token back to owner's charter
             if token.extra
               token.remove!
             else
@@ -993,7 +1005,7 @@ module Engine
         end
 
         def corporation_opts
-          two_player_share_limit? ? { max_ownership_percent: 70 } : {}
+          two_player? ? { max_ownership_percent: 70 } : {}
         end
 
         def convert(corporation)
@@ -1014,7 +1026,7 @@ module Engine
             raise GameError, 'Cannot convert 10-share corporation'
           end
           corporation.max_ownership_percent = 60
-          corporation.max_ownership_percent = two_player_share_limit? ? 70 : 60
+          corporation.max_ownership_percent = two_player? ? 70 : 60
           shares.each { |share| corporation.share_holders[share.owner] += share.percent }
           new_shares.each { |share| add_new_share(share) }
 
@@ -1035,9 +1047,23 @@ module Engine
 
         def timeline
           @timeline = [
-            'End of OR 1.1: All unsold 2-trains are exported.',
-            'End of each subsequent OR: The next-available train is exported', \
+            'End of OR 1.1: All unsold 2-trains are exported*',
+            'End of each subsequent OR: The next-available train is exported*',
             '*Exported trains are removed from the game and can trigger phase changes as if purchased',
+            '-----------------------------------------------------------------------------------------------'\
+            '-----------------------------------------------------------------------------------------------'\
+            '---------------------------------------------------------------------',
+            'IC Formation occurs when IC Line is completed. IC starts at $80 share price with $800 in its treasury',
+            'Corporations exchange option cubes for shares of IC. Corps with tokens along IC Line have an '\
+            'opportunity to merge',
+            'IC places tokens, adjusts its share price, and buys the first-available train',
+            'It operates in the current OR if no mergers occured or no merged corporation had operated',
+            '-----------------------------------------------------------------------------------------------'\
+            '-----------------------------------------------------------------------------------------------'\
+            '---------------------------------------------------------------------',
+            "The 'Rogers' train runs between Springfield and Jacksonville and rusts immediately after running",
+            'An x+yC train may visit x red areas or cities, plus y additional cities that earn double revenue. '\
+            'The doubled cities may be anywhere along the route. The train may also include any number of towns or ports',
           ].freeze
         end
 
@@ -1091,28 +1117,30 @@ module Engine
             percent += share.percent
             bundles << Engine::ShareBundle.new(bundle, percent)
           end
-          if !intro_game? && corporation == share_premium.owner &&
-            @round.steps.find do |step|
-              step.instance_of?(G18IL::Step::SpecialIssueShares)
-            end&.active?
-            all_bundles.each do |b|
-              b.share_price = corporation.share_price.price * 2.0
-            end
-          # halves the value of corporate-held shares if EMRing
-          elsif @round.steps.find do |step|
-                  step.instance_of?(G18IL::Step::CorporateSellShares)
-                end&.active? &&
-            !@round.steps.find do |step|
-               step.instance_of?(G18IL::Step::IssueShares)
-             end&.active? &&
-             share_holder.is_a?(Corporation)
-            all_bundles.each do |b|
-              b.share_price = corporation.share_price.price / 2.0 if corporation != ic
-            end
-          end
-          all_bundles.concat(partial_bundles_for_presidents_share(corporation, bundle, percent)) if shares.last.president
 
+          if !intro_game? && corporation == share_premium.owner && sp_toggle_enabled?(corporation)
+            all_bundles.each { |b| b.share_price = corporation.share_price.price * 2.0 }
+
+          elsif @round.steps.find { |s| s.instance_of?(G18IL::Step::CorporateSellShares) }&.active? &&
+                  !@round.steps.find { |s| s.instance_of?(G18IL::Step::IssueShares) }&.active? &&
+                  share_holder.is_a?(Corporation)
+            all_bundles.each { |b| b.share_price = corporation.share_price.price / 2.0 if corporation != ic }
+          end
+
+          all_bundles.concat(partial_bundles_for_presidents_share(corporation, bundle, percent)) if shares.last.president
           all_bundles.sort_by(&:percent)
+        end
+
+        def sp_toggle_enabled?(corp)
+          sp = share_premium
+          return false if !sp || sp.owner != corp
+          return false unless @round.respond_to?(:steps)
+
+          issue_step = @round.steps.find { |s| s.instance_of?(G18IL::Step::IssueShares) }
+          return false unless issue_step&.active?
+          return false unless @round.respond_to?(:sp_issue_toggle)
+
+          !!@round.sp_issue_toggle[corp]
         end
 
         def sell_shares_and_change_price(bundle, allow_president_change: true, swap: nil, movement: nil)
@@ -1148,7 +1176,6 @@ module Engine
           return [] unless entity.corporation?
           return [] if entity.num_ipo_shares.zero?
 
-          # @emr_active = true
           bundles = bundles_for_corporation(entity, entity)
           bundles.each { |b| b.share_price = entity.share_price.price / 2.0 }
           eligible, remaining = bundles.partition { |bundle| bundle.price + entity.cash < @depot.min_depot_price }
@@ -1196,51 +1223,11 @@ module Engine
             nc.trains.shift
             @log << '-- Event: Rogers (1+1) train rusts --'
             phase.next!
-          # elsif !@train_bought_this_or && phase.name != 'D'
           elsif phase.name != 'D'
             depot.export!
           elsif phase.name == 'D'
             @last_set_pending = true
           end
-          # @train_bought_this_or = false
-        end
-
-        def or_round_finished
-          # buy_train will disallow cross-train buys in final OR before final cycle
-          @last_set_pending = true if phase.name == 'D'
-        end
-
-        def or_set_finished
-          # no one owns IC if in receivership
-          ic.owner = nil if ic_in_receivership?
-
-          # convert unstarted corporations at the appropriate time.
-          if %w[4A 4B 5 6 D].include?(@phase.name)
-            @corporations.each do |c|
-              # Convert only if not floated and not closed
-              if !c.floated? && !@closed_corporations.include?(c)
-                convert(c) if c.total_shares == 2
-                convert(c) if c.total_shares == 5 && @phase.name != '4A'
-              end
-
-              # update the attached company's share_count (including closed corps)
-              if (company = @companies.find { |comp| comp.sym == c.name })
-                company.meta[:share_count] = c.total_shares
-              end
-            end
-          end
-
-          return unless phase.name == 'D'
-
-          # remove unopened corporations and decrement cert limit
-          remove_unparred_corporations!
-
-          @log << "-- Event: Certificate limit adjusted to #{@cert_limit} --"
-
-          # Pullman Strike
-          @log << '-- Event: Pullman Strike --'
-          event_pullman_strike!
-          @last_set = true
         end
 
         def init_stock_market
@@ -1249,21 +1236,21 @@ module Engine
           stock_market
         end
 
-        def p_bonus(route, stops)
-          return 0 unless route.train.name.end_with?('P')
+        def c_bonus(route, stops)
+          name = route.train.name
+          return 0 unless name.include?('C')
 
-          # Exclude offboard/edge cities even if implemented as city parts
           offboard_groups = %w[West East North South STL]
           cities = stops.select { |s| s.city? && (s.groups & offboard_groups).empty? }
           return 0 if cities.empty?
 
-          # Use the number right before 'P' (e.g., "4+2P" => 2, "3P" => 3)
-          m = route.train.name.match(/(\d+)P$/)
+          m = name.match(/(\d+)\s*C/)
           count = m ? m[1].to_i : 0
           return 0 if count.zero?
 
-          cities.map { |stop| stop.route_revenue(route.phase, route.train) }
-                .max([count, cities.size].min)
+          n = [count, cities.size].min
+          cities.map { |s| s.route_revenue(route.phase, route.train) }
+                .max(n)
                 .sum
         end
 
@@ -1301,7 +1288,7 @@ module Engine
           return if entity == frink_walker_co.owner
 
           @bank.spend(20, frink_walker_co.owner)
-          @log << "#{frink_walker_co.owner.name} receives a subsidy of #{format_currency(20)} "\
+          @log << "#{frink_walker_co.owner.name} receives a #{format_currency(20)} subsidy "\
                   'from the bank (Frink, Walker, & Co.)'
         end
 
@@ -1313,7 +1300,7 @@ module Engine
 
         def revenue_for(route, stops)
           revenue = super
-          revenue += ew_ns_bonus(stops)[:revenue] + p_bonus(route, stops)
+          revenue += ew_ns_bonus(stops)[:revenue] + c_bonus(route, stops)
           revenue
         end
 
@@ -1346,7 +1333,7 @@ module Engine
         end
 
         def check_three_p(route, visits)
-          return unless route.train.name == '3P'
+          return unless route.train.name == '0+3C'
           raise GameError, 'Cannot visit red areas' if visits.first.tile.color == :red || visits.last.tile.color == :red
         end
 
@@ -1370,7 +1357,7 @@ module Engine
           # checks STL for permit token
           check_stl(visits)
 
-          # disallows 3P trains from running to red areas
+          # disallows 0+3C trains from running to red areas
           check_three_p(route, visits)
 
           # disallows Rogers train from running outside of Springfield/Jacksonville
@@ -1379,7 +1366,20 @@ module Engine
           # disallows corporations without a port token from running to a port
           check_port(route, visits)
 
-          super
+          return super unless @optional_rules.include?(:town_cannot_end_route)
+          return super if route.train.name == 'Rogers (1+1)'
+
+          first = visits.first
+          last  = visits.last
+
+          first_bad = first.town? && !town_endpoint_ok?(first)
+          last_bad  = last.town?  && !town_endpoint_ok?(last)
+
+          raise GameError, 'Route cannot begin/end in a town' if first_bad || last_bad
+        end
+
+        def town_endpoint_ok?(node)
+          node.town? && (node.hex == hex_by_id('H1'))
         end
 
         def init_loans
@@ -1452,45 +1452,6 @@ module Engine
           super
         end
 
-        def event_signal_end_game!
-          # Play one more OR, then Pullman Strike and blocking token events occur, then play one final set (CR, SR, 3 ORs)
-          @final_operating_rounds = 3
-          @last_set_triggered = true
-          game_end_check
-          @operating_rounds = 3 if phase.name == 'D' && round.round_num == 2
-          @log << "-- First D train bought, game ends at the end of OR #{@turn + 1}.#{@final_operating_rounds} --"
-          @log << "-- At the end of OR #{@turn}.#{@round.round_num + 1}, 4+2P and 5+1P trains will downgrade to "\
-                  '4- and 5-trains --'
-          @log << '-- Pullman Strike: Blocking tokens will be placed in the home locations of unopened corporations --'
-          tiles.concat(@gray_boom_tiles) unless intro_game?
-        end
-
-        def remove_unparred_corporations!
-          @blocking_log = []
-          @removed_corp_log = []
-
-          @corporations.reject(&:ipoed).reject(&:closed?).each do |corporation|
-            place_home_blocking_token(corporation) if corporation.coordinates
-            @removed_corp_log << corporation.name
-            @corporations.delete(corporation)
-            company = company_by_id(corporation.name)
-            @companies.delete(company)
-            @cert_limit -= 1
-          end
-
-          @log << if @blocking_log.empty?
-                    '-- Event: Removing unopened corporations --'
-                  else
-                    '-- Event: Removing unopened corporations and placing blocking tokens --'
-                  end
-
-          @log << "#{list_with_and(@removed_corp_log)} #{@removed_corp_log.count == 1 ? 'is' : 'are'} removed from the game"
-
-          return nil if @blocking_log.empty?
-
-          @log << "Blocking #{@blocking_log.count == 1 ? 'token' : 'tokens'} placed on #{list_with_and(@blocking_log)}"
-        end
-
         def place_home_blocking_token(corporation)
           cities = []
 
@@ -1504,8 +1465,6 @@ module Engine
           cities.each do |city|
             @blocking_log << "#{hex.name} (#{hex.location_name})"
             city ||= hex.tile.cities[0]
-            # token = Token.new(corporation, price: 0, logo: "/logos/18_il/#{corporation.name}.svg",
-            #                                simple_logo: "/logos/18_il/#{corporation.name}.alt.svg", type: :blocking)
             token = Token.new(corporation, price: 0, logo: "/logos/18_il/#{corporation.name}.alt.svg",
                                            simple_logo: "/logos/18_il/#{corporation.name}.alt.svg", type: :blocking)
             token.status = :flipped
@@ -1515,27 +1474,6 @@ module Engine
 
         def final_operating_rounds
           @final_operating_rounds || super
-        end
-
-        # Pullman Strike: 4+2P and 5+1P trains downgrade to 4- and 5-trains, respectively.
-        def event_pullman_strike!
-          @corporations.each do |c|
-            c.trains.each do |train|
-              next unless train.name.include?('P')
-
-              # pull out the numeric part (e.g., "3P" -> 3)
-              base_num = train.name[/\d+/].to_i
-
-              @log << "#{train.name} train downgraded to a #{base_num}-train (#{c.name})"
-
-              # rename to the plain number (as a string) and set numeric distances
-              train.name = base_num.to_s
-              train.distance = [
-                { 'nodes' => %w[town],             'pay' => 99,        'visit' => 99 },
-                { 'nodes' => %w[city offboard],    'pay' => base_num,  'visit' => base_num },
-              ]
-            end
-          end
         end
 
         def process_single_action(action)
@@ -1569,6 +1507,111 @@ module Engine
             .reject { |bundle| entity.cash < bundle.price }
         end
 
+        def or_round_finished
+          # buy_train will disallow cross-train buys in final OR before final cycle
+          @last_set_pending = true if phase.name == 'D'
+        end
+
+        def or_set_finished
+          # no one owns IC if in receivership
+          ic.owner = nil if ic_in_receivership?
+
+          # convert unstarted corporations at the appropriate time.
+          if %w[4A 4B 5 6 D].include?(@phase.name)
+            @corporations.each do |c|
+              # Convert only if not floated and not closed
+              if !c.floated? && !@closed_corporations.include?(c)
+                convert(c) if c.total_shares == 2
+                convert(c) if c.total_shares == 5 && @phase.name != '4A'
+              end
+
+              # update the attached company's share_count (including closed corps)
+              if (company = @companies.find { |comp| comp.sym == c.name })
+                company.meta[:share_count] = c.total_shares
+              end
+            end
+          end
+
+          return unless phase.name == 'D'
+
+          event_pullman_strike!
+          event_blocking_tokens!
+          event_cert_limit_change!
+
+          @last_set = true
+        end
+
+        # ---------------- EVENTS ----------------------
+        def event_signal_end_game!
+          # Play one more OR, then Pullman Strike and blocking token events occur, then play one final set (CR, SR, 3 ORs)
+          @final_operating_rounds = 3
+          @last_set_triggered = true
+          game_end_check
+          @operating_rounds = 3 if phase.name == 'D' && round.round_num == 2
+          @log << "-- First D train bought, game ends at the end of OR #{@turn + 1}.#{@final_operating_rounds} --"
+          @log << "-- At the end of OR #{@turn}.#{@round.round_num + 1}, 4+2C and 5+1C trains will downgrade to "\
+                  '4- and 5-trains --'
+          @log << '-- Pullman Strike: Blocking tokens will be placed in the home locations of unopened corporations --'
+        end
+
+        # Pullman Strike: C-trains downgrade to their base (non-C) value.
+        def event_pullman_strike!
+          @log << '-- Event: Pullman Strike --'
+
+          @corporations.each do |corp|
+            corp.trains.each do |train|
+              name = train.name
+              next unless name.include?('C')
+
+              m = name.match(/^(\d+)\s*\+/) || name.match(/(\d+)\s*C\b/) || name.match(/(\d+)/)
+              base = m && m[1].to_i
+
+              next unless base&.positive?
+
+              @log << "#{name} train downgraded to a #{base}-train (#{corp.name})"
+
+              # Rename to the plain number and set distances accordingly
+              train.name = base.to_s
+              train.distance = [
+                { 'nodes' => ['town'],          'pay' => 99,       'visit' => 99 },
+                { 'nodes' => %w[city offboard], 'pay' => base,     'visit' => base },
+              ]
+            end
+          end
+        end
+
+        # Blocking tokens are placed in unopened corporation's home locations
+        def event_blocking_tokens!
+          @blocking_log = []
+          @removed_corp_log = []
+
+          @corporations.reject(&:ipoed).reject(&:closed?).each do |corporation|
+            place_home_blocking_token(corporation) if corporation.coordinates
+            @removed_corp_log << corporation.name
+            @corporations.delete(corporation)
+            company = company_by_id(corporation.name)
+            @companies.delete(company)
+            @cert_limit -= 1
+          end
+
+          @log << if @blocking_log.empty?
+                    '-- Event: Removing unopened corporations --'
+                  else
+                    '-- Event: Removing unopened corporations and placing blocking tokens --'
+                  end
+
+          @log << "#{list_with_and(@removed_corp_log)} #{@removed_corp_log.count == 1 ? 'is' : 'are'} removed from the game"
+
+          return nil if @blocking_log.empty?
+
+          @log << "Blocking #{@blocking_log.count == 1 ? 'token' : 'tokens'} placed on #{list_with_and(@blocking_log)}"
+        end
+
+        # Cert limit is reduced by 1 for each unopened corporation that is removed
+        def event_cert_limit_change!
+          @log << "-- Event: Certificate limit adjusted to #{@cert_limit} --"
+        end
+
         def event_ic_formation!
           @log << '-- Event: Illinois Central Formation --'
           @merged_min_entity_index = nil
@@ -1576,7 +1619,7 @@ module Engine
           @log << if @mergeable_candidates.any?
                     present_mergeable_candidates(@mergeable_candidates).to_s
                   else
-          'IC forms with no merger'
+                    'IC forms with no merger'
                   end
 
           # Mark formation in-progress
@@ -1586,10 +1629,10 @@ module Engine
           ic_setup
           option_cube_exchange
 
-          # Let the finalizer decide whether to finish now or later
           finalize_ic_formation_if_ready!
         end
 
+        # ---------------- IC FORMATION ----------------------
         def ic_setup
           ic.add_ability(self.class::STOCK_PURCHASE_ABILITY)
           ic.add_ability(self.class::TRAIN_BUY_ABILITY)
@@ -1662,7 +1705,7 @@ module Engine
           cost = ic.share_price.price / 2
           # If there are no market shares OR corp can't afford the exchange, auto-sell
           auto_sell = @exchange_choice_corps.select do |corp|
-            ic.num_market_shares.zero? || corp.cash < cost
+            ic.num_market_shares.zero? || corp.cash <= cost
           end
 
           auto_sell.each { |corp| option_sell(corp) }
@@ -1687,13 +1730,17 @@ module Engine
 
         def option_sell(corp)
           refund = ic.share_price.price / 2
-          @bank.spend(refund, corp)
-          @log << if ic.num_market_shares.positive?
-                    "#{corp.name} sells 1 option cube for #{format_currency(refund)}"
+          refund_str = format_currency(refund)
+
+          @log << if ic.num_market_shares.positive? && corp.cash < refund
+                    "#{corp.name} sells 1 option cube for #{refund_str} (insufficient cash to exchange)"
+                  elsif ic.num_market_shares.positive?
+                    "#{corp.name} sells 1 option cube for #{refund_str}"
                   else
-                    "#{corp.name} sells 1 option cube for #{format_currency(refund)} "\
-                      "(#{ic.name} has no market shares to exchange)"
+                    "#{corp.name} sells 1 option cube for #{refund_str} (#{ic.name} has no market shares to exchange)"
                   end
+
+          @bank.spend(refund, corp)
           @option_cubes[corp] -= 1
         end
 
@@ -1972,29 +2019,7 @@ module Engine
             stock_market.set_par(ic, ic_new_share_price)
           end
 
-          add_ic_receivership_ability
-          if ic_in_receivership?
-            @log << "#{ic.name} enters receivership (it has no president)"
-
-            queue = @round.entities
-            live_in_queue = queue.select { |e| e.corporation? && e.ipoed }
-            trigger_idx = queue.index(@ic_trigger_entity)
-
-            index_corp =
-              if trigger_idx && live_in_queue.any?
-                prev = (trigger_idx - 1).downto(0).map { |i| queue[i] }
-                        .find { |e| e.corporation? && e.ipoed }
-                prev || live_in_queue.last
-              end
-
-            index_corp ||= operating_order.find { |c| c.corporation? && c.ipoed }
-
-            ic.owner = index_corp ? index_corp.owner : @players.min_by { rand }
-
-            @log << "While in receivership, #{ic.name} will be operated by a random player (#{ic.owner.name})"
-          else
-            add_ic_operating_ability
-          end
+          sync_ic_operating_state!
 
           if @round.entities.empty?
             @log << 'IC will operate for the first time in this operating round (no corporations merged)'
@@ -2002,11 +2027,9 @@ module Engine
           else
             entities_size = @round.entities.size
 
-            # +∞ if none recorded/remaining
             merged_idxs = (@merged_corps || []).map { |c| @round.entities.index(c) }.compact
             earliest_index = @merged_min_entity_index || (merged_idxs.min unless merged_idxs.empty?) || entities_size
 
-            # −∞ if trigger corp no longer present (merged/closed)
             current_corp_index = @round.entities.index(@ic_trigger_entity) || -1
 
             if current_corp_index < earliest_index
@@ -2037,22 +2060,38 @@ module Engine
             end
           end
 
+          assign_ic_operator! if ic_in_receivership?
+
           ic.floatable = true
           ic.floated   = true
           ic.ipoed     = true
           ic.trains.sort_by!(&:price)
         end
 
-        def add_ic_operating_ability
-          return if @ic_president == true
-
+        def sync_ic_operating_state!
           ic.remove_ability(self.class::RECEIVERSHIP_ABILITY)
-          ic.add_ability(self.class::OPERATING_ABILITY)
-          @ic_president = true
+          ic.remove_ability(self.class::OPERATING_ABILITY)
+          if ic_in_receivership?
+            ic.add_ability(self.class::RECEIVERSHIP_ABILITY)
+          else
+            ic.add_ability(self.class::OPERATING_ABILITY)
+          end
         end
 
-        def add_ic_receivership_ability
-          ic.add_ability(self.class::RECEIVERSHIP_ABILITY)
+        def assign_ic_operator!
+          queue  = @round.entities
+          ic_idx = queue.index(ic) || 0
+
+          prev_owner =
+            if ic_idx.positive?
+              prev = (ic_idx - 1).downto(0).map { |i| queue[i] }
+                            .find { |e| e.corporation? && e.ipoed }
+              prev&.owner
+            end
+
+          ic.owner = prev_owner || @players.min_by { rand }
+
+          @log << "While in receivership, #{ic.name} will be operated by a random player (#{ic.owner.name})"
         end
 
         def ic_in_receivership?

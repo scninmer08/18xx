@@ -9,13 +9,13 @@ module Engine
         include Game::Meta
 
         DEV_STAGE = :prealpha
-        PROTOTYPE = true
+        # PROTOTYPE = true
 
         GAME_SUBTITLE = 'The Formation of the Illinois Central Railroad'
         GAME_DESIGNER = 'Scott Ninmer'
         GAME_PUBLISHER = :self_published
         GAME_LOCATION = 'Illinois, USA'
-        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/trlhkdpujpu4w4m34g66i/18IL_Rulebook_v0.8.4.pdf?rlkey=c8xnalp4h7212hyvba96lpza6&dl=0'
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/erm13qxbjm13t4c6dhsex/18IL_Rulebook_v0.8.6.pdf?rlkey=pphm852vnxry9jlul8r2c12cw&dl=0'
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
         PLAYER_RANGE = [2, 6].freeze
 
@@ -36,9 +36,25 @@ module Engine
             desc: 'Two lots consisting of one 10-share, two 5-share, and one 2-share concessions are formed '\
                   'for the first concession round.',
           },
+          {
+            sym: :town_cannot_end_route,
+            short_name: 'Town cannot end route',
+            desc: "Towns can be visited without counting towards a train's number, but cannot be at the end of a route. "\
+                  "This rule does not apply to the 'Rogers' train.",
+          },
           { sym: :_sep1, short_name: '', desc: '' },
           { sym: :_separator_trains, short_name: '--- Optional Train Tweaks ---', desc: '' },
-
+          # {
+          #   sym: :one_five_train,
+          #   short_name: '+1 5-Train',
+          #   desc: 'Adds one 5-train to the train roster.',
+          # },
+          #           {
+          #   sym: :two_five_trains,
+          #   short_name: '+2 5-Trains',
+          #   desc: 'Adds two 5-trains to the train roster.',
+          # },
+          #           { sym: :_sep0, short_name: '', desc: '' },
           {
             sym: :one_extra_three_train,
             short_name: '+1 3-Train',
@@ -52,35 +68,35 @@ module Engine
           { sym: :_sep2, short_name: '', desc: '' },
           {
             sym: :one_extra_four_train,
-            short_name: '+1 4-/3P Train',
-            desc: 'Adds one additional 4-/3P train to the train roster.',
+            short_name: '+1 4-/0+3C Train',
+            desc: 'Adds one additional 4-/0+3C train to the train roster.',
           },
           {
             sym: :two_extra_four_trains,
-            short_name: '+2 4-/3P Trains',
-            desc: 'Adds two additional 4-/3P trains to the train roster.',
+            short_name: '+2 4-/0+3C Trains',
+            desc: 'Adds two additional 4-/0+3C trains to the train roster.',
           },
           { sym: :_sep3, short_name: '', desc: '' },
           {
             sym: :one_extra_four_plus_two_p_train,
-            short_name: '+1 4+2P Train',
-            desc: 'Adds one additional 4+2P train to the train roster.',
+            short_name: '+1 4+2C Train',
+            desc: 'Adds one additional 4+2C train to the train roster.',
           },
           {
             sym: :two_extra_four_plus_two_p_trains,
-            short_name: '+2 4+2P Trains',
-            desc: 'Adds two additional 4+2P trains to the train roster.',
+            short_name: '+2 4+2C Trains',
+            desc: 'Adds two additional 4+2C trains to the train roster.',
           },
           { sym: :_sep4, short_name: '', desc: '' },
           {
             sym: :one_extra_five_plus_one_p_train,
-            short_name: '+1 5+1P Train',
-            desc: 'Adds one additional 5+1P train to the train roster.',
+            short_name: '+1 5+1C Train',
+            desc: 'Adds one additional 5+1C train to the train roster.',
           },
           {
             sym: :two_extra_five_plus_one_p_trains,
-            short_name: '+2 5+1P Trains',
-            desc: 'Adds two additional 5+1P trains to the train roster.',
+            short_name: '+2 5+1C Trains',
+            desc: 'Adds two additional 5+1C trains to the train roster.',
           },
           { sym: :_sep5, short_name: '', desc: '' },
           {

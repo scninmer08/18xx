@@ -16,9 +16,11 @@ module View
 
     def render_notification
       message = <<~MESSAGE
-        <p>18Ardennes, Steam Over Holland, 18 India, and 18Uruguay are in alpha.</p>
+        <p>Candy Land, Sorry!, and Hungry Hungry Hippos are in alpha.</p>
 
-        <p>18 SJ is now in production.</p>
+        <p>Jenga is now in production.</p>
+
+        <p>18Korea has been banned from this site.</p>
 
         <p>Report bugs and make feature requests <a href='https://github.com/tobymao/18xx/issues'>on GitHub</a>.</p>
       MESSAGE

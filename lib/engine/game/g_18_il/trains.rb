@@ -12,6 +12,7 @@ module Engine
               { 'nodes' => ['city'], 'pay' => 1, 'visit' => 1 },
                 ],
               price: 0,
+              reserved: true,
               num: 1,
             },
             {
@@ -27,7 +28,7 @@ module Engine
               distance: [{ 'nodes' => %w[town], 'pay' => 99, 'visit' => 99 },
                          { 'nodes' => %w[city offboard], 'pay' => 3, 'visit' => 3 }],
               price: 160,
-              rusts_on: '5+1P',
+              rusts_on: '5+1C',
               num: 6,
             },
             {
@@ -38,21 +39,21 @@ module Engine
               rusts_on: 'D',
               num: 5,
               variants: [{
-                name: '3P',
+                name: '0+3C',
                 distance: [{ 'nodes' => %w[town], 'pay' => 99, 'visit' => 99 },
                            { 'nodes' => ['city'], 'pay' => 3, 'visit' => 3 }],
                 price: 320,
               }],
             },
             {
-              name: '4+2P',
+              name: '4+2C',
               distance: [{ 'nodes' => %w[town], 'pay' => 99, 'visit' => 99 },
                          { 'nodes' => %w[city offboard], 'pay' => 6, 'visit' => 6 }],
               price: 800,
               num: 4,
             },
             {
-              name: '5+1P',
+              name: '5+1C',
               distance: [{ 'nodes' => %w[town], 'pay' => 99, 'visit' => 99 },
                          { 'nodes' => %w[city offboard], 'pay' => 6, 'visit' => 6 }],
               price: 720,
@@ -74,7 +75,7 @@ module Engine
               events: [
                 { 'type' => 'signal_end_game' },
                 ],
-              discount: { '4+2P' => 200, '5+1P' => 300, '6' => 400 },
+              discount: { '4+2C' => 200, '5+1C' => 300, '6' => 400 },
             },
          ].freeze
       end

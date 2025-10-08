@@ -22,6 +22,12 @@ module Engine
             end
           end
 
+          def max_bid(entity, _company)
+            raw = entity.cash
+            inc = @game.class::MIN_BID_INCREMENT
+            raw - (raw % inc)
+          end
+
           def min_company
             return nil if @companies.nil? || @companies.empty?
 
@@ -266,44 +272,44 @@ module Engine
             resolve_lot!(winner.entity, company.meta[:lot_index]) if company.meta[:type] == :lot
 
             player = winner.entity
-            ic = @game.ic
+            ic     = @game.ic
 
-            # exchange for ordinary share of IC
             case company.meta[:type]
             when :share
-              bundle = ShareBundle.new(ic.shares.last)
-              @game.share_pool.transfer_shares(bundle, player)
-              # if IC now has a president and president's cert still exists,
-              # remove the president's cert proxy from the auction
-              if !@game.ic_in_receivership? && (pres = @game.companies.find { |c| c == @game.company_by_id('ICP') })
-                company.close!
-                @companies << company
-                if @bought_shares.empty?
-                  @companies.select! { |c| c.meta[:type] == :concession }
-                  prepare_ic_shares unless @game.ic.ipo_shares.empty?
-                else
-                  @game.companies << @bought_shares.first
-                  @companies << @bought_shares.first
-                end
+              @game.share_pool.transfer_shares(ShareBundle.new(ic.shares.last), player)
+
+              @game.companies.delete(company)
+              @companies.delete(company)
+              company.close!
+
+              @game.sync_ic_operating_state!
+
+              if (pres = @game.company_by_id('ICP')) && !@game.ic_in_receivership?
                 @companies.delete(pres)
                 @game.companies.delete(pres)
                 pres.close!
-                @companies = @companies.sort_by { |c| [c.meta[:type], c.meta[:share_count], c.sym] }
-                @game.add_ic_operating_ability
-              else
-                @bought_shares << company
-                @game.companies.delete(company)
-                @companies.delete(company)
-                company.close!
               end
-            # exchange for president's share of IC
+
+              refresh_ic_share_proxies!
+
             when :presidents_share
-              bundle = ShareBundle.new(ic.shares.first)
-              @game.share_pool.transfer_shares(bundle, player)
+              @game.share_pool.transfer_shares(ShareBundle.new(ic.shares.first), player)
+
               @game.companies.delete(company)
+              @companies.delete(company)
               company.close!
-              @game.add_ic_operating_ability
+
+              @game.sync_ic_operating_state!
+              refresh_ic_share_proxies!
             end
+          end
+
+          def refresh_ic_share_proxies!
+            @companies.reject! { |c| c.meta && %i[share presidents_share].include?(c.meta[:type]) }
+
+            prepare_ic_shares if @game.ic_formation_triggered? && !@game.ic.ipo_shares.empty?
+
+            @companies.sort_by! { |c| [c.meta[:type], c.meta[:share_count], c.sym] }
           end
         end
       end

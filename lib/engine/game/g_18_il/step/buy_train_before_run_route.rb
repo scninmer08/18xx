@@ -66,6 +66,9 @@ module Engine
 
             @log << "#{@game.rush_delivery.name} (#{action.entity.name}) closes"
             @game.rush_delivery.close!
+
+            return if @game.pending_rusting_event
+
             pass!
           end
 

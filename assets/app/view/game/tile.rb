@@ -61,71 +61,79 @@ module View
         true
       end
 
-      def render
-        # hash mapping the different regions to a number representing how much
-        # they've been used; it gets passed to the different tile parts and is
-        # modified before being passed on to the next one
-        @region_use = Hash.new(0)
+def render
+  # hash mapping the different regions to a number representing how much
+  # they've been used; it gets passed to the different tile parts and is
+  # modified before being passed on to the next one
+  @region_use = Hash.new(0)
 
-        # array of parts to render
-        # - `render_tile_part` is called in the order they impact the region
-        #   usage
-        # - the order of this array determines the order the parts are added to
-        #   the DOM; parts at the end of the array render on top of ealier parts
-        children = []
+  # array of parts to render
+  # - `render_tile_part` is called in the order they impact the region
+  #   usage
+  # - the order of this array determines the order the parts are added to
+  #   the DOM; parts at the end of the array render on top of ealier parts
+  children = []
 
-        render_revenue = should_render_revenue?
-        if !@tile.paths.empty? || !@tile.stubs.empty? || !@tile.future_paths.empty?
-          children << render_tile_part(Part::Track, routes: @routes)
-        end
-        children << render_tile_part(Part::Cities, show_revenue: !render_revenue) unless @tile.cities.empty?
+  render_revenue = should_render_revenue?
 
-        children << render_tile_part(Part::Towns, routes: @routes, show_revenue: !render_revenue) unless @tile.towns.empty?
+  # --- NEW: true half/half fill under everything (requires frame+partition) ---
+  if @tile.frame && (@tile.frame.color || @tile.frame.color2) && !@tile.partitions.empty?
+    children << render_tile_part(Part::HalfFill)
+  end
+  # ---------------------------------------------------------------------------
 
-        borders = render_tile_part(Part::Borders) if @tile.borders.any?(&:type)
-        # OO tiles have different rules...
-        if @tile.location_name && @tile.cities.size > 1 && !@tile.hex.hide_location_name
-          rendered_loc_name = render_tile_part(Part::LocationName)
-        end
-        revenue = render_tile_part(Part::Revenue) if render_revenue
-        @tile.labels.each { |l| children << render_tile_part(Part::Label, label: l) }
+  if !@tile.paths.empty? || !@tile.stubs.empty? || !@tile.future_paths.empty?
+    children << render_tile_part(Part::Track, routes: @routes)
+  end
+  children << render_tile_part(Part::Cities, show_revenue: !render_revenue) unless @tile.cities.empty?
 
-        render_tile_parts_by_loc(
-          Part::Upgrades,
-          parts: @tile.upgrades,
-          formatter: @game && @game.class::FORMAT_UPGRADES_ON_HEXES ? ->(cost) { @game.format_currency(cost) } : nil,
-        ).each { |p| children << p }
-        children << render_tile_part(Part::Blocker)
+  children << render_tile_part(Part::Towns, routes: @routes, show_revenue: !render_revenue) unless @tile.towns.empty?
 
-        if @tile.location_name && (@tile.cities.size <= 1) && !@tile.hex.hide_location_name
-          rendered_loc_name = render_tile_part(Part::LocationName)
-        end
-        @tile.reservations.each do |r|
-          children << render_tile_part(Part::Reservation, reservation: r) if @game.render_hex_reservation?(r)
-        end
+  borders = render_tile_part(Part::Borders) if @tile.borders.any?(&:type)
+  # OO tiles have different rules...
+  if @tile.location_name && @tile.cities.size > 1 && !@tile.hex.hide_location_name
+    rendered_loc_name = render_tile_part(Part::LocationName)
+  end
+  revenue = render_tile_part(Part::Revenue) if render_revenue
+  @tile.labels.each { |l| children << render_tile_part(Part::Label, label: l) }
 
-        large, normal = @tile.icons.partition(&:large)
-        render_tile_parts_by_loc(Part::Icons, parts: normal).each { |i| children << i }
-        children << render_tile_part(Part::LargeIcons) unless large.empty?
-        children << render_tile_part(Part::FutureLabel) if @tile.future_label
+  render_tile_parts_by_loc(
+    Part::Upgrades,
+    parts: @tile.upgrades,
+    formatter: @game && @game.class::FORMAT_UPGRADES_ON_HEXES ? ->(cost) { @game.format_currency(cost) } : nil,
+  ).each { |p| children << p }
+  children << render_tile_part(Part::Blocker)
 
-        children << render_tile_part(Part::Assignments) unless @tile.hex&.assignments&.empty?
+  if @tile.location_name && (@tile.cities.size <= 1) && !@tile.hex.hide_location_name
+    rendered_loc_name = render_tile_part(Part::LocationName)
+  end
+  @tile.reservations.each do |r|
+    children << render_tile_part(Part::Reservation, reservation: r) if @game.render_hex_reservation?(r)
+  end
 
-        # these parts should always be on the top layer
-        children << revenue if revenue
-        children << borders if borders
-        children << render_tile_part(Part::Partitions) unless @tile.partitions.empty?
+  large, normal = @tile.icons.partition(&:large)
+  render_tile_parts_by_loc(Part::Icons, parts: normal).each { |i| children << i }
+  children << render_tile_part(Part::LargeIcons) unless large.empty?
+  children << render_tile_part(Part::FutureLabel) if @tile.future_label
 
-        # location name and coordinates on top of other "top" layer since they
-        # can be hidden
-        children << rendered_loc_name if rendered_loc_name && setting_for(:show_location_names, @game)
-        children << render_coords if @show_coords
-        children << render_tile_part(Part::DebugRegionWeights) if Lib::Params['grid']
+  children << render_tile_part(Part::Assignments) unless @tile.hex&.assignments&.empty?
 
-        children.flatten!
+  # these parts should always be on the top layer
+  children << revenue if revenue
+  children << borders if borders
+  children << render_tile_part(Part::Partitions) unless @tile.partitions.empty?
 
-        h('g.tile', children)
-      end
+  # location name and coordinates on top of other "top" layer since they
+  # can be hidden
+  children << rendered_loc_name if rendered_loc_name && setting_for(:show_location_names, @game)
+  children << render_coords if @show_coords
+  children << render_tile_part(Part::DebugRegionWeights) if Lib::Params['grid']
+
+  children.flatten!
+
+  h('g.tile', children)
+end
+
 
       def rotation
         @rotation ||=

@@ -202,15 +202,15 @@ module Engine
                     '2' => 0.25,
                     '3' => 0.25,
                     '4' => 0.25,
-                    '3P' => 0.25,
-                    '4+2P' => 0.25,
-                    '5+1P' => 0.25,
+                    '0+3C' => 0.25,
+                    '4+2C' => 0.25,
+                    '5+1C' => 0.25,
                     '6' => 0.25,
                     'D' => 0.25,
                   },
                   owner_type: 'corporation',
                   use_across_ors: false,
-                  trains: %w[2 3 4 3P 4+2P 5+1P 6 D],
+                  trains: %w[2 3 4 0+3C 4+2C 5+1C 6 D],
                   count: 99,
                   closed_when_used_up: true,
                   when: 'buy_train',
@@ -260,16 +260,17 @@ module Engine
               name: 'Goodrich Transit Line',
               value: 0,
               revenue: 0,
-              desc: "An available token is placed from the corporation's charter in Chicago (H3) "\
-                    'in the GTL slot. This does not count as a token action. The corporation '\
-                    'gains a port marker for free. This company closes after use. It closes immediately '\
-                    'if it remains open when Chicago upgrades to a brown tile.',
+              desc: "At any time during the corporation's operating turn, an available token may be "\
+                    "placed from the corporation's charter in Chicago (H3) in the GTL slot. "\
+                    'This does not count as a token action. The corporation gains a port marker for free. '\
+                    'This company closes after use. It closes immediately if it remains open when Chicago '\
+                    'upgrades to a brown tile.',
               sym: 'GTL',
               meta: { type: :private, class: :A },
               abilities: [
                 {
                   type: 'token',
-                  when: %w[track token route buying_train bought_train],
+                  when: %w[owning_corp_or_turn],
                   owner_type: 'corporation',
                   hexes: ['H3'],
                   city: 2,
@@ -303,6 +304,7 @@ module Engine
                   special_only: true,
                   closed_when_used_up: true,
                   price: 0,
+                  count: 1,
                   hexes: %w[B11 C6 C8 D15 E2 E8 E12 F3 F9 F11 G4 G6 G16 H21 I6],
                 },
               ],
@@ -407,7 +409,7 @@ module Engine
               value: 0,
               revenue: 0,
               desc: 'When the corporation performs two tile actions in a turn, the second '\
-                    'action costs $10 instead of $20 (terrain costs still apply).',
+                    'action is free instead of $20 (terrain costs still apply).',
               sym: 'EE',
               meta: { type: :private, class: :B },
               abilities: [

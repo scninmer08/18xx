@@ -15,10 +15,6 @@ module Engine
             ACTIONS
           end
 
-          # def setup
-          #   @game.ic_needs_train! if @game.ic.trains.empty?
-          # end
-
           def description
             'Borrow Train'
           end

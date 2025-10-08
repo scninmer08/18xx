@@ -4,13 +4,6 @@ module Engine
   module Game
     module G18IL
       module Phases
-        STATUS_TEXT = Base::STATUS_TEXT.merge(
-          'pullman_strike' => [
-            'Pullman Strike',
-            '4+2P downgrades to 4; 5+1P downgrades to 5',
-          ],
-        ).freeze
-
         PHASES = [
               {
                 name: '2',
@@ -37,7 +30,7 @@ module Engine
               },
               {
                 name: '4B',
-                on: '4+2P',
+                on: '4+2C',
                 train_limit: 2,
                 tiles: %i[yellow green brown],
                 operating_rounds: 2,
@@ -45,7 +38,7 @@ module Engine
               },
               {
                 name: '5',
-                on: '5+1P',
+                on: '5+1C',
                 train_limit: 2,
                 tiles: %i[yellow green brown],
                 operating_rounds: 2,
@@ -66,7 +59,7 @@ module Engine
                 tiles: %i[yellow green brown gray],
                 operating_rounds: 2,
                 corporation_sizes: [10],
-                status: ['pullman_strike'],
+                status: %w[pullman_strike blocking_tokens cert_limit_change],
               },
             ].freeze
       end

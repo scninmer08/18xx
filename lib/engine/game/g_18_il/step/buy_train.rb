@@ -144,7 +144,14 @@ module Engine
             other_trains.reject! { |t| t.owner == @game.ic } if @game.ic_in_receivership?
             other_trains = [] if entity.cash.zero? || @game.emr_active?
 
-            return depot_trains if @game.last_set_pending
+            # In last OR before final cycle, corp cannot buy only train from corp that has already operated
+            # (ensures each corp has a train going into the final set)
+            if @game.last_set_pending
+              other_trains.reject! do |t|
+                seller = t.owner
+                (seller.corporation? && seller != entity && seller.operated? && seller.trains.size == 1)
+              end
+            end
 
             depot_trains + other_trains
           end
@@ -168,12 +175,10 @@ module Engine
             @round.bought_trains << action.entity if @round.respond_to?(:bought_trains)
             @game.ic_owns_train! if action.entity == @game.ic
 
-            if action.entity == @game.ic && @game.ic_in_receivership?
-              pass!
-              return
-            end
+            return if @game.pending_rusting_event
 
-            pass! unless can_buy_train?(action.entity)
+            pass! if (action.entity == @game.ic && @game.ic_in_receivership?) ||
+                      !can_buy_train?(action.entity)
           end
 
           def buy_train_action(action, entity = nil, borrow_from: nil)
