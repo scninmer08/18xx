@@ -15,9 +15,18 @@ module Engine
         GAME_DESIGNER = 'Scott Ninmer'
         GAME_PUBLISHER = :self_published
         GAME_LOCATION = 'Illinois, USA'
-        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/erm13qxbjm13t4c6dhsex/18IL_Rulebook_v0.8.6.pdf?rlkey=pphm852vnxry9jlul8r2c12cw&dl=0'
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/xxvtqs72mt70omg4y9nxg/18IL_Rulebook_v0.8.8.pdf?rlkey=z0ydawe6sv55vo9e5lhfjq55f&dl=0'
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
         PLAYER_RANGE = [2, 6].freeze
+
+        GAME_VARIANTS = [
+          {
+            sym: :solo,
+            name: 'Solo',
+            title: '18IL Solo',
+            desc: 'Play against the Pullman bot!',
+          },
+        ].freeze
 
         OPTIONAL_RULES = [
           {
@@ -36,25 +45,8 @@ module Engine
             desc: 'Two lots consisting of one 10-share, two 5-share, and one 2-share concessions are formed '\
                   'for the first concession round.',
           },
-          {
-            sym: :town_cannot_end_route,
-            short_name: 'Town cannot end route',
-            desc: "Towns can be visited without counting towards a train's number, but cannot be at the end of a route. "\
-                  "This rule does not apply to the 'Rogers' train.",
-          },
           { sym: :_sep1, short_name: '', desc: '' },
           { sym: :_separator_trains, short_name: '--- Optional Train Tweaks ---', desc: '' },
-          # {
-          #   sym: :one_five_train,
-          #   short_name: '+1 5-Train',
-          #   desc: 'Adds one 5-train to the train roster.',
-          # },
-          #           {
-          #   sym: :two_five_trains,
-          #   short_name: '+2 5-Trains',
-          #   desc: 'Adds two 5-trains to the train roster.',
-          # },
-          #           { sym: :_sep0, short_name: '', desc: '' },
           {
             sym: :one_extra_three_train,
             short_name: '+1 3-Train',

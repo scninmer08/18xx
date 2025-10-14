@@ -13,6 +13,7 @@ module Engine
 
           def actions(entity)
             return [] if @game.last_set
+            return [] unless entity == current_entity
             # IC in receivership: once it has bought, it's done
             if entity == @game.ic && @game.ic_in_receivership? &&
                @round.respond_to?(:bought_trains) && @round.bought_trains.include?(entity)

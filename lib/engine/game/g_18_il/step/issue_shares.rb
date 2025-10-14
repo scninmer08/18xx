@@ -9,11 +9,18 @@ module Engine
         class IssueShares < Engine::Step::IssueShares
           def round_state
             super.merge(
-              {
-                sp_issue_toggle: Hash.new(false),
-              }
+              sp_issue_toggle: Hash.new(false),
             )
           end
+
+          def setup
+            super
+            @issued = false
+          end
+
+          def description = 'Issue a Share'
+          def pass_description = 'Pass (Issue)'
+          def redeemable_shares(_entity) = []
 
           def actions(entity)
             return [] if @game.last_set
@@ -23,10 +30,11 @@ module Engine
                entity.owner == current_entity &&
                issuable_share_available(current_entity) &&
                !@game.intro_game? &&
-               !@game.sp_used.equal?(entity)
+               !@round.sp_issue_toggle[current_entity]
               return ['choose_ability']
             end
 
+            # Only the current operating corp can issue
             return [] unless entity == current_entity
             return [] if entity == @game.ic
 
@@ -36,40 +44,24 @@ module Engine
             acts
           end
 
-          def description
-            'Issue a Share'
-          end
-
-          def setup
-            super
-            @issued = nil
-            @bought = nil
-          end
-
           def issuable_share_available(entity)
-            return false if issuable_shares(entity).empty?
             return false if @issued
-            return true  if @game.intro_game?
-            return false if @game.sp_used == @game.share_premium&.owner
+            return false if issuable_shares(entity).empty?
 
             true
           end
 
-          def redeemable_shares(_entity)
-            []
-          end
+          def can_sell?(entity, bundle)
+            return false unless bundle
 
-          def pass_description
-            'Pass (Issue)'
+            bundle.owner == entity &&
+              bundle.corporation == entity &&
+              bundle.num_shares == 1 &&
+              !@issued
           end
 
           def issuable_shares(entity)
-            # Done via Sell Shares
             @game.issuable_shares(entity)
-          end
-
-          def actions_for(entity)
-            actions(entity)
           end
 
           def choices_ability(company)
@@ -77,6 +69,7 @@ module Engine
 
             corp = current_entity
             return {} if @round.sp_issue_toggle[corp]
+            return {} unless issuable_share_available(corp)
 
             {
               'sp_on' => "Enable Share Premium (issue at #{@game.format_currency(corp.share_price.price * 2)})",
@@ -86,12 +79,12 @@ module Engine
           def process_choose_ability(action)
             company = action.entity
             return unless company == @game.share_premium
-
-            corp = current_entity
             return unless action.choice == 'sp_on'
 
+            corp = current_entity
             @round.sp_issue_toggle[corp] = true
             @log << "#{corp.name} can issue at double current price (#{company.name})"
+
             @game.reserved_share.buyable = true if @game.reserved_share
           end
 
@@ -102,18 +95,15 @@ module Engine
             @game.sell_shares_and_change_price(
               action.bundle,
               allow_president_change: false,
-              swap: nil,
-              movement: :left_share
+              movement: :left_share,
             )
 
             new_price = corp.share_price.price
-            @log << "#{corp.name}'s share price moves left from #{@game.format_currency(old_price)} "\
-                    "to #{@game.format_currency(new_price)}"
+            @log << "#{corp.name}'s share price moves left from "\
+                    "#{@game.format_currency(old_price)} to #{@game.format_currency(new_price)}"
 
             if @round.sp_issue_toggle[corp]
-              sp = @game.share_premium
-              if sp&.owner == corp
-                @game.sp_used = sp
+              if (sp = @game.share_premium)&.owner == corp
                 sp.close!
                 @log << "#{sp.name} (#{corp.name}) closes"
               end
@@ -121,15 +111,6 @@ module Engine
             end
 
             @issued = true
-          end
-
-          def can_sell?(entity, bundle)
-            return false unless bundle
-
-            bundle.owner == entity &&
-              bundle.corporation == entity &&
-              bundle.num_shares == 1 &&
-              !@issued
           end
 
           def log_pass(entity)

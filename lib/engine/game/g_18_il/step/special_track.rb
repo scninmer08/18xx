@@ -48,15 +48,15 @@ module Engine
 
                   # disallows Engineering Master corp from upgrading two incomplete IC Line hexes
                   if @round.num_laid_track > 1 && @round.laid_hexes.first.tile.color == :green &&
-                    @game.class::IC_LINE_HEXES.include?(@round.laid_hexes.first)
+                    @game.class::IC_LINE_CITY_HEXES.include?(@round.laid_hexes.first)
                     raise GameError, 'Cannot upgrade two incomplete IC Line hexes in one turn'
                   end
 
                   # adds reservation to IC Line hex when new tile is green city
-                  tile.add_reservation!(@game.ic, city) if @game.class::IC_LINE_HEXES.include?(hex.id)
+                  tile.add_reservation!(@game.ic, city) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id)
 
                 when :brown
-                  tile.remove_reservation!(@game.ic) if @game.class::IC_LINE_HEXES.include?(hex.id)
+                  tile.remove_reservation!(@game.ic) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id)
                 end
               end
 

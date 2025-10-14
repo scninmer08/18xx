@@ -387,8 +387,8 @@ module Engine
               revenue: 0,
               desc: 'During its tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, '\
                     'ignoring terrain costs. This does not require a token connection and does not count as the tile lay. '\
-                    'Whenever any other corporation runs one or more trains to Galena (C2), it receives a $20 subsidy from '\
-                    'the bank. This effect applies even if the corporation is unopened.',
+                    'While the corporation is open, it receives a $10 subsidy from the bank to its treasury whenever any '\
+                    'other corporation runs one or more trains to Galena (C2).',
               sym: 'FWC',
               meta: { type: :private, class: :B },
               abilities: [
@@ -420,8 +420,8 @@ module Engine
               name: 'Engineering Mastery',
               value: 0,
               revenue: 0,
-              desc: 'During its tile-laying step, the corporation may upgrade two tiles (instead of the usual two lays '\
-                    'or lay + upgrade) by paying $30 instead of $20 (terrain costs still apply).',
+              desc: 'During its tile-laying step, the corporation may upgrade two tiles for $20 (instead of the usual two lays '\
+                    'or lay + upgrade).',
               sym: 'EM',
               meta: { type: :private, class: :B },
             },

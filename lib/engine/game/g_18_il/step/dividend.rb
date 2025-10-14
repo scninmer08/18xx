@@ -22,6 +22,7 @@ module Engine
 
           def actions(entity)
             return [] if @game.last_set
+            return [] unless entity == current_entity
 
             super
           end
@@ -95,7 +96,7 @@ module Engine
             payouts = {}
             (@game.players + @game.corporations).each do |payee|
               # shares remaining in concession auction do not pay to IC
-              next if payee == @game.ic
+              next if payee == @game.ic && entity == @game.ic
 
               payout_entity(entity, payee, per_share, payouts)
             end

@@ -227,14 +227,14 @@ module Engine
               raise GameError, 'Tile must complete IC Line' if @game.ic_line_connections(hex) < 2
 
               if @round.num_laid_track > 1 && @round.laid_hexes.first.tile.color == :green &&
-                 @game.class::IC_LINE_HEXES.include?(@round.laid_hexes.first)
+                 @game.class::IC_LINE_CITY_HEXES.include?(@round.laid_hexes.first)
                 raise GameError, 'Cannot upgrade two incomplete IC Line hexes in one turn'
               end
 
-              tile.add_reservation!(@game.ic, city) if @game.class::IC_LINE_HEXES.include?(hex.id) &&
+              tile.add_reservation!(@game.ic, city) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id) &&
                                                        !@game.ic.tokens.find { |t| t.hex == hex }
             when :brown
-              tile.remove_reservation!(@game.ic) if @game.class::IC_LINE_HEXES.include?(hex.id)
+              tile.remove_reservation!(@game.ic) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id)
             end
           end
         end

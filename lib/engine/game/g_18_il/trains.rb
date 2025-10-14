@@ -43,6 +43,7 @@ module Engine
                 distance: [{ 'nodes' => %w[town], 'pay' => 99, 'visit' => 99 },
                            { 'nodes' => ['city'], 'pay' => 3, 'visit' => 3 }],
                 price: 320,
+                rusts_on: '6',
               }],
             },
             {
@@ -75,7 +76,7 @@ module Engine
               events: [
                 { 'type' => 'signal_end_game' },
                 ],
-              discount: { '4+2C' => 200, '5+1C' => 300, '6' => 400 },
+              discount: { '4+2C' => 250, '5+1C' => 250, '6' => 250 },
             },
          ].freeze
       end

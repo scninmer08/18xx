@@ -12,8 +12,10 @@ module Engine
 
           def actions(entity)
             return [] if @game.last_set
-            return [] if @game.will_buy_other_train == true
+            return [] if @game.will_buy_other_train
             return [] unless entity == current_entity
+            return [] unless @game.rush_delivery&.owner == entity
+            return [] if @round.premature_trains_bought.include?(entity)
             return [] if entity.cash < @depot.min_depot_price && entity.trains.any?
 
             actions = []
@@ -24,7 +26,7 @@ module Engine
             actions.flatten
           end
 
-          def must_buy_train?
+          def must_buy_train?(_entity)
             false
           end
 
@@ -53,10 +55,10 @@ module Engine
           def active_entities
             return [] unless @game.rush_delivery&.owner == @round.current_operator
 
-            [@game.rush_delivery&.owner].compact
+            [@round.current_operator]
           end
 
-          def process_buy_train(action, borrow_from: action.entity)
+          def process_buy_train(action)
             raise GameError, 'Premature buys are only allowed from the Depot' unless action.train.from_depot?
 
             buy_train_action(action)

@@ -22,6 +22,29 @@ module Engine
             end
           end
 
+          def tiered_auction_companies
+            return [@companies] if @companies.nil? || @companies.empty?
+
+            concessions     = @companies.select { |c| c.meta&.[](:type) == :concession }
+            non_concessions = @companies - concessions
+
+            tiers = concessions.map do |con|
+              corp = @game.corporations.find { |co| co.name == con.sym }
+              attached = []
+              if corp
+                a = corp.companies.find { |p| p.meta&.[](:type) == :private && p.meta&.[](:class) == :A }
+                b = corp.companies.find { |p| p.meta&.[](:type) == :private && p.meta&.[](:class) == :B }
+                attached << a if a
+                attached << b if b
+              end
+              [con, *attached]
+            end
+
+            tiers << non_concessions
+
+            tiers
+          end
+
           def max_bid(entity, _company)
             raw = entity.cash
             inc = @game.class::MIN_BID_INCREMENT
@@ -51,9 +74,12 @@ module Engine
 
           def change_private_description(company)
             corp = @game.corporations.find { |c| c.name == company.sym }
-            share_count = company&.meta&.[](:share_count) || corp&.total_shares || 10
+            share_count = company&.meta&.[](:share_count)
 
+            names = corp.companies.map { |c| c&.name }.compact
             base = "Can start #{company.sym} as a #{share_count}-share corporation."
+            base += " Starts with #{names.join(' and ')}." if names.any?
+
             holdings = nil
 
             if corp && (corp.cash.positive? || corp.trains.any?)
@@ -106,7 +132,9 @@ module Engine
             company.min_bid
           end
 
-          def may_bid?
+          def may_bid?(company = nil)
+            return false if company.meta&.[](:type) == :private
+
             true
           end
 
@@ -120,6 +148,10 @@ module Engine
 
           def lots_first_turn?
             @game.lots_variant? && @game.turn == 1
+          end
+
+          def show_map
+            true
           end
 
           def help
@@ -138,8 +170,7 @@ module Engine
                 @game.corporations.find { |corp| corp.name == c.sym }.companies.any?
               end
               str << [
-                "The private companies attached to each concession are shown at the bottom of the concession's card. ",
-                'Select the Entities tab to view their descriptions.',
+                "The private companies attached to each concession are shown next to the concession's card.",
               ]
             end
 
@@ -301,6 +332,17 @@ module Engine
 
               @game.sync_ic_operating_state!
               refresh_ic_share_proxies!
+
+            when :concession
+              corp = @game.corporations.find { |c| c.name == company.sym }
+              return unless corp
+
+              attached = corp.companies.select do |p|
+                p.meta&.[](:type) == :private && %i[A B].include?(p.meta[:class])
+              end
+
+              (@companies ||= []).delete(company)
+              attached.each { |p| @companies.delete(p) }
             end
           end
 

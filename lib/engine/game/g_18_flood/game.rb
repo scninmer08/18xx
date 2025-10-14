@@ -34,7 +34,6 @@ module Engine
         EVENTS_TEXT = Base::EVENTS_TEXT.merge.freeze
         STATUS_TEXT = Base::STATUS_TEXT.merge.freeze
 
-        POOL_SHARE_DROP = :down_share
         CERT_LIMIT_INCLUDES_PRIVATES = false
         MIN_BID_INCREMENT = 5
         MUST_BID_INCREMENT_MULTIPLE = true
@@ -54,12 +53,6 @@ module Engine
         )
 
         NATIONAL_STARTING_PRICE = 120
-        PHASE_OBSO_MAP = {
-          4 => %w[A],
-          5 => %w[B],
-          6 => %w[C],
-          8 => %w[5],
-        }.freeze
 
         PROGRESS_INFORMATION = [
           { type: :SR, name: '1' },
@@ -410,23 +403,6 @@ module Engine
           }[@phase.name]
         end
 
-        def handle_phase_obsolescence!
-          ph = @phase.name.to_i
-          names = PHASE_OBSO_MAP[ph]
-          return unless names&.any?
-
-          names.each { |n| obsolete_trains_named(n) }
-        end
-
-        def obsolete_trains_named(name)
-          # Mark all trains named +name+ (owned or in depot) as obsolete and log once
-          to_obsolete = trains.select { |t| t.name == name && !t.obsolete }
-          return if to_obsolete.empty?
-
-          to_obsolete.each { |t| t.obsolete = true }
-          @log << "-- Event: #{name} trains are obsolete --"
-        end
-
         def new_auction_round
           @log << '-- Stock Round 1 --'
           G18FLOOD::Round::Auction.new(self, [
@@ -531,7 +507,6 @@ module Engine
             G18FLOOD::Step::ResourceDelivery,
             G18FLOOD::Step::Route,
             G18FLOOD::Step::Dividend,
-            #      G18FLOOD::Step::CenterPublicWorks,
             G18FLOOD::Step::ShellChoice,
             G18FLOOD::Step::ParShell,
             G18FLOOD::Step::BuyTrain,
@@ -598,10 +573,8 @@ module Engine
           return entity if entity&.player?
           return nil    unless entity&.corporation?
 
-          # If it's a shell, map to its parent national first
           corp = shell_corporation?(entity) ? (shell_parent[entity] || entity) : entity
 
-          # Walk ownership chain until a player or the share pool
           owner = corp.owner
           seen  = {}
           while owner&.corporation? && !seen[owner]
@@ -615,20 +588,16 @@ module Engine
           nil
         end
 
-        # The UI uses this for grouping/display under “owner”
         def corporation_owner(entity)
           controller(entity)
         end
 
         def acting_for_entity(entity)
-          # Shells act through their parent's controlling player
           return controller(shell_parent[entity] || entity) || entity if shell_corporation?(entity)
 
-          # Nationals/others: a player if there is one, else itself
           entity&.player? ? entity : (controller(entity) || entity)
         end
 
-        # 0 for non-corps, 1 for directly player-owned corps, 2+ for corps owned by corps (e.g., shells)
         def chain_depth(entity)
           return 0 unless entity&.corporation?
 
@@ -641,9 +610,7 @@ module Engine
           depth
         end
 
-        # sorts shells beneath owning nationals for the UI
         def player_sort(entities)
-          # preserve controller (player) encounter order
           controller_order = []
           entities.each do |e|
             ctrl = acting_for_entity(e)
@@ -657,9 +624,9 @@ module Engine
           grouped.transform_values! do |arr|
             arr.sort_by do |e|
               [
-                chain_depth(e),                   # parent (1) before shell (2)
-                op_index[e] || Float::INFINITY,   # then OR order position
-                e.name,                           # then name
+                chain_depth(e),
+                op_index[e] || Float::INFINITY,
+                e.name,
               ]
             end
           end
@@ -746,37 +713,30 @@ module Engine
         end
 
         def operating_order
-          # Shells still need to be floated to operate (keep existing behavior)
           shell_order = shells.select(&:floated?).sort
 
-          # Nationals: always floated; order by controlling player's seat order,
-          # then by name within each controller group.
           nat_by_player = @players.flat_map do |player|
-            nationals.select { |n| controller(n) == player }.sort_by(&:name)
+            nationals.select { |n| controller(n) == player }
           end
 
-          # Any national not controlled by a player (e.g., market/receivership) goes last, by name.
-          nat_uncontrolled = nationals - nat_by_player
-
-          shell_order + nat_by_player + nat_uncontrolled.sort_by(&:name)
+          shell_order + nat_by_player
         end
 
         # --------------------------- Shell company helpers ---------------------------
 
         def begin_shell_post_swap_shares!(shell)
-          # Starter = the player who owns the parent (you already set shell.owner = parent.owner)
           starter_player = shell.owner.owner
           raise GameError, 'Shell has no owner player' unless starter_player&.player?
 
-          @players.each(&:unpass!) # fresh window for everyone
+          @players.each(&:unpass!)
 
           @round.shell_ipo = {
             corp: shell,
             starter: starter_player,
-            remaining: 30, # percent the starter may buy (3x 10%)
-            phase: :starter, # then :others
-            cursor: 0, # index into others in seat order
-            acted: {}, # players who already acted in :others
+            remaining: 30,
+            phase: :starter,
+            cursor: 0,
+            acted: {},
           }
         end
 
@@ -807,18 +767,15 @@ module Engine
           shell = next_free_shell
           raise GameError, 'No unused Shell corporations remain' unless shell
 
-          # Normalize state in case this shell was touched by undo/load during testing
-          #  shell.owner       = nil
           shell.ipoed       = false
           shell.floated     = false
           shell.share_price = nil
 
           ensure_free_token!(shell)
 
-          # Track mapping for later logic
           shell_parent[shell] = parent
 
-          # Put shell right after parent in the round order (once)
+          # Put shell right after parent in the round order
           if @round.respond_to?(:entities)
             idx = @round.entities.index(parent)
             @round.entities.insert(idx + 1, shell) if idx && !@round.entities.include?(shell)
@@ -841,7 +798,7 @@ module Engine
           pres = shell.presidents_share
           raise GameError, 'Shell has no president share to buy' unless pres
 
-          price = par_price * (pres.percent / 10) # e.g., 50% => x5
+          price = par_price * (pres.percent / 10)
           raise GameError, "#{parent.name} cannot afford #{format_currency(price)}" if parent.cash < price
 
           bundle = Engine::ShareBundle.new(pres, pres.percent)
@@ -853,7 +810,7 @@ module Engine
           shell.floated = true
           shell.owner   = parent
 
-          enqueue_shell_token_swap!(parent, shell)
+          shell_token_swap!(parent, shell)
 
           @pending_shell = nil
           @graph.clear_graph_for_all
@@ -870,11 +827,9 @@ module Engine
           end
         end
 
-        def enqueue_shell_token_swap!(parent, shell)
-          # Parent’s home hex ids (string or array supported)
+        def shell_token_swap!(parent, shell)
           home_ids = Array(parent.coordinates).compact
 
-          # Only hexes with a parent token, excluding the parent’s home hex
           hexes = @hexes.select do |hex|
             next false if home_ids.include?(hex.id)
 
@@ -903,7 +858,6 @@ module Engine
           (hex_by_id(hid)&.neighbors || {}).values.compact.map(&:id)
         end
 
-        # “Plain blank” = preprinted white with no cities/towns/offboards/paths
         def blank_plain?(hex)
           t = hex&.tile
           t&.preprinted &&
@@ -914,7 +868,6 @@ module Engine
             t.offboards.empty?
         end
 
-        # Candidate hex is plain+blank AND all neighbors are plain+blank right NOW
         def isolated_blank_hex_id?(hid)
           hex = hex_by_id(hid)
           return false unless blank_plain?(hex)
@@ -922,7 +875,6 @@ module Engine
           hex.neighbors.values.all? { |nbr| blank_plain?(nbr) }
         end
 
-        # BFS rings from a center hex id, capped at radius 9
         def rings_from(center_hid, max_r = 9)
           start = hex_by_id(center_hid) or raise GameError, "No hex #{center_hid}"
           rings = Hash.new { |h, k| h[k] = [] }
@@ -944,9 +896,7 @@ module Engine
           rings
         end
 
-        # Rough sextant partitioning (0..5) around a center (flat layout)
         def sextant_index(center_hid, hid)
-          # Quick-and-sufficient angle partition using ASCII row/col as a plane
           col = hid[/\d+/].to_i
           row = hid[0].ord - 'A'.ord + 1
           ccol = center_hid[/\d+/].to_i
@@ -957,8 +907,6 @@ module Engine
           ang += 2 * Math::PI if ang.negative?
           (ang / (Math::PI / 3)).floor % 6
         end
-
-        # --- pool-only tile lays -----------------------------------------------------
 
         def pool_tile(name)
           @tiles.find { |t| t.name == name && t.hex.nil? } or
@@ -975,7 +923,6 @@ module Engine
           new_tile
         end
 
-        # Exactly one mountain upgrade with the given cost
         def ensure_mountain_upgrade_cost!(tile, cost)
           tile.upgrades.reject! { |u| Array(u.terrains) == [:mountain] }
           tile.upgrades << Engine::Part::Upgrade.new(cost, [:mountain], nil)
@@ -984,10 +931,9 @@ module Engine
         # --- GREEN cities: 3 per sextant (rings 4,5,6) with costs 40/20/20 ----------
 
         def seed_green_cities!
-          center = self.class::CENTER_CITY.first # 'J19'
+          center = self.class::CENTER_CITY.first
           rings  = rings_from(center, 9)
 
-          # Place in three passes to maximize spacing: all r4 first, then r5, then r6
           [[4, 40], [5, 20], [6, 20]].each do |ring, cost|
             6.times do |sx|
               candidates = rings[ring]
@@ -1024,7 +970,7 @@ module Engine
           end
         end
 
-        # --- WATER: fill every eligible isolated blank (non-fatal skips) -------------
+        # --- WATER: fill every eligible isolated blank --------------------------------
 
         def seed_blue_waters!
           @hexes.map(&:id)
@@ -1046,12 +992,9 @@ module Engine
         end
 
         # --- randomizers --------------------------------------------------------------
-        # discard the worst 16 bits
-        def r_hi       = (rand >> 16)
-        # boolean
-        def coin_flip  = (r_hi & 1).zero?
-        # small, less-biased range
-        def r_mod(n)   = r_hi % n
+        def r_hi = (rand >> 16)
+        def coin_flip = (r_hi & 1).zero?
+        def r_mod(n) = r_hi % n
       end
     end
   end

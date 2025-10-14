@@ -39,7 +39,6 @@ module Engine
 
           def corporate_actions(entity)
             return [] if @corporate_action && @corporate_action.entity != entity
-            #  return [] if entity == @game.ic
             return [] if must_sell?(entity.owner)
 
             actions = []

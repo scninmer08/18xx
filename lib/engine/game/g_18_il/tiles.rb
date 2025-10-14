@@ -6,19 +6,19 @@ module Engine
       module Tiles
         TILE_TYPE = :lawson
         TILES = {
-          '5' => 4,
-          '6' => 4,
-          '7' => 5,
+          '5' => 14,
+          '6' => 14,
+          '7' => 15,
           '8' => 12,
           '9' => 12,
-          '14' => 6,
-          '15' => 6,
-          '57' => 4,
-          '58' => 9,
-          '80' => 5,
-          '81' => 5,
-          '82' => 8,
-          '83' => 8,
+          '14' => 16,
+          '15' => 16,
+          '57' => 14,
+          '58' => 19,
+          '80' => 15,
+          '81' => 15,
+          '82' => 18,
+          '83' => 18,
           '544' => 4,
           '545' => 4,
           '546' => 4,
@@ -30,7 +30,7 @@ module Engine
           {
             'count' => 1,
             'color' => 'yellow',
-            'code' => 'town=revenue:30;path=a:1,b:_0;path=a:4,b:_0;path=a:5,b:_0;label=G',
+            'code' => 'town=revenue:20;path=a:1,b:_0;path=a:4,b:_0;path=a:5,b:_0;label=G',
           },
 
           'S1' =>
@@ -87,7 +87,7 @@ module Engine
           {
             'count' => 1,
             'color' => 'green',
-            'code' => 'town=revenue:10;path=a:1,b:_0;path=a:2,b:_0;path=a:4,b:_0;path=a:5,b:_0;label=J',
+            'code' => 'town=revenue:10;path=a:0,b:_0;path=a:1,b:_0;path=a:3,b:_0;path=a:4,b:_0;label=J',
           },
           'P2' =>
           {
@@ -137,6 +137,12 @@ module Engine
           },
 
           # BROWN
+          'J2' =>
+          {
+            'count' => 1,
+            'color' => 'brown',
+            'code' => 'town=revenue:20;path=a:0,b:_0;path=a:1,b:_0;path=a:2,b:_0;path=a:3,b:_0;path=a:4,b:_0;label=J',
+          },
           'P3' =>
           {
             'count' => 1,
@@ -156,7 +162,7 @@ module Engine
           {
             'count' => 1,
             'color' => 'brown',
-            'code' => 'city=revenue:70,slots:3;path=a:1,b:_0;path=a:2,b:_0;path=a:0,b:_0;path=a:4,b:_0;label=Chi',
+            'code' => 'city=revenue:70,slots:3;path=a:1,b:_0;path=a:0,b:_0;path=a:4,b:_0;label=Chi',
           },
 
           'C31' =>
