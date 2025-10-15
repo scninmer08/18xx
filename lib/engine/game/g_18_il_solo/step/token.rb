@@ -16,7 +16,7 @@ module Engine
           def skip!
             entity = current_entity
             if entity && auto_token_entity?(entity) && (auto = build_auto_token_action(entity))
-              process_place_token(auto)
+              process_place_token(auto) if !@game.last_set
               return
             end
             super

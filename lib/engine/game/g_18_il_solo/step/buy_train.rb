@@ -59,10 +59,16 @@ module Engine
 
           def buyable_trains(entity)
             if entity.owner == @game.robot
-              @depot.depot_trains.reject { |t| owns_family?(entity, t) }
-            else
-              super
+              trains = @depot.depot_trains.reject { |t| owns_family?(entity, t) }
+
+              if trains.any? { |t| t.name == '6' }
+                trains.reject! { |t| t.name == 'D' }
+              end
+
+              return trains
             end
+
+            super
           end
 
           def train_variant_helper(train, entity)
