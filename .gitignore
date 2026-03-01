@@ -38,3 +38,4 @@ validate/
 .vscode
 
 .rerun
+spec/fixtures
