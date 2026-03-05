@@ -9,13 +9,12 @@ module Engine
         include Game::Meta
 
         DEV_STAGE = :prealpha
-        # PROTOTYPE = true
 
         GAME_SUBTITLE = 'The Formation of the Illinois Central Railroad'
         GAME_DESIGNER = 'Scott Ninmer'
         GAME_PUBLISHER = :self_published
         GAME_LOCATION = 'Illinois, USA'
-        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/xxvtqs72mt70omg4y9nxg/18IL_Rulebook_v0.8.8.pdf?rlkey=z0ydawe6sv55vo9e5lhfjq55f&dl=0'
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/zays0t6omxh93npnp4nxv/18IL_Rulebook_v0.9.0.pdf?rlkey=bqkbe6eb3o9mg3vhf3jdketxn&dl=0'
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
         PLAYER_RANGE = [2, 6].freeze
 
@@ -45,6 +44,12 @@ module Engine
           short_name: '(2p only) Lots Variant',
           desc: 'Two lots consisting of one 10-share, two 5-share, and one 2-share concessions are formed '\
                 'for the first concession round.',
+        },
+        {
+          sym: :two_player_draft,
+          short_name: '(2p only) Draft Variant',
+          desc: 'Two lots are randomly assigned to the two players. Players then snake-draft the eight '\
+                'class A and eight class B privates before assigning them to their corporations.',
         },
           # { sym: :_sep1, short_name: '', desc: '' },
           # { sym: :_separator_trains, short_name: '--- Optional Train Tweaks ---', desc: '' },

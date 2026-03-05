@@ -236,13 +236,6 @@ module Engine
             @round.corp_started = action.corporation
             super
             company = @game.company_by_id(action.corporation.name)
-            if !@game.intro_game? && @game.extra_station&.owner == action.corporation
-              @log << "#{action.corporation.name} gains an extra token"
-              @log << "#{@game.extra_station.name} (#{action.corporation.name}) closes"
-              @game.extra_station.close!
-
-              action.corporation.tokens << Engine::Token.new(action.corporation, price: 0)
-            end
             @game.companies.delete(company)
             company.close!
           end

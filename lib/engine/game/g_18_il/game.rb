@@ -26,12 +26,12 @@ module Engine
         include Phases
         include CitiesPlusTownsRouteDistanceStr
 
-        attr_accessor :stl_nodes, :exchange_choice_player, :exchange_choice_corp, :exchange_choice_corps,
-                      :borrowed_trains, :train_borrowed, :closed_corporations, :will_buy_other_train, :emr_active,
-                      :pending_rusting_event, :last_set_pending, :lots, :lot_proxies
+        attr_accessor :exchange_choice_player, :exchange_choice_corp, :train_borrowed, :will_buy_other_train,
+                      :emr_active, :pending_rusting_event
 
-        attr_reader :merged_corporation, :last_set, :ic_line_completed_hexes, :insolvent_corporations,
-                    :ic_trigger_entity, :reserved_share
+        attr_reader :stl_nodes, :exchange_choice_corps, :borrowed_trains, :closed_corporations,
+                    :last_set_pending, :lots, :lot_proxies, :merged_corporation, :last_set,
+                    :insolvent_corporations, :ic_trigger_entity
 
         TRACK_RESTRICTION = :permissive
         SELL_BUY_ORDER = :sell_buy
@@ -50,9 +50,6 @@ module Engine
         STATUS_TEXT = Base::STATUS_TEXT.merge(
           'pullman_strike' => ['Pullman Strike (end of next OR)',
                                '4+2C and 5+1C trains are downgraded to 4- and 5-trains, respectively'],
-          # 'blocking_tokens' => ['Blocking Tokens (end of next OR)',
-          #                       'Unopened corporations are removed from the game and blocking tokens are placed in their '\
-          #                      'home locations'],
           'cert_limit_change' => ['Cert Limit Change (end of next OR)',
                                   'Cert limit is reduced by 1 for each unopened corporation that is removed'],
         )
@@ -89,8 +86,6 @@ module Engine
 
         PORT_HEXES = %w[H1].freeze
         TOWN_HEXES = %w[C2 D9 D13 D17 E6 E14 E16 F5 F13 F21 G22 H11].freeze
-        CLASS_A_COMPANIES = %w[].freeze
-        CLASS_B_COMPANIES = %w[].freeze
         STL_HEXES = %w[B15 B17 C16 C18].freeze
         STL_TOKEN_HEX = ['C18'].freeze
         CHICAGO_HEX = ['H3'].freeze
@@ -190,6 +185,11 @@ module Engine
         def next_round!
           @round =
             case @round
+            when G18IL::Round::Draft
+              new_assignment_round
+            when G18IL::Round::Assignment
+              init_round_finished
+              new_stock_round
             when Engine::Round::Auction
               clear_programmed_actions
               reorder_players(:least_cash, log_player_order: true)
@@ -206,9 +206,6 @@ module Engine
                 or_set_finished
                 new_concession_round
               end
-            when init_round.class
-              init_round_finished
-              new_stock_round
             end
         end
 
@@ -337,7 +334,10 @@ module Engine
         end
 
         def company_closing_after_using_ability(company, silent = false)
-          @log << "#{company.name} (#{company.owner.name}) closes" unless silent
+          return if silent
+
+          owner_str = company.owner ? " (#{company.owner.name})" : ''
+          @log << "#{company.name}#{owner_str} closes"
         end
 
         def status_array(corp)
@@ -351,7 +351,17 @@ module Engine
         end
 
         def init_round
-          new_concession_round
+          two_player_draft? ? new_draft_round : new_concession_round
+        end
+
+        def new_draft_round
+          @log << '-- Private Draft --'
+          G18IL::Round::Draft.new(self, [G18IL::Step::DraftPrivate])
+        end
+
+        def new_assignment_round
+          @log << '-- Private Assignment --'
+          G18IL::Round::Assignment.new(self, [G18IL::Step::AssignPrivate])
         end
 
         def new_concession_round
@@ -398,38 +408,6 @@ module Engine
         def company_status_str(company)
           return if company.owner
           return unless company.meta[:type] == :concession
-          # return if @companies.none? { |c| c.meta[:type] == :private }
-
-          # corp = @corporations.find { |c| c.name == company.sym }
-          # return if corp.nil? || corp.companies.none?
-
-          # a = corp.companies[0]
-          # b = corp.companies[1]
-
-          # parts = []
-          # parts << a.name.to_s if a
-          # parts << ' | ' if a && b
-          # parts << b.name.to_s if b
-          # result = parts.join
-
-          # # Abbreviate if needed to keep the status on one line
-          # if result.length > 38
-          #   abbreviations = {
-          #     'Goodrich Transit Line' => 'GTL',
-          #     'Illinois Steel Bridge Co.' => 'IL Steel Bridge Co.',
-          #     'Chicago-Virden Coal Co.' => 'C-V Coal Co.',
-          #     'Union Stock Yards' => 'USY',
-          #   }
-
-          #   abbreviations.each do |long, short|
-          #     if result.include?(long)
-          #       result = result.gsub(long, short)
-          #       break
-          #     end
-          #   end
-          # end
-
-          # result
         end
 
         def purchasable_companies(entity = nil)
@@ -446,7 +424,7 @@ module Engine
           when :share then 'ORDINARY SHARE'
           when :presidents_share then "PRESIDENT'S SHARE"
           when :concession then 'CONCESSION'
-          when :private then 'PRIVATE COMPANY'
+          when :private then "CLASS #{company.meta[:class]} PRIVATE"
           end
         end
 
@@ -463,6 +441,36 @@ module Engine
           '2 shares to start'
         end
 
+        CORP_SORT_ORDER = { 'two_share' => 0, 'five_share' => 1, 'ten_share' => 2 }.freeze
+
+        def bank_sort(corporations)
+          corporations.sort_by do |c|
+            [c.id == 'IC' ? 1 : 0, CORP_SORT_ORDER[c.type.to_s] || 9, c.name]
+          end
+        end
+
+        # Tiles only placeable via private company abilities; shown greyed out in the manifest
+        PRIVATE_ABILITY_TILES = %w[838 P4 S4].freeze
+
+        # After cache is built, extend tile_by_id to also search the private ability tile pool
+        # (those tiles are removed from @tiles so the manifest shows them as "None Left")
+        def cache_objects
+          super
+          define_singleton_method(:tile_by_id) do |id|
+            @_tiles[id] || @private_ability_tile_pool&.find { |t| t.id == id }
+          end
+        end
+
+        def find_private_ability_tile(name)
+          @private_ability_tile_pool&.find { |t| t.name == name && !t.hex }
+        end
+
+        def unowned_purchasable_companies(_entity)
+          @companies
+            .select { |c| !c.owner && !c.closed? && %i[A B].include?(c.meta[:class]) }
+            .sort_by { |c| [c.meta[:class].to_s, c.name] }
+        end
+
         def nc
           @nc ||= corporation_by_id('NC')
         end
@@ -471,36 +479,38 @@ module Engine
           @ic_formation_triggered
         end
 
-        def stlbc
-          @stl_blocking_corp
-        end
-
-        def find_company_by_name(name)
-          @companies.find { |c| c&.name == name }
-        end
-
-        # def optional_hexes
-        #   return game_hexes unless intro_game?
-
-        #   hexes = game_hexes
-
-        #   hexes[:white].delete(GALENA_HEX)
-        #   hexes[:yellow][GALENA_HEX] = 'town=revenue:20;path=a:1,b:_0;path=a:4,b:_0;path=a:5,b:_0;label=G'
-        #   hexes[:red][['B3']] = 'label=W;offboard=revenue:yellow_20|brown_40,groups:West;path=a:4,b:_0;path=a:0,b:_0;'\
-        #                         'border=edge:0;border=edge:5'
-        #   hexes
-        # end
-
         def setup_preround
           super
+          # Northern Cross starts with the 'Rogers' train
+          # Use @corporations directly — corporation_by_id is not yet available in setup_preround
+          nc_corp = @corporations.find { |c| c.id == 'NC' }
+          train = @depot.trains.find { |t| t.name == ROGERS_NAME }
+          @depot.remove_train(train)
+          train.buyable = false
+          train.owner = nc_corp
+          train.obsolete = true
+          nc_corp.trains << train
+
+          @log << "Northern Cross Railroad starts with the #{ROGERS_NAME} train"
+
+          # In the intro game, P4/S4 are normal gray tiles (no CIB restriction), so leave them in the pool.
+          # In the full game, remove private-ability-only tiles from @tiles so the manifest shows them
+          # as greyed out; they're stored separately so the step and action decoder can still find them.
+          unless intro_game?
+            @private_ability_tile_pool = @tiles.select { |t| PRIVATE_ABILITY_TILES.include?(t.name) }
+            @tiles.reject! { |t| PRIVATE_ABILITY_TILES.include?(t.name) }
+          end
 
           # Create and initialize the blocking corporation for placing blocking tokens in STL
           create_blocking_corp
 
           # Set up corporations for intro game or regular game setup
-          initial_auction_lot unless intro_game?
-          setup_lots if lots_variant?
-          @log << "Northern Cross Railroad starts with the #{ROGERS_NAME} train"
+          initial_auction_lot if !intro_game? && !two_player_draft?
+          if two_player_draft?
+            setup_lots_draft
+          elsif lots_variant?
+            setup_lots
+          end
         end
 
         # Create the corporation that places blocking tokens in St. Louis
@@ -531,6 +541,10 @@ module Engine
 
         def lots_variant?
           optional_rules&.include?(:lots_variant) && two_player?
+        end
+
+        def two_player_draft?
+          optional_rules&.include?(:two_player_draft) && two_player?
         end
 
         # Set up corporations for auction lot formation in the regular game
@@ -590,6 +604,38 @@ module Engine
           @companies |= @lot_proxies
         end
 
+        def setup_lots_draft
+          @log << '-- Draft Variant: Lot Formation --'
+
+          bucket = @corporations.select(&:floatable).group_by(&:total_shares)
+
+          ten_shares  = bucket[10].sort_by { rand }
+          five_shares = bucket[5].sort_by { rand }
+          two_shares  = bucket[2].sort_by { rand }
+
+          @lots = Array.new(2) do
+            [ten_shares.shift, five_shares.shift, five_shares.shift, two_shares.shift].compact
+          end
+
+          @lots.each_with_index do |lot, idx|
+            names = list_with_and(lot.map(&:name))
+            @log << "Lot #{idx + 1}: #{names}"
+          end
+
+          # Randomly assign lots to players
+          ordered_lots = @lots.sort_by { rand }
+          @players.each_with_index do |player, idx|
+            lot = ordered_lots[idx]
+            lot.each do |corp|
+              concession = @companies.find { |c| c.sym == corp.name }
+              concession.owner = player
+              player.companies << concession
+            end
+            names = list_with_and(lot.map(&:name))
+            @log << "#{player.name} is randomly assigned: #{names}"
+          end
+        end
+
         def make_lot_company(idx)
           names = list_with_and(@lots[idx].map(&:name))
 
@@ -646,15 +692,13 @@ module Engine
 
           ic.add_ability(self.class::FORMATION_ABILITY)
           ic.owner = nil
-          @corporation_debts = Hash.new { |h, k| h[k] = 0 }
           @insolvent_corporations = []
           @last_set_pending = nil
           @last_set = nil
-          @ic_president = nil
+          @ic_needs_train = false
           @ic_owns_train = false
           @ic_formation_triggered = nil
           @ic_formation_pending = nil
-          @ic_formation_completed = nil
           @merge_share_prices = []
           @merged_min_entity_index = nil
           @closed_corporations = []
@@ -667,27 +711,38 @@ module Engine
           @ic_line_completed_hexes = []
           @operated_mergees = []
 
-          # Northern Cross starts with the 'Rogers' train
-          train = @depot.trains.find { |t| t.name == ROGERS_NAME }
-          @depot.remove_train(train)
-          train.buyable = false
-          train.owner = nc
-          train.obsolete = true
-          nc.trains << train
-
           @corporations.select { |corp| corp.type == :two_share }.each { |c| c.max_ownership_percent = 100 }
 
-          if !intro_game? && (share_premium&.owner&.total_shares == 10)
-            @reserved_share = share_premium&.owner&.ipo_shares&.last
-            @reserved_share.buyable = false
+          @reserved_shares = {}
+          unless intro_game?
+            @corporations.each do |corp|
+              next if corp == ic
+              next unless corp.total_shares == 10
+
+              reserve_last_share(corp)
+            end
           end
 
           @stl_nodes = STL_HEXES.map do |h|
             hex_by_id(h).tile.nodes.find { |n| n.offboard? && n.groups.include?('STL') }
           end
 
-          # Removes 838 tile and G1 tile
+          # Removes 838 tile and G1 tile in the intro game
           @all_tiles.each { |tile| tile.hide if tile.name == 'G1' || tile.name == '838' } if intro_game?
+
+          # Color private companies by class so they're visually distinct on the Entities page
+          @companies.each do |company|
+            next unless company.meta[:type] == :private
+            next if company.color != :yellow # already explicitly colored (e.g. lots variant assigns corp color)
+
+            if company.meta[:class] == :A
+              company.instance_variable_set(:@color, '#006d6d')
+              company.instance_variable_set(:@text_color, 'white')
+            else
+              company.instance_variable_set(:@color, '#a3c9c9')
+              company.instance_variable_set(:@text_color, 'black')
+            end
+          end
         end
 
         def ipo_name(_entity = nil) = 'Treasury'
@@ -769,7 +824,7 @@ module Engine
         def company_sellable(company); end
 
         def upgrades_to?(from, to, special = false, selected_company: nil)
-          # P4 and S4 are available in intro game, but only available to Central Illinois Boom in normal game
+          # P4 and S4 are available in intro game, but only available to Central IL Boom in normal game
           if !intro_game? && BOOM_HEXES.include?(from.hex.id)
             if selected_company != central_il_boom || !phase.tiles.include?(:gray)
               return false if to.name == 'P4' || to.name == 'S4'
@@ -1014,10 +1069,6 @@ module Engine
           count
         end
 
-        def path_to_city(paths, edge)
-          paths.find { |p| p.exits == [edge] }
-        end
-
         def ic_line_completed?
           @ic_line_completed_hexes.size == IC_LINE_COUNT
         end
@@ -1056,10 +1107,7 @@ module Engine
           shares.each { |share| corporation.share_holders[share.owner] += share.percent }
           new_shares.each { |share| add_new_share(share) }
 
-          if !intro_game? && corporation == share_premium.owner && corporation.total_shares == 10
-            @reserved_share = share_premium&.owner&.ipo_shares&.last
-            @reserved_share.buyable = false
-          end
+          reserve_last_share(corporation) if !intro_game? && corporation != ic && corporation.total_shares == 10
           new_shares
         end
 
@@ -1204,11 +1252,23 @@ module Engine
           remaining.empty? ? [eligible.last].compact : [remaining.first].compact
         end
 
+        def reserve_last_share(corp)
+          share = corp.ipo_shares.last
+          return unless share
+
+          @reserved_shares[corp.name] = share
+          share.buyable = false
+        end
+
+        def reserved_share_for(corp)
+          @reserved_shares[corp&.name]
+        end
+
         def issuable_shares(entity)
           return [] unless entity.corporation?
           return [] if entity.num_treasury_shares.zero?
 
-          bundles_for_corporation(entity, entity).take(1)
+          bundles_for_corporation(entity, entity).select(&:buyable).take(1)
         end
 
         def borrow_train(action)
@@ -1305,11 +1365,12 @@ module Engine
           return unless routes.any? { |r| r.hexes.any? { |h| GALENA_HEX.include?(h.id) } }
 
           owner = frink_walker_co.owner
+          return unless owner
           return if owner == entity
-          return if !owner.ipoed || closed_corporations.include?(owner)
+          return if owner.corporation? && (!owner.ipoed || closed_corporations.include?(owner))
 
-          @bank.spend(FRINK_SUBSIDY, frink_walker_co.owner)
-          @log << "#{frink_walker_co.owner.name} receives a #{format_currency(FRINK_SUBSIDY)} subsidy "\
+          @bank.spend(FRINK_SUBSIDY, owner)
+          @log << "#{owner.name} receives a #{format_currency(FRINK_SUBSIDY)} subsidy "\
                   'from the bank (Frink, Walker, & Co.)'
         end
 
@@ -1322,6 +1383,12 @@ module Engine
         def revenue_for(route, stops)
           revenue = super
           revenue += ew_ns_bonus(stops)[:revenue] + c_bonus(route, stops)
+          if !intro_game? &&
+              route.corporation == interstate_commerce_corridor&.owner &&
+              !interstate_commerce_corridor.closed? &&
+              ew_ns_bonus(stops)[:revenue].positive?
+            revenue += 20
+          end
           revenue
         end
 
@@ -1329,6 +1396,12 @@ module Engine
           str = super
           bonus = ew_ns_bonus(route.stops)[:description]
           str += " + #{bonus}" if bonus
+          if !intro_game? &&
+              route.corporation == interstate_commerce_corridor&.owner &&
+              !interstate_commerce_corridor.closed? &&
+              bonus
+            str += ' + ICC'
+          end
           str
         end
 
@@ -1474,26 +1547,6 @@ module Engine
           super
         end
 
-        def place_home_blocking_token(corporation)
-          cities = []
-
-          hex = hex_by_id(corporation.coordinates)
-          if hex.tile.reserved_by?(corporation)
-            cities.concat(hex.tile.cities)
-          else
-            cities << hex.tile.cities.find { |city| city.reserved_by?(corporation) }
-            cities.first.remove_reservation!(corporation)
-          end
-          cities.each do |city|
-            @blocking_log << "#{hex.name} (#{hex.location_name})"
-            city ||= hex.tile.cities[0]
-            token = Token.new(corporation, price: 0, logo: "/logos/18_il/#{corporation.name}.alt.svg",
-                                           simple_logo: "/logos/18_il/#{corporation.name}.alt.svg", type: :blocking)
-            token.status = :flipped
-            city.place_token(corporation, token, check_tokenable: false)
-          end
-        end
-
         def final_operating_rounds
           @final_operating_rounds || super
         end
@@ -1519,6 +1572,7 @@ module Engine
 
           @log << "Tile ##{tile_to_remove} is removed from the game"
           tiles.delete_if { |t| t.name == tile_to_remove }
+          @private_ability_tile_pool&.delete_if { |t| t.name == tile_to_remove }
         end
 
         def redeemable_shares(entity)
@@ -1556,7 +1610,6 @@ module Engine
           return unless phase.name == 'D'
 
           event_pullman_strike!
-          event_blocking_tokens!
           event_cert_limit_change!
 
           @last_set = true
@@ -1572,7 +1625,6 @@ module Engine
           @log << "-- First D train bought/exported, game ends at the conclusion of OR #{@turn + 1}.#{@final_operating_rounds} --"
           @log << "-- At the end of OR #{@turn}.#{@round.round_num + 1}, 4+2C and 5+1C trains will downgrade to "\
                   '4- and 5-trains --'
-          #   @log << '-- Pullman Strike: Blocking tokens will be placed in the home locations of unopened corporations --'
         end
 
         # Pullman Strike: C-trains downgrade to their base (non-C) value.
@@ -1601,35 +1653,21 @@ module Engine
           end
         end
 
-        # # Blocking tokens are placed in unopened corporation's home locations
-        def event_blocking_tokens!
-          # @blocking_log = []
-          @removed_corp_log = []
+        def event_cert_limit_change!
+          removed = []
 
           @corporations.reject(&:ipoed).reject(&:closed?).each do |corporation|
-            # place_home_blocking_token(corporation) if corporation.coordinates
-            @removed_corp_log << corporation.name
+            removed << corporation.name
             @corporations.delete(corporation)
             company = company_by_id(corporation.name)
             @companies.delete(company)
             @cert_limit -= 1
           end
 
-          # @log << if @blocking_log.empty?
-          #           '-- Event: Removing unopened corporations --'
-          #         else
-          #           '-- Event: Removing unopened corporations and placing blocking tokens --'
-          #         end
+          return if removed.empty?
 
-          # @log << "#{list_with_and(@removed_corp_log)} #{@removed_corp_log.count == 1 ? 'is' : 'are'} removed from the game"
-
-          # return nil if @blocking_log.empty?
-
-          # @log << "Blocking #{@blocking_log.count == 1 ? 'token' : 'tokens'} placed on #{list_with_and(@blocking_log)}"
-        end
-
-        # Cert limit is reduced by 1 for each unopened corporation that is removed
-        def event_cert_limit_change!
+          @log << '-- Event: Removing unopened corporations --'
+          @log << "#{list_with_and(removed)} #{removed.count == 1 ? 'is' : 'are'} removed from the game"
           @log << "-- Event: Certificate limit adjusted to #{@cert_limit} --"
         end
 
@@ -1665,7 +1703,6 @@ module Engine
           stock_market.set_par(ic, @stock_market.par_prices.find do |p|
             p.price == IC_STARTING_PRICE
           end)
-          # @bank.spend(IC_STARTING_PRICE * 10, ic)
           @bank.spend(IC_STARTING_PRICE * 5, ic)
           @merge_share_prices = [ic.share_price.price] # adds IC's share price to array to be averaged later
           @log << "#{ic.name} starts at an #{format_currency(IC_STARTING_PRICE)} share price and "\

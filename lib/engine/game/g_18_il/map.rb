@@ -12,7 +12,6 @@ module Engine
           'B17' => 'St. Louis',
           'C2' => 'Galena',
           'C6' => 'Rock Island',
-        #  'C8' => 'Galesburg',
           'D5' => 'Sterling',
           'D9' => 'Canton',
           'D13' => 'Jacksonville',
@@ -65,7 +64,6 @@ module Engine
               ['C2'] => 'label=G;town=revenue:0,groups:Galena;upgrade=cost:60,terrain:mountain;'\
                         'border=edge:1,type:water,cost:20',
               ['C6'] => 'city=revenue:0;border=edge:2,type:water,cost:20',
-          #    ['C8'] => 'city=revenue:0',
               ['C14'] => 'border=edge:1,type:water,cost:20;border=edge:0,type:water,cost:20',
               ['D5'] => 'city=revenue:0',
               ['D15'] => 'city=revenue:0;border=edge:1,type:water,cost:20',

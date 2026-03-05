@@ -62,14 +62,12 @@ module Engine
 
         STOCKMARKET_COLORS = Base::STOCKMARKET_COLORS.merge(
           par: :yellow,
-          #repar: :red,
         ).freeze
 
         MARKET_TEXT = {
           par: 'Par value',
           close: 'Corporation closes',
           endgame: 'End game trigger',
-          #repar: 'Cannot convert',
         }.freeze
 
         def price_movement_chart

@@ -21,23 +21,6 @@ module Engine
             actions
           end
 
-          def runnable_trains(entity)
-            trains = super
-            return trains unless entity == @game.ic
-
-            info = entity.trains.map do |t|
-              [
-                t.name,
-                "rusted=#{t.respond_to?(:rusted?) ? t.rusted? : t.rusted}",
-                "obsolete=#{t.respond_to?(:obsolete?) ? t.obsolete? : t.obsolete}",
-                "distance=#{t.distance.inspect}",
-              ].join(' ')
-            end
-            @log << "IC trains: #{info.join(' | ')}"
-            @log << "Base runnable (super): #{trains.map(&:name).join(', ')}"
-            trains
-          end
-
           def scrappable_trains(entity)
             entity.trains
           end

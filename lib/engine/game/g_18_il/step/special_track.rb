@@ -7,6 +7,25 @@ module Engine
     module G18IL
       module Step
         class SpecialTrack < Engine::Step::SpecialTrack
+          def potential_tiles(entity_or_entities, hex)
+            entities = Array(entity_or_entities)
+            entity = entities.first
+            return [] unless (tile_ability = abilities(entity))
+
+            tiles = tile_ability.tiles.map do |name|
+              @game.tiles.find { |t| t.name == name } || @game.find_private_ability_tile(name)
+            end
+            tiles = @game.tiles.uniq(&:name) if tile_ability.tiles.empty?
+
+            special = tile_ability.special if tile_ability.type == :tile_lay
+            tiles
+              .compact
+              .select do |t|
+                @game.tile_valid_for_phase?(t, hex: hex, phase_color_cache: potential_tile_colors(entity, hex)) &&
+                  @game.upgrades_to?(hex.tile, t, special, selected_company: entity)
+              end
+          end
+
           def process_lay_tile(action)
             if @company && (@company != action.entity) &&
                (ability = @game.abilities(@company, :tile_lay, time: 'track')) &&
@@ -63,7 +82,8 @@ module Engine
               # closes GTL if Chicago is upgraded to brown
               if !@game.intro_game? && tile.name == 'CHI3' && !@game.goodrich_transit_line.closed?
                 company = @game.goodrich_transit_line
-                @log << "#{company.name} (#{company.owner.name}) closes"
+                owner_str = company.owner ? " (#{company.owner.name})" : ''
+                @log << "#{company.name}#{owner_str} closes"
                 company.close!
               end
 

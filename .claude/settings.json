@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /mnt/nas/18xx-server/lib/engine/game/g_18_il/round/*.rb)"
+    ]
+  }
+}

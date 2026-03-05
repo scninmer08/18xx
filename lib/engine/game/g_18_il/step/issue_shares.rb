@@ -85,7 +85,7 @@ module Engine
             @round.sp_issue_toggle[corp] = true
             @log << "#{corp.name} can issue at double current price (#{company.name})"
 
-            @game.reserved_share.buyable = true if @game.reserved_share
+            @game.reserved_share_for(current_entity)&.buyable = true
           end
 
           def process_sell_shares(action)

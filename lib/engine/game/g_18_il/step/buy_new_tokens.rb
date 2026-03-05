@@ -65,8 +65,8 @@ module Engine
             num = action.choice.to_i
             total = price(num)
             entity = pending_entity
-            @round.buy_tokens.shift #if num > 0
-            @game.purchase_tokens!(entity, num, total)  if num > 0
+            @round.buy_tokens.shift # if num > 0
+            @game.purchase_tokens!(entity, num, total) if num.positive?
           end
 
           def choice_available?(entity)

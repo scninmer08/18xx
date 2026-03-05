@@ -12,6 +12,11 @@ module Engine
             @train_export_triggered = false
           end
 
+          def next_entity!
+            clear_cache!
+            super
+          end
+
           def finished?
             return false unless super
 
@@ -20,7 +25,7 @@ module Engine
               @train_export_triggered = true
             end
 
-            super
+            true
           end
         end
       end
