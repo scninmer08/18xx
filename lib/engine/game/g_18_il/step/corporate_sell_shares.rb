@@ -41,8 +41,8 @@ module Engine
 
           def help
             str = []
-            if @game.rush_delivery&.owner == @round.current_operator
-              str << "#{@game.rush_delivery&.name} allows the corporation to buy one train from the Depot "\
+            if @game.company_by_id('RD')&.owner == @round.current_operator
+              str << "#{@game.company_by_id('RD')&.name} allows the corporation to buy one train from the Depot "\
                      'prior to running trains.'
             end
             str << 'If emergency money raising, corporation must first sell shares of IC.'

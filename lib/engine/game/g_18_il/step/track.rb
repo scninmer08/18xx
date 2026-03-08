@@ -21,26 +21,20 @@ module Engine
           def process_lay_tile(action)
             hex       = action.hex
             hex_name  = hex.name
-            tile_name = action.tile.name # pre-lay (what’s being placed)
+            tile_name = action.tile.name
 
-            # Block certain upgrades until IC has started
-            unless @game.ic.ipoed
-              blocked =
-                (hex_name == 'H7' && tile_name == 'K31') ||
-                (%w[G10 F17 E22].include?(hex_name) && %w[C31 C32].include?(tile_name))
-              if blocked
-                raise GameError,
-                      "Cannot upgrade tile in #{hex.location_name} (#{hex_name}) until Illinois Central has started"
-              end
+            if !@game.ic.ipoed && ic_line_upgrade_blocked?(hex_name, tile_name)
+              raise GameError,
+                    "Cannot upgrade tile in #{hex.location_name} (#{hex_name}) until Illinois Central has started"
             end
 
             lay_tile_action(action)
 
-            ic_line_tile(action) if @game.ic_line_hex?(hex)
+            @game.process_ic_line(action, beneficiary: action.entity, round: @round) if @game.ic_line_hex?(hex)
 
             # Close GTL if Chicago upgrades to brown
-            if !@game.intro_game? && tile_name == 'CHI3' && !@game.goodrich_transit_line.closed?
-              company = @game.goodrich_transit_line
+            if !@game.intro_game? && tile_name == 'CHI3' && !@game.company_by_id('GTL').closed?
+              company = @game.company_by_id('GTL')
               owner_str = company.owner ? " (#{company.owner.name})" : ''
               @log << "#{company.name}#{owner_str} closes"
               company.close!
@@ -53,7 +47,9 @@ module Engine
             'Pass (Track)'
           end
 
-          # --- override only to tweak one line in the engine's lay_tile ---
+          # Override lay_tile to include border types in terrain even when net border cost is zero.
+          # The parent only does `terrain += border_types if border.positive?`, but 18IL needs
+          # border types recorded even for zero-cost borders (e.g. rivers without a terrain cost).
           def lay_tile(action, extra_cost: 0, entity: nil, spender: nil)
             entity ||= action.entity
             entities = [entity, *action.combo_entities]
@@ -137,14 +133,11 @@ module Engine
             terrain = old_tile.terrain
             cost =
               if free
-                remove_border_calculate_cost!(tile, entity_or_entities, spender) # side effect: delete completed borders
+                remove_border_calculate_cost!(tile, entity_or_entities, spender)
                 extra_cost
               else
                 border, border_types = remove_border_calculate_cost!(tile, entity_or_entities, spender)
-
-                # >>>>> ONLY CHANGE: also add border types even if net border cost is zero
                 terrain += border_types if border.positive? || !border_types.empty?
-                # <<<<<
 
                 base_cost = @game.upgrade_cost(old_tile, hex, entity, spender) + border + extra_cost
 
@@ -167,7 +160,6 @@ module Engine
               end
             end
           end
-          # --- end override ---
 
           def can_lay_tile?(entity)
             return true if tile_lay_abilities_should_block?(entity)
@@ -186,11 +178,17 @@ module Engine
             # Forces NC to lay in its home hex first if it is not yellow
             if !@game.class::SPRINGFIELD_HEX.include?(hex.id) &&
                @game.hex_by_id(entity.coordinates).tile.color == :white &&
-               entity == @game.nc
+               entity == @game.corporation_by_id('NC')
               return nil
             end
 
             super
+          end
+
+          # Brown tiles along the IC line cannot be laid until IC has formed.
+          def ic_line_upgrade_blocked?(hex_name, tile_name)
+            @game.class::IC_LINE_CITY_HEXES.include?(hex_name) &&
+              @game.class::IC_LINE_BROWN_TILES.include?(tile_name)
           end
 
           def pay_terrain_tile_income(company, ability, terrain, entity, spender)
@@ -210,34 +208,6 @@ module Engine
             @log << "#{company.owner.name} earns #{@game.format_currency(income)} for the #{noun} built by #{company.name}"
           end
 
-          def ic_line_tile(action)
-            @game.ic_line_improvement(action)
-
-            hex = action.hex
-            tile = hex.tile
-            city = tile.cities.first
-
-            case tile.color
-            when :yellow
-              raise GameError, 'Tile must overlay at least one section of the dashed path' if @game.ic_line_connections(hex) < 1
-
-              @log << "#{action.entity.name} receives a #{@game.format_currency(20)} subsidy from the bank "\
-                      '(IC Line improvement)'
-              @game.bank.spend(20, action.entity)
-            when :green
-              raise GameError, 'Tile must complete IC Line' if @game.ic_line_connections(hex) < 2
-
-              if @round.num_laid_track > 1 && @round.laid_hexes.first.tile.color == :green &&
-                 @game.class::IC_LINE_CITY_HEXES.include?(@round.laid_hexes.first)
-                raise GameError, 'Cannot upgrade two incomplete IC Line hexes in one turn'
-              end
-
-              tile.add_reservation!(@game.ic, city) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id) &&
-                                                       !@game.ic.tokens.find { |t| t.hex == hex }
-            when :brown
-              tile.remove_reservation!(@game.ic) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id)
-            end
-          end
         end
       end
     end

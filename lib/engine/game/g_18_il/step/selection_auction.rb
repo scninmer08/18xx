@@ -7,6 +7,7 @@ module Engine
     module G18IL
       module Step
         class SelectionAuction < Engine::Step::SelectionAuction
+          SHARE_VALUE_ROUND = 5
           def setup
             @game.players.each(&:unpass!)
             @bought_shares = []
@@ -20,45 +21,6 @@ module Engine
 
               @round.next_entity_index!
             end
-          end
-
-          def tiered_auction_companies
-            return [@companies] if @companies.nil? || @companies.empty? || @game.intro_game?
-
-            concessions     = @companies.select { |c| c.meta&.[](:type) == :concession }
-            non_concessions = @companies - concessions
-
-            tiers = concessions.map do |con|
-              corp = @game.corporations.find { |co| co.name == con.sym }
-              attached = []
-              if corp
-                a = corp.companies.find { |p| p.meta&.[](:type) == :private && p.meta&.[](:class) == :A }
-                b = corp.companies.find { |p| p.meta&.[](:type) == :private && p.meta&.[](:class) == :B }
-                attached << a if a
-                attached << b if b
-              end
-              [con, *attached]
-            end
-
-            tiers << non_concessions
-
-            tiers
-          end
-
-          def max_bid(entity, _company)
-            raw = entity.cash
-            inc = @game.class::MIN_BID_INCREMENT
-            raw - (raw % inc)
-          end
-
-          def min_company
-            return nil if @companies.nil? || @companies.empty?
-
-            # concessions always start at $10 minimum
-            min_value_company = @companies.min_by(&:value)
-            min_value = [min_value_company.value, 10].min
-
-            @companies.find { |c| c.value == min_value } || min_value_company
           end
 
           def company_setup
@@ -76,17 +38,13 @@ module Engine
             corp = @game.corporations.find { |c| c.name == company.sym }
             share_count = company&.meta&.[](:share_count)
 
-            names = corp.companies.map { |c| c&.name }.compact
-            base = "Can start #{company.sym} as a #{share_count}-share corporation."
-            base += " Starts with #{names.join(' and ')}." if names.any?
-
-            holdings = nil
+            base = "Can start #{bold(company.sym)}#{corp&.coordinates ? " (#{corp.coordinates})" : ''} as a #{share_count}-share corporation."
 
             if corp && (corp.cash.positive? || corp.trains.any?)
               cash_part = corp.cash.positive? ? @game.format_currency(corp.cash) : nil
 
               if corp.trains.any?
-                items = corp.trains.map { |t| t.name.match?(/^\d$/) ? "#{t.name}-" : t.name }
+                items = corp.trains.map { |train| train.name.match?(/^\d$/) ? "#{train.name}-" : train.name }
                 if items.size == 1
                   name = items.first
                   trains_part = name.end_with?('-') ? "#{name}train" : "#{name} train"
@@ -97,10 +55,20 @@ module Engine
               end
 
               parts = [cash_part, trains_part].compact
-              holdings = "\nCorporation holdings: #{parts.join(' and ')}" unless parts.empty?
+              base += "\n\n#{bold('Corporation holdings')}: #{parts.join(' and ')}" unless parts.empty?
             end
 
-            company.desc = "#{base}#{holdings}"
+            if corp
+              a = corp.companies.find { |p| p.meta&.[](:type) == :private && p.meta&.[](:class) == :A }
+              b = corp.companies.find { |p| p.meta&.[](:type) == :private && p.meta&.[](:class) == :B }
+              if a || b
+                base += "\nStarts with:"
+                base += "\n\n#{bold(a.name.upcase)}\n#{a.desc}" if a
+                base += "\n\n#{bold(b.name.upcase)}\n#{b.desc}" if b
+              end
+            end
+
+            company.desc = base
           end
 
           def prepare_ic_shares
@@ -118,21 +86,9 @@ module Engine
           end
 
           def up_to_nearest_five(num)
-            return num if (num % 5).zero?
+            return num if (num % SHARE_VALUE_ROUND).zero?
 
             up_to_nearest_five(num + 1)
-          end
-
-          def starting_bid(company)
-            return 10 if !company || company&.meta&.[](:type) == :concession
-
-            company.min_bid
-          end
-
-          def may_bid?(company = nil)
-            return false if company.meta&.[](:type) == :private
-
-            true
           end
 
           def actions(entity)
@@ -145,37 +101,6 @@ module Engine
 
           def lots_first_turn?
             @game.lots_variant? && @game.turn == 1
-          end
-
-          def show_map
-            true
-          end
-
-          def help
-            str = []
-            return str if @auctioning && @auctioning.meta[:type] != :concession
-
-            if lots_first_turn? && !@auctioning
-              str << 'Choose one Lot to start an auction. The winner receives all four concessions in that lot; '\
-                     'the other player receives the remaining lot for free.'
-              return str
-            end
-
-            if !@game.intro_game? &&
-              @companies.any? do |c|
-                c.meta[:type] == :concession &&
-                @game.corporations.find { |corp| corp.name == c.sym }.companies.any?
-              end
-              str << [
-                "The private companies attached to each concession are shown next to the concession's card.",
-              ]
-            end
-
-            unless @auctioning
-              str << '—' unless str.empty?
-              str << 'Start an auction or decline:'
-            end
-            str
           end
 
           def description
@@ -196,6 +121,66 @@ module Engine
             end
           end
 
+          def help
+            str = []
+            return str if @auctioning && @auctioning.meta[:type] != :concession
+
+            if lots_first_turn? && !@auctioning
+              str << 'Choose one Lot to start an auction. The winner receives all four concessions in that lot; ' \
+                     'the other player receives the remaining lot for free.'
+              return str
+            end
+
+            if !@game.intro_game? &&
+              @companies.any? do |c|
+                c.meta[:type] == :concession &&
+                @game.corporations.find { |corp| corp.name == c.sym }.companies.any?
+              end
+              str << ['The attached Class A and Class B privates are described on each concession card.']
+            end
+
+            unless @auctioning
+              str << '—' unless str.empty?
+              str << 'Start an auction or decline:'
+            end
+            str
+          end
+
+          def show_map
+            true
+          end
+
+          def tiered_auction_companies
+            return [@companies] if @companies.nil? || @companies.empty? || @game.intro_game?
+
+            concessions     = @companies.select { |c| c.meta&.[](:type) == :concession }
+            non_concessions = @companies - concessions
+
+            tiers = [concessions]
+            tiers << non_concessions unless non_concessions.empty?
+
+            tiers
+          end
+
+          BOLD_MAP = {
+            'A' => '𝐀', 'B' => '𝐁', 'C' => '𝐂', 'D' => '𝐃', 'E' => '𝐄',
+            'F' => '𝐅', 'G' => '𝐆', 'H' => '𝐇', 'I' => '𝐈', 'J' => '𝐉',
+            'K' => '𝐊', 'L' => '𝐋', 'M' => '𝐌', 'N' => '𝐍', 'O' => '𝐎',
+            'P' => '𝐏', 'Q' => '𝐐', 'R' => '𝐑', 'S' => '𝐒', 'T' => '𝐓',
+            'U' => '𝐔', 'V' => '𝐕', 'W' => '𝐖', 'X' => '𝐗', 'Y' => '𝐘',
+            'Z' => '𝐙',
+            'a' => '𝐚', 'b' => '𝐛', 'c' => '𝐜', 'd' => '𝐝', 'e' => '𝐞',
+            'f' => '𝐟', 'g' => '𝐠', 'h' => '𝐡', 'i' => '𝐢', 'j' => '𝐣',
+            'k' => '𝐤', 'l' => '𝐥', 'm' => '𝐦', 'n' => '𝐧', 'o' => '𝐨',
+            'p' => '𝐩', 'q' => '𝐪', 'r' => '𝐫', 's' => '𝐬', 't' => '𝐭',
+            'u' => '𝐮', 'v' => '𝐯', 'w' => '𝐰', 'x' => '𝐱', 'y' => '𝐲',
+            'z' => '𝐳',
+          }.freeze
+
+          def bold(str)
+            str.gsub(/./) { |c| BOLD_MAP[c] || c }
+          end
+
           def process_pass(action, reason = nil)
             entity = action.entity
 
@@ -212,7 +197,7 @@ module Engine
               next_entity!
             end
 
-            return pass! if @companies.none?
+            pass! if @companies.none?
           end
 
           def next_entity!
@@ -292,8 +277,8 @@ module Engine
             lot_won.each  { |corp| assign_company(@game.company_by_id(corp.name), winner_player) }
             lot_free.each { |corp| assign_company(@game.company_by_id(corp.name), other_player) }
 
-            @log << "#{winner_player.name} wins Lot #{lot_idx + 1} and receives: #{lot_won.map(&:name).join(', ')}"
-            @log << "#{other_player.name} receives Lot #{2 - lot_idx} with: #{lot_free.map(&:name).join(', ')}"
+            @log << "#{winner_player.name} wins Lot #{lot_idx + 1} and receives: #{@game.list_with_and(lot_won.map(&:name))}"
+            @log << "#{other_player.name} receives Lot #{2 - lot_idx} with: #{@game.list_with_and(lot_free.map(&:name))}"
 
             tokens = Array(@game.lot_proxies)
             tokens.each(&:close!)
@@ -354,6 +339,34 @@ module Engine
             prepare_ic_shares if @game.ic_formation_triggered? && !@game.ic.ipo_shares.empty?
 
             @companies.sort_by! { |c| [c.meta[:type], c.meta[:share_count], c.sym] }
+          end
+
+          def may_bid?(company = nil)
+            return false if company.meta&.[](:type) == :private
+
+            true
+          end
+
+          def starting_bid(company)
+            return 10 if !company || company&.meta&.[](:type) == :concession
+
+            company.min_bid
+          end
+
+          def max_bid(entity, _company)
+            raw = entity.cash
+            inc = @game.class::MIN_BID_INCREMENT
+            raw - (raw % inc)
+          end
+
+          def min_company
+            return nil if @companies.nil? || @companies.empty?
+
+            # concessions always start at $10 minimum
+            min_value_company = @companies.min_by(&:value)
+            min_value = [min_value_company.value, 10].min
+
+            @companies.find { |c| c.value == min_value } || min_value_company
           end
         end
       end

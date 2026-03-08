@@ -14,6 +14,8 @@ module Engine
 
           def next_entity!
             clear_cache!
+            return if @entities.empty?
+
             super
           end
 

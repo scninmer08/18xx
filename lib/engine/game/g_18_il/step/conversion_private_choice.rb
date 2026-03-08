@@ -63,8 +63,10 @@ module Engine
 
           private
 
+          # Medium (5-share) corporations receive class B privates; large (10-share) receive class A.
           def private_class
-            @round.converted&.total_shares == 5 ? :B : :A
+            medium_share_count = @game.class::CORPORATION_SIZES.key(:medium)
+            @round.converted&.total_shares == medium_share_count ? :B : :A
           end
 
           def available_companies

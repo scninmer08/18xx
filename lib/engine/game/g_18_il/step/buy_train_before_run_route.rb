@@ -14,7 +14,7 @@ module Engine
             return [] if @game.last_set
             return [] if @game.will_buy_other_train
             return [] unless entity == current_entity
-            return [] unless @game.rush_delivery&.owner == entity
+            return [] unless @game.company_by_id('RD')&.owner == entity
             return [] if @round.premature_trains_bought.include?(entity)
             return [] if entity.cash < @depot.min_depot_price && entity.trains.any?
 
@@ -53,7 +53,7 @@ module Engine
           end
 
           def active_entities
-            return [] unless @game.rush_delivery&.owner == @round.current_operator
+            return [] unless @game.company_by_id('RD')&.owner == @round.current_operator
 
             [@round.current_operator]
           end
@@ -66,8 +66,8 @@ module Engine
             @round.bought_trains << action.entity if @round.respond_to?(:bought_trains)
             @round.premature_trains_bought << action.entity
 
-            @log << "#{@game.rush_delivery.name} (#{action.entity.name}) closes"
-            @game.rush_delivery.close!
+            @log << "#{@game.company_by_id('RD').name} (#{action.entity.name}) closes"
+            @game.company_by_id('RD').close!
 
             return if @game.pending_rusting_event
 
@@ -118,9 +118,8 @@ module Engine
 
             @game.buy_train(entity, train, price)
             @game.phase.buying_train!(entity, train, train.owner)
-            train.buyable = false if entity == @game.ic && !train.rusts_on
-            train.operated = false
             @game.emr_active = nil
+            do_after_buy_train_action(action, entity)
           end
 
           def buyable_trains(entity)
@@ -128,7 +127,7 @@ module Engine
           end
 
           def description
-            "Use #{@game.rush_delivery.name} ability"
+            "Use #{@game.company_by_id('RD').name} ability"
           end
 
           def can_buy_train?(entity)
@@ -138,16 +137,17 @@ module Engine
           end
 
           def help
-            "#{@game.rush_delivery&.name} allows the corporation to buy one train from the Depot prior to running trains:"
+            "#{@game.company_by_id('RD')&.name} allows the corporation to buy one train from the Depot prior to running trains:"
           end
 
           def ability(entity)
-            return if !@game.rush_delivery || !entity || @game.rush_delivery&.owner != entity
+            return if !@game.company_by_id('RD') || !entity || @game.company_by_id('RD')&.owner != entity
 
-            @game.abilities(@game.rush_delivery, :train_buy)
+            @game.abilities(@game.company_by_id('RD'), :train_buy)
           end
 
-          def do_after_buy_train_action(action, _entity)
+          def do_after_buy_train_action(action, entity)
+            action.train.buyable = false if entity == @game.ic && !action.train.rusts_on
             action.train.operated = false
           end
         end

@@ -97,7 +97,7 @@ module Engine
             super
             return if @game.intro_game?
 
-            company = @game.train_subsidy
+            company = @game.company_by_id('TS')
             return if company.ability_uses.first == 99
 
             @log << "#{company.name} (#{@round.current_operator.name}) closes" unless company.closed?
@@ -251,7 +251,10 @@ module Engine
             @game.buy_train(entity, train, price)
             @game.phase.buying_train!(entity, train, train.owner)
             @game.emr_active = nil
+            do_after_buy_train_action(action, entity)
           end
+
+          def do_after_buy_train_action(_action, _entity); end
 
           def swap_sell(_player, _corporation, _bundle, _pool_share); end
 

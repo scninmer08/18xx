@@ -49,39 +49,11 @@ module Engine
               lay_tile(action, spender: owner)
 
               hex = action.hex
-              tile = action.hex.tile
-              city = tile.cities.first
-              if @game.ic_line_hex?(hex)
-                @game.ic_line_improvement(action)
-                case tile.color
-                when :yellow
-                  # checks for one IC Line connection when laying yellow
-                  raise GameError, 'Tile must overlay at least one dashed path' if @game.ic_line_connections(hex) < 1
-
-                  @log << "#{action.entity.owner.name} receives a #{@game.format_currency(20)} subsidy from the bank "\
-                          '(IC Line improvement)'
-                  @game.bank.spend(20, action.entity.owner)
-                when :green
-                  # checks for both IC Line connections when laying green
-                  raise GameError, 'Tile must complete IC Line' if @game.ic_line_connections(hex) < 2
-
-                  # disallows Engineering Master corp from upgrading two incomplete IC Line hexes
-                  if @round.num_laid_track > 1 && @round.laid_hexes.first.tile.color == :green &&
-                    @game.class::IC_LINE_CITY_HEXES.include?(@round.laid_hexes.first)
-                    raise GameError, 'Cannot upgrade two incomplete IC Line hexes in one turn'
-                  end
-
-                  # adds reservation to IC Line hex when new tile is green city
-                  tile.add_reservation!(@game.ic, city) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id)
-
-                when :brown
-                  tile.remove_reservation!(@game.ic) if @game.class::IC_LINE_CITY_HEXES.include?(hex.id)
-                end
-              end
+              @game.process_ic_line(action, beneficiary: action.entity.owner, round: @round) if @game.ic_line_hex?(hex)
 
               # closes GTL if Chicago is upgraded to brown
-              if !@game.intro_game? && tile.name == 'CHI3' && !@game.goodrich_transit_line.closed?
-                company = @game.goodrich_transit_line
+              if !@game.intro_game? && tile.name == 'CHI3' && !@game.company_by_id('GTL').closed?
+                company = @game.company_by_id('GTL')
                 owner_str = company.owner ? " (#{company.owner.name})" : ''
                 @log << "#{company.name}#{owner_str} closes"
                 company.close!

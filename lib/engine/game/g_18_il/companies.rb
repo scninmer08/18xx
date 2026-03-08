@@ -7,8 +7,6 @@ module Engine
   module Game
     module G18IL
       module Companies
-        MINES = %w[D9 D17 E6 E14 E16 F5 F13 F21 G22 H11].freeze
-
         def game_companies
           companies = [
             {
@@ -52,7 +50,7 @@ module Engine
               meta: { type: :concession, share_count: 5 },
             },
             {
-              name: 'Chicago, Burlington, & Quincy',
+              name: 'Chicago, Burlington & Quincy',
               sym: 'CBQ',
               value: 10,
               revenue: 0,
@@ -177,8 +175,8 @@ module Engine
               name: 'U.S. Mail Line',
               value: 0,
               revenue: 0,
-              desc: 'The corporation receives a $10 subsidy for each city it visits while '\
-                    'running trains. Cities count multiple times if visited by multiple trains.',
+              desc: 'The owning corporation receives a $10 subsidy per city visited by its trains. '\
+                    'Each city is counted only once, regardless of how many trains visit it.',
               sym: 'USML',
               meta: { type: :private, class: :A },
               abilities: [
@@ -196,19 +194,11 @@ module Engine
               abilities: [
                 {
                   type: 'train_discount',
-                  discount: {
-                    '2' => 0.25,
-                    '3' => 0.25,
-                    '4' => 0.25,
-                    '0+3C' => 0.25,
-                    '4+2C' => 0.25,
-                    '5+1C' => 0.25,
-                    '6' => 0.25,
-                    'D' => 0.25,
-                  },
+                  discount: 0.25,
                   owner_type: 'corporation',
                   use_across_ors: false,
-                  trains: %w[2 3 4 0+3C 4+2C 5+1C 6 D],
+                  trains: self.class::TRAINS.reject { |t| t[:reserved] }
+                             .flat_map { |t| [t[:name]] + (t[:variants]&.map { |v| v[:name] } || []) },
                   count: 99,
                   closed_when_used_up: true,
                   when: 'buy_train',
@@ -261,7 +251,7 @@ module Engine
                   type: 'token',
                   when: %w[owning_corp_or_turn],
                   owner_type: 'corporation',
-                  hexes: ['H3'],
+                  hexes: self.class::CHICAGO_HEX,
                   city: 2,
                   price: 0,
                   teleport_price: 0,
@@ -270,7 +260,7 @@ module Engine
                   extra_action: true,
                   closed_when_used_up: true,
                 },
-                { type: 'reservation', remove: 'sold', hex: 'H3', city: 1 },
+                { type: 'reservation', remove: 'sold', hex: self.class::CHICAGO_HEX.first, city: 1 },
               ],
             },
             {
@@ -278,8 +268,8 @@ module Engine
               value: 0,
               revenue: 0,
               desc: "During the corporation's token placement step, it may close this company to place a token in any connected "\
-                    'city except Chicago (H3) or St. Louis (C18). This token is non-blocking and does not use a city '\
-                    'slot. This counts as its token placement for the turn.',
+                    'city except Chicago (H3), St. Louis (C18), or IC-Line cities (H7, G10, F17, E22). This token is '\
+                    'non-blocking and does not use a city slot. This counts as its token placement for the turn.',
               sym: 'USY',
               meta: { type: :private, class: :A },
               abilities: [
@@ -294,7 +284,7 @@ module Engine
                   closed_when_used_up: true,
                   price: 0,
                   count: 1,
-                  hexes: %w[B11 C6 C8 D15 E2 E8 E12 F3 F9 F11 G4 G6 G16 H21 I6],
+                  hexes: self.class::USY_CITY_HEXES,
                 },
               ],
             },
@@ -323,7 +313,7 @@ module Engine
                 {
                   type: 'tile_lay',
                   tiles: %w[838],
-                  hexes: MINES,
+                  hexes: self.class::CVCC_TOWN_HEXES,
                   when: 'track',
                   owner_type: 'corporation',
                   count: 1,
@@ -339,7 +329,7 @@ module Engine
               revenue: 0,
               desc: 'When a rusting event occurs, the corporation may close this company to delay the rusting of one of '\
                     'its trains. The train is removed from play at the end of its next “Run Trains” step.',
-              sym: 'DC',
+              sym: 'PO',
               meta: { type: :private, class: :B },
             },
             {
@@ -356,8 +346,8 @@ module Engine
                 {
                   type: 'tile_lay',
                   blocks: true,
-                  tiles: %w[P4 S4],
-                  hexes: %w[E8 E12],
+                  tiles: self.class::BOOM_TILES,
+                  hexes: self.class::BOOM_HEXES,
                   when: 'track',
                   owner_type: 'corporation',
                   count: 1,
@@ -369,7 +359,7 @@ module Engine
               ],
             },
             {
-              name: 'Frink, Walker, & Co.',
+              name: 'Frink, Walker & Co.',
               value: 0,
               revenue: 0,
               desc: "During the corporation's tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, "\

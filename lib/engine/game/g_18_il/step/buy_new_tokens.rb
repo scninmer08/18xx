@@ -80,20 +80,19 @@ module Engine
           end
 
           def price(num)
-            return 0 if num.zero? || (!@game.intro_game? && pending_entity == @game.station_subsidy.owner)
+            return 0 if num.zero? || (!@game.intro_game? && pending_entity == @game.company_by_id('SS').owner)
 
             pending_first_price + ((num - 1) * pending_price)
           end
 
           def choices
-            Array.new(pending_max - pending_min + 1) do |i|
-              num = i + pending_min
+            (pending_min..pending_max).each_with_object({}) do |num, hash|
               total = price(num)
               next if (num > pending_min) && (total > pending_corp.cash)
 
               emr = total > pending_corp.cash ? ' - EMR' : ''
-              [num, "#{num} (#{@game.format_currency(total)}#{emr})"]
-            end.compact.to_h
+              hash[num] = "#{num} (#{@game.format_currency(total)}#{emr})"
+            end
           end
 
           def visible_corporations

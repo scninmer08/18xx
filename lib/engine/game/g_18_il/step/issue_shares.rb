@@ -26,7 +26,7 @@ module Engine
             return [] if @game.last_set
 
             if entity.company? &&
-               entity == @game.share_premium &&
+               entity == @game.company_by_id('SP') &&
                entity.owner == current_entity &&
                issuable_share_available(current_entity) &&
                !@game.intro_game? &&
@@ -65,7 +65,7 @@ module Engine
           end
 
           def choices_ability(company)
-            return {} unless company == @game.share_premium
+            return {} unless company == @game.company_by_id('SP')
 
             corp = current_entity
             return {} if @round.sp_issue_toggle[corp]
@@ -78,7 +78,7 @@ module Engine
 
           def process_choose_ability(action)
             company = action.entity
-            return unless company == @game.share_premium
+            return unless company == @game.company_by_id('SP')
             return unless action.choice == 'sp_on'
 
             corp = current_entity
@@ -103,7 +103,7 @@ module Engine
                     "#{@game.format_currency(old_price)} to #{@game.format_currency(new_price)}"
 
             if @round.sp_issue_toggle[corp]
-              if (sp = @game.share_premium)&.owner == corp
+              if (sp = @game.company_by_id('SP'))&.owner == corp
                 sp.close!
                 @log << "#{sp.name} (#{corp.name}) closes"
               end

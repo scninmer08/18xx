@@ -48,15 +48,15 @@ module Engine
         def game_hexes
           {
             white: {
-              RADIUS2 => 'upgrade=cost:240,terrain:mountain;',
-              RADIUS3 => 'upgrade=cost:240,terrain:mountain;',
-              RADIUS4 => 'upgrade=cost:120,terrain:mountain;',
-              RADIUS5 => 'upgrade=cost:120,terrain:mountain;',
-              RADIUS6 => 'upgrade=cost:60,terrain:mountain;',
-              RADIUS7 => 'upgrade=cost:60,terrain:mountain;',
-              RADIUS8 => 'upgrade=cost:60,terrain:mountain;',
-              RADIUS9 => 'upgrade=cost:60,terrain:mountain;',
-              SINGLE_SLOT_CITIES => 'city=revenue:0;upgrade=cost:240,terrain:mountain;',
+              RADIUS2 => 'frame=color:#F57C00;upgrade=cost:240,terrain:mountain;',
+              RADIUS3 => 'frame=color:#FB8C00;upgrade=cost:240,terrain:mountain;',
+              RADIUS4 => 'frame=color:#FF9800;upgrade=cost:120,terrain:mountain;',
+              RADIUS5 => 'frame=color:#FFA726;upgrade=cost:120,terrain:mountain;',
+              RADIUS6 => 'frame=color:#FFB74D;upgrade=cost:60,terrain:mountain;',
+              RADIUS7 => 'frame=color:#FFCC80;upgrade=cost:60,terrain:mountain;',
+              RADIUS8 => 'frame=color:#FFE0B2;upgrade=cost:60,terrain:mountain;',
+              RADIUS9 => 'frame=color:#FFF3E0;upgrade=cost:60,terrain:mountain;',
+              SINGLE_SLOT_CITIES => 'city=revenue:0;frame=color:#F57C00;upgrade=cost:240,terrain:mountain;',
               ['J13'] => 'frame=color:brown,color2:gray;' \
                          'partition=a:2.5,b:5.5,type:split;' \
                          'icon=image:mine,name:steel,sticky:1,loc:2.5;' \

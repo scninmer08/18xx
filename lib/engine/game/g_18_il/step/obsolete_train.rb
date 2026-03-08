@@ -29,12 +29,7 @@ module Engine
 
           def choices
             train = trains_rusting_for(po.owner, purchased_train).first
-            name = train.name
-
-            # If the name is only digits (e.g. "2" or "3"), format as "2-Train"
-            display = name.match?(/^\d+$/) ? "#{name}-Train" : "#{name} Train"
-
-            [display]
+            [format_train_name(train.name, capitalize: true)]
           end
 
           def active_entities
@@ -46,7 +41,7 @@ module Engine
           end
 
           def po
-            @po ||= @game.planned_obsolescence
+            @po ||= @game.company_by_id('PO')
           end
 
           def purchased_train
@@ -59,8 +54,7 @@ module Engine
 
           def process_choose(action)
             train = trains_rusting_for(po.owner, purchased_train).first
-            train_name = train.name.match?(/^\d+$/) ? "#{train.name}-train" : "#{train.name} train"
-            @log << "#{action.entity.name} chooses to use #{po.name} to prevent a #{train_name} " \
+            @log << "#{action.entity.name} chooses to use #{po.name} to prevent a #{format_train_name(train.name)} " \
                     'from rusting. It becomes obsolete instead'
             train.obsolete_on = purchased_train.sym
             train.rusts_on = nil
@@ -76,6 +70,11 @@ module Engine
 
           def log_pass(entity)
             @log << "#{entity.name} declines to use #{po.name}"
+          end
+
+          def format_train_name(name, capitalize: false)
+            word = capitalize ? 'Train' : 'train'
+            name.match?(/^\d+$/) ? "#{name}-#{word}" : "#{name} #{word}"
           end
 
           def trigger_rusting_event

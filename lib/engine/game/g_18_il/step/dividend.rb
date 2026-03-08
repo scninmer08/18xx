@@ -78,9 +78,8 @@ module Engine
             revenue = total_revenue / 2 if @game.train_borrowed
             dividend_types.to_h do |type|
               payout = send(type, entity, revenue)
-              payout[:divs_to_corporation] = corporation_dividends(entity, payout[:per_share])
-              # shares remaining in concession auction do not pay to IC
-              payout[:divs_to_corporation] = 0 if entity == @game.ic
+              # Shares remaining in concession auction do not pay dividends to IC
+              payout[:divs_to_corporation] = entity == @game.ic ? 0 : corporation_dividends(entity, payout[:per_share])
               [type, payout.merge(share_price_change(entity, revenue - payout[:corporation]))]
             end
           end
