@@ -15,7 +15,7 @@ module Engine
             return [] unless active?
             return [] unless entity == current_entity
 
-            %w[acquire_company choose]
+            %w[acquire_company pass]
           end
 
           def choices
@@ -49,10 +49,29 @@ module Engine
           def process_acquire_company(action)
             corp = @round.converted
             company = action.company
+            raise GameError, "Cannot acquire #{company.name}" unless available_companies.include?(company)
+
+            from_development_pool = company.owner.nil?
+
+            unless from_development_pool
+              president = corp.owner
+              president.companies.delete(company) if president.is_a?(Engine::Player)
+            end
+
             company.owner = corp
+            @game.update_private_name!(company)
             corp.companies << company
-            @log << "#{corp.name} receives #{company.name} (Class #{private_class})"
+            @log << if from_development_pool
+                      "#{corp.name} acquires #{company.name} (Class #{private_class}) from the development pool"
+                    else
+                      "#{corp.name} receives #{company.name} (Class #{private_class}) from its president"
+                    end
             @chosen_for << corp
+          end
+
+          def process_pass(action)
+            @log << "#{action.entity.name} declines to assign a private company"
+            @chosen_for << @round.converted
           end
 
           def companies_to_display
@@ -72,7 +91,10 @@ module Engine
           def available_companies
             return [] unless @round.converted
 
-            @game.companies.select { |c| c.meta[:class] == private_class && c.owner.nil? }
+            corp = @round.converted
+            president = corp.owner
+            @game.eligible_private_acquisitions(corp, president)
+              .select { |company| company.meta[:class] == private_class }
           end
         end
       end

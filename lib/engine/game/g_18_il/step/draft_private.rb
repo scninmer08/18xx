@@ -37,7 +37,11 @@ module Engine
             r_str = "#{remaining} #{remaining == 1 ? 'private' : 'privates'}"
             ["#{player.name} has drafted #{a_str} and #{b_str}. " \
              "#{r_str} remaining in the pool. " \
-             'Each player may draft no more than 4 of each class.']
+             "Each player may draft no more than #{draft_cap} of each class."]
+          end
+
+          def draft_cap
+            4
           end
 
           def process_bid(action)
@@ -48,18 +52,19 @@ module Engine
 
             cls = company.meta[:class]
             already = player.companies.count { |c| c.meta[:type] == :private && c.meta[:class] == cls }
-            raise GameError, "#{player.name} already has 4 Class #{cls} privates" if already >= 4
+            raise GameError, "#{player.name} already has #{draft_cap} Class #{cls} privates" if already >= draft_cap
 
             company.owner = player
             player.companies << company
             @available.delete(company)
 
             @log << "#{player.name} drafts #{company.name} (Class #{company.meta[:class]})"
+            @game.update_private_name!(company)
 
-            if @available.empty?
+            if draft_complete?
               pass!
             else
-              @round.next_entity_index!
+              next_drafter!
             end
           end
 
@@ -71,7 +76,7 @@ module Engine
             return [] unless player
 
             @available.reject do |company|
-              player.companies.count { |c| c.meta[:type] == :private && c.meta[:class] == company.meta[:class] } >= 4
+              player.companies.count { |c| c.meta[:type] == :private && c.meta[:class] == company.meta[:class] } >= draft_cap
             end
           end
 
@@ -111,6 +116,23 @@ module Engine
 
           def min_bid(_company)
             0
+          end
+
+          private
+
+          def draft_complete?
+            @game.players.all? do |player|
+              %i[A B].all? do |cls|
+                player.companies.count { |c| c.meta[:type] == :private && c.meta[:class] == cls } >= draft_cap
+              end
+            end
+          end
+
+          def next_drafter!
+            loop do
+              @round.next_entity_index!
+              break unless available_for(current_entity).empty?
+            end
           end
         end
       end

@@ -32,6 +32,7 @@ module Engine
           def process_run_routes(action)
             super
             @game.pay_fwc_bonus!(@round.routes, action.entity) unless @game.intro_game?
+            @game.rust_rogers! if action.routes.any? { |route| route.train.name == @game.class::ROGERS_NAME }
           end
 
           def scrap_button_text(_train)

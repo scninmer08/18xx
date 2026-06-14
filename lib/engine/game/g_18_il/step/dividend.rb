@@ -69,7 +69,8 @@ module Engine
 
             @game.log << "#{current_entity.name} returns a #{borrowed_train.name} train"
             @game.remove_train(borrowed_train)
-            @game.depot.unshift_train(borrowed_train)
+            @game.depot.trains.delete(borrowed_train)
+            @game.depot.insert_train(borrowed_train)
             @game.borrowed_trains[current_entity] = nil
           end
 
@@ -78,7 +79,7 @@ module Engine
             revenue = total_revenue / 2 if @game.train_borrowed
             dividend_types.to_h do |type|
               payout = send(type, entity, revenue)
-              # Shares remaining in concession auction do not pay dividends to IC
+              # Shares remaining in the auction pool do not pay dividends to IC
               payout[:divs_to_corporation] = entity == @game.ic ? 0 : corporation_dividends(entity, payout[:per_share])
               [type, payout.merge(share_price_change(entity, revenue - payout[:corporation]))]
             end
@@ -94,7 +95,7 @@ module Engine
 
             payouts = {}
             (@game.players + @game.corporations).each do |payee|
-              # shares remaining in concession auction do not pay to IC
+              # Shares remaining in the auction pool do not pay to IC
               next if payee == @game.ic && entity == @game.ic
 
               payout_entity(entity, payee, per_share, payouts)

@@ -30,8 +30,7 @@ module Engine
                       :emr_active, :pending_rusting_event
 
         attr_reader :stl_nodes, :exchange_choice_corps, :borrowed_trains, :closed_corporations,
-                    :last_set_pending, :lots, :lot_proxies, :merged_corporation, :last_set,
-                    :insolvent_corporations, :ic_trigger_entity
+                    :last_set_pending, :merged_corporation, :last_set, :insolvent_corporations, :ic_trigger_entity
 
         TRACK_RESTRICTION = :permissive
         SELL_BUY_ORDER = :sell_buy
@@ -177,8 +176,8 @@ module Engine
         )
         STOCK_PURCHASE_ABILITY = Ability::Description.new(
           type: 'description',
-          description: 'Treasury shares available in CRs',
-          desc_detail: 'IC treasury shares are only available during concession rounds.'
+          description: 'Treasury shares available in ARs',
+          desc_detail: 'IC treasury shares are only available during auction rounds.'
         )
         FORMATION_ABILITY = Ability::Description.new(
           type: 'description',
@@ -197,16 +196,19 @@ module Engine
           @round =
             case @round
             when G18IL::Round::Draft
-              new_assignment_round
-            when G18IL::Round::Assignment
-              init_round_finished
-              new_stock_round
+              if full_draft_variant?
+                init_round_finished
+                new_stock_round
+              else
+                log_development_pool_privates!
+                new_auction_round
+              end
             when Engine::Round::Auction
               clear_programmed_actions
-              reorder_players(:least_cash, log_player_order: true)
               new_stock_round
             when Engine::Round::Stock
               @operating_rounds = @final_operating_rounds || @phase.operating_rounds
+              reorder_players
               new_operating_round
             when Engine::Round::Operating
               or_round_finished
@@ -215,12 +217,12 @@ module Engine
               else
                 @turn += 1
                 or_set_finished
-                new_concession_round
+                new_auction_round
               end
             end
         end
 
-        def concession_round
+        def auction_round
           G18IL::Round::Auction.new(self, [
              G18IL::Step::SelectionAuction,
           ])
@@ -229,6 +231,7 @@ module Engine
         def stock_round
           G18IL::Round::Stock.new(self, [
             G18IL::Step::HomeToken,
+            G18IL::Step::AssignPrivateOnPar,
             G18IL::Step::BuyNewTokens,
             G18IL::Step::BaseBuySellParShares,
           ])
@@ -293,22 +296,35 @@ module Engine
         end
 
         def init_round
-          two_player_draft? ? new_draft_round : new_concession_round
+          if full_draft_variant?
+            new_full_draft_round
+          elsif draft_variant?
+            new_general_draft_round
+          else
+            new_auction_round
+          end
         end
 
-        def new_draft_round
+        def new_general_draft_round
           @log << '-- Private Draft --'
-          G18IL::Round::Draft.new(self, [G18IL::Step::DraftPrivate])
+          G18IL::Round::Draft.new(self, [G18IL::Step::GeneralDraftPrivate])
         end
 
-        def new_assignment_round
-          @log << '-- Private Assignment --'
-          G18IL::Round::Assignment.new(self, [G18IL::Step::AssignPrivate])
+        def new_full_draft_round
+          @log << '-- Full Draft --'
+          G18IL::Round::Draft.new(self, [G18IL::Step::FullDraft])
         end
 
-        def new_concession_round
-          @log << "-- Concession Round #{@turn} --"
-          concession_round
+        def log_development_pool_privates!
+          privates = development_pool_privates
+          return if privates.empty?
+
+          @log << "Privates placed in the development pool: #{list_with_and(privates.map(&:name))}"
+        end
+
+        def new_auction_round
+          @log << "-- Auction Round #{@turn} --"
+          auction_round
         end
 
         def entity_can_use_company?(_entity, company)
@@ -317,6 +333,9 @@ module Engine
 
           # No abilities usable during IC formation
           return false if ic_formation_pending?
+
+          # No abilities usable during the post-conversion share transaction.
+          return false if step.is_a?(G18IL::Step::PostConversionShares)
 
           # Central IL Boom only available in gray phase
           return false if company.sym == 'CIB' && !phase.tiles.include?(:gray)
@@ -408,15 +427,44 @@ module Engine
             next unless c&.owner&.player?
 
             player = c.owner
+            restore_closed_concession_privates!(corporation_by_id(c.sym))
             player.companies.delete(c)
             c.owner = nil
             @log << "The #{c.sym} concession has not been used by #{player.name} and has been returned"
           end
         end
 
+        def update_private_name!(company)
+          return unless company.meta[:type] == :private
+
+          company.name = company.name.sub(/ \([AB]\)\z/, '')
+          company.name += " (#{company.meta[:class]})" if company.owner&.player?
+        end
+
+        def restore_closed_concession_privates!(corporation)
+          privates = @closed_concession_privates.delete(corporation) || []
+          privates.each do |private_company|
+            private_company.owner&.companies&.delete(private_company)
+            private_company.owner = corporation
+            update_private_name!(private_company)
+            corporation.companies << private_company
+          end
+        end
+
         def finish_stock_round
+          remove_unstarted_rogers! if @turn == 1
           return_concessions!
           assign_ic_operator! if ic_in_receivership? && ic_formation_triggered?
+        end
+
+        def remove_unstarted_rogers!
+          nc = corporation_by_id('NC')
+          return if nc.ipoed
+          return unless (train = nc.trains.find { |t| t.name == ROGERS_NAME })
+
+          @log << "NC was not started during the first stock round; the #{ROGERS_NAME} train is removed from the game"
+          remove_train(train)
+          train.owner = nil
         end
 
         def initial_auction_companies
@@ -425,6 +473,7 @@ module Engine
 
         def company_status_str(company)
           return if company.owner
+          return 'Development Pool' if development_pool_privates.include?(company)
 
           nil unless company.meta[:type] == :concession
         end
@@ -436,9 +485,18 @@ module Engine
           super
         end
 
-        def company_header(company)
-          return 'CONCESSION LOT' if lots_variant? && @turn == 1
+        def buyable_bank_owned_companies
+          entry = @round.respond_to?(:assign_privates_on_par) && @round.assign_privates_on_par.first
+          return super unless entry
 
+          player = entry[:player]
+          corp   = entry[:corp]
+          return super unless corp && player
+
+          eligible_private_acquisitions(corp, player)
+        end
+
+        def company_header(company)
           case company.meta[:type]
           when :share then 'ORDINARY SHARE'
           when :presidents_share then "PRESIDENT'S SHARE"
@@ -516,12 +574,7 @@ module Engine
           create_blocking_corp
 
           # Set up corporations for intro game or regular game setup
-          initial_auction_lot if !intro_game? && !two_player_draft?
-          if two_player_draft?
-            setup_lots_draft
-          elsif lots_variant?
-            setup_lots
-          end
+          initial_auction_pool_setup if !intro_game? && !draft_variant? && !full_draft_variant?
         end
 
         # Create the corporation that places blocking tokens in St. Louis
@@ -542,30 +595,70 @@ module Engine
           end
         end
 
-        def fixed_setup?
-          optional_rules&.include?(:fixed_setup)
-        end
-
         def intro_game?
           optional_rules&.include?(:intro_game)
         end
 
-        def lots_variant?
-          optional_rules&.include?(:lots_variant) && two_player?
+        def full_draft_variant?
+          optional_rules&.include?(:full_draft_variant)
         end
 
-        def two_player_draft?
-          optional_rules&.include?(:two_player_draft) && two_player?
+        def private_assignment_on_par?
+          !intro_game?
         end
 
-        # Set up corporations for auction lot formation in the regular game
-        def initial_auction_lot
+        def privates_in_auction_pool?
+          !intro_game? && ic_formation_triggered?
+        end
+
+        def development_pool_privates
+          return [] if intro_game? || ic_formation_triggered?
+
+          @companies.select do |company|
+            company.meta[:type] == :private && company.owner.nil? && !company.closed?
+          end
+        end
+
+        def eligible_private_acquisitions(corp, player)
+          return [] unless corp && corp.total_shares > 2
+
+          assigned_classes = corp.companies
+            .select { |company| company.meta[:type] == :private }
+            .map { |company| company.meta[:class] }
+
+          player_classes = (corp.total_shares == 5 ? %i[B] : %i[A B]) - assigned_classes
+          player_privates =
+            if player.is_a?(Engine::Player)
+              player.companies.select do |company|
+                company.meta[:type] == :private && player_classes.include?(company.meta[:class])
+              end
+            else
+              []
+            end
+
+          development_class = corp.total_shares == 5 ? :B : :A
+          development_privates =
+            if assigned_classes.include?(development_class)
+              []
+            else
+              development_pool_privates.select { |company| company.meta[:class] == development_class }
+            end
+
+          player_privates + development_privates
+        end
+
+        def draft_variant?
+          optional_rules&.include?(:draft_variant)
+        end
+
+        # Attach the regular-game privates before the first auction round.
+        def initial_auction_pool_setup
           class_a = @companies.select { |c| c.meta[:class] == :A }
           class_b = @companies.select { |c| c.meta[:class] == :B }
-          class_a = class_a.sort_by { rand } unless fixed_setup?
-          class_b = class_b.sort_by { rand } unless fixed_setup?
+          class_a = class_a.sort_by { rand }
+          class_b = class_b.sort_by { rand }
 
-          @log << '-- Auction Lot Formation --'
+          @log << '-- Auction Pool Formation --'
 
           floatable = @corporations.select(&:floatable)
           ten_share_corps = floatable.select { |c| c.type == :ten_share }
@@ -591,76 +684,8 @@ module Engine
             corp.companies << company_b
             @log << "#{company_b.name} assigned to #{corp.name} concession"
           end
-        end
 
-        def setup_lots
-          @log << '-- Lots Formation --'
-
-          bucket = @corporations.select(&:floatable).group_by(&:total_shares)
-
-          # Always randomize corp order for lot formation (independent of fixed_setup)
-          ten_shares  = bucket[10].sort_by { rand }
-          five_shares = bucket[5].sort_by { rand }
-          two_shares  = bucket[2].sort_by { rand }
-
-          @lots = Array.new(2) do
-            [ten_shares.shift, five_shares.shift, five_shares.shift, two_shares.shift].compact
-          end
-
-          @lots.each_with_index do |lot, idx|
-            names = list_with_and(lot.map(&:name))
-            @log << "#{names} concessions are assigned to Lot #{idx + 1}"
-          end
-          @lot_proxies = [make_lot_company(0), make_lot_company(1)]
-          @companies |= @lot_proxies
-        end
-
-        def setup_lots_draft
-          @log << '-- Draft Variant: Lot Formation --'
-
-          bucket = @corporations.select(&:floatable).group_by(&:total_shares)
-
-          ten_shares  = bucket[10].sort_by { rand }
-          five_shares = bucket[5].sort_by { rand }
-          two_shares  = bucket[2].sort_by { rand }
-
-          @lots = Array.new(2) do
-            [ten_shares.shift, five_shares.shift, five_shares.shift, two_shares.shift].compact
-          end
-
-          @lots.each_with_index do |lot, idx|
-            names = list_with_and(lot.map(&:name))
-            @log << "Lot #{idx + 1}: #{names}"
-          end
-
-          # Randomly assign lots to players
-          ordered_lots = @lots.sort_by { rand }
-          @players.each_with_index do |player, idx|
-            lot = ordered_lots[idx]
-            lot.each do |corp|
-              concession = @companies.find { |c| c.sym == corp.name }
-              concession.owner = player
-              player.companies << concession
-            end
-            names = list_with_and(lot.map(&:name))
-            @log << "#{player.name} is randomly assigned: #{names}"
-          end
-        end
-
-        def make_lot_company(idx)
-          names = list_with_and(@lots[idx].map(&:name))
-
-          Engine::Company.new(
-            sym: "BL#{idx + 1}",
-            name: "Lot #{idx + 1}",
-            value: 10,
-            revenue: 0,
-            desc: "Contains #{names}",
-            color: '#333333',
-            text_color: 'white',
-            abilities: [],
-            meta: { type: :lot, lot_index: idx },
-          )
+          log_development_pool_privates!
         end
 
         def list_with_and(array)
@@ -710,6 +735,7 @@ module Engine
           @merged_corps = []
           @ic_trigger_entity = nil
           @emr_active = nil
+          @closed_concession_privates = {}
           @option_cubes ||= Hash.new(0)
           @ic_line_completed_hexes = []
           @operated_mergees = []
@@ -937,7 +963,11 @@ module Engine
           corporation.unfloat!
 
           # sell owned shares of IC to market
-          @bank.spend(corporation.shares_of(ic).size * ic.share_price.price, corporation) if corporation.shares_of(ic)&.any?
+          ic_shares = corporation.shares_of(ic)
+          if ic_shares&.any?
+            @bank.spend(ic_shares.size * ic.share_price.price, corporation)
+            @share_pool.transfer_shares(ShareBundle.new(ic_shares), @share_pool)
+          end
 
           @corporations.each do |c|
             next if c == corporation
@@ -994,6 +1024,17 @@ module Engine
           president.companies << company
           @companies << company
           @companies = @companies.sort
+
+          open_privates = corporation.companies.select do |private_company|
+            private_company.meta[:type] == :private && !private_company.closed?
+          end
+          open_privates.each do |private_company|
+            corporation.companies.delete(private_company)
+            private_company.owner = president
+            update_private_name!(private_company)
+            president.companies << private_company
+          end
+          @closed_concession_privates[corporation] = open_privates
 
           close_corporations_in_close_cell!
         end
@@ -1161,6 +1202,7 @@ module Engine
             'opportunity to merge',
             'IC places tokens, adjusts its share price, and buys the first-available train',
             'It operates in the current OR if no mergers occured or no merged corporation had operated',
+            'All private companies in the development pool move to the auction pool',
             sep,
             "The 'Rogers' train runs between Springfield and Jacksonville and rusts immediately after running",
             'An x+yC train may visit x red areas or cities, plus y additional cities that earn double revenue. ' \
@@ -1174,12 +1216,6 @@ module Engine
           if !intro_game? && corporation == company_by_id('SS').owner
             @log << "#{corporation.name} uses #{company_by_id('SS').name} and buys " \
                     "#{count} #{count == 1 ? 'token' : 'tokens'} for #{format_currency(total_cost)}"
-            token_ability = corporation.all_abilities.find { |a| a.desc_detail == 'Station Subsidy' }
-            count.times { token_ability.use! }
-            unless token_ability.any?
-              company_by_id('SS').close!
-              @log << "#{company_by_id('SS').name} (#{corporation.name}) closes"
-            end
           else
             corporation.spend(total_cost, @bank)
             unless quiet
@@ -1273,6 +1309,7 @@ module Engine
         end
 
         def emergency_issuable_bundles(entity)
+          return [] if entity == ic
           return [] unless entity.cash < @depot.min_depot_price
           return [] unless entity.corporation?
           return [] if entity.num_ipo_shares.zero?
@@ -1319,6 +1356,14 @@ module Engine
           owner = train.owner
           @log << "#{owner.name} scraps a #{train.name} train"
           @depot.reclaim_train(train)
+        end
+
+        def rust_rogers!
+          train = corporation_by_id('NC').trains.find { |t| t.name == ROGERS_NAME }
+          return unless train
+
+          @log << "The #{ROGERS_NAME} train rusts after running"
+          rust(train)
         end
 
         def city_tokened_by?(city, entity)
@@ -1487,6 +1532,16 @@ module Engine
           raise GameError, 'Corporation must own a port marker to visit a port'
         end
 
+        def check_other(route)
+          multiple_cities = route.visited_stops
+                                 .select(&:city?)
+                                 .group_by(&:hex)
+                                 .any? { |_hex, cities| cities.size > 1 }
+          return unless multiple_cities
+
+          raise GameError, 'Train cannot visit multiple cities in the same hex'
+        end
+
         def check_distance(route, visits)
           # checks STL for permit token
           check_stl(visits)
@@ -1582,7 +1637,7 @@ module Engine
         end
 
         def round_description(name, round_number = nil)
-          return 'Concession Round' if name == 'Auction'
+          return 'Auction Round' if name == 'Auction'
 
           super
         end
@@ -1631,22 +1686,6 @@ module Engine
           # no one owns IC if in receivership
           ic.owner = nil if ic_in_receivership?
 
-          # convert unstarted corporations at the appropriate time.
-          if %w[4A 4B 5 6 D].include?(@phase.name)
-            @corporations.each do |c|
-              # Convert only if not floated and not closed
-              if !c.floated? && !@closed_corporations.include?(c)
-                convert(c) if c.total_shares == 2
-                convert(c) if c.total_shares == 5 && @phase.name != '4A'
-              end
-
-              # update the attached company's share_count (including closed corps)
-              if (company = @companies.find { |comp| comp.sym == c.name })
-                company.meta[:share_count] = c.total_shares
-              end
-            end
-          end
-
           return unless phase.name == 'D'
 
           event_pullman_strike!
@@ -1657,7 +1696,7 @@ module Engine
 
         # ---------------- EVENTS ----------------------
         def event_signal_end_game!
-          # Play one more OR, then Pullman Strike and blocking token events occur, then play one final set (CR, SR, 3 ORs)
+          # Play one more OR, then Pullman Strike and blocking token events occur, then play one final set (AR, SR, 3 ORs)
           @final_operating_rounds = 3
           @last_set_triggered = true
           game_end_check
@@ -1713,6 +1752,7 @@ module Engine
 
         def event_ic_formation!
           @log << '-- Event: Illinois Central Formation --'
+          move_development_pool_to_auction_pool!
           @mergeable_candidates = mergeable_corporations
           @log << if @mergeable_candidates.any?
                     present_mergeable_candidates(@mergeable_candidates).to_s
@@ -1726,6 +1766,15 @@ module Engine
           finalize_ic_formation_if_ready!
         end
 
+        def move_development_pool_to_auction_pool!
+          privates = @companies.select do |company|
+            company.meta[:type] == :private && company.owner.nil? && !company.closed?
+          end
+          return if privates.empty?
+
+          @log << "#{list_with_and(privates.map(&:name))} moved from the development pool to the auction pool"
+        end
+
         # ---------------- IC FORMATION ----------------------
         def ic_setup
           ic.add_ability(self.class::STOCK_PURCHASE_ABILITY)
@@ -1734,11 +1783,9 @@ module Engine
           ic.remove_ability(self.class::FORMATION_ABILITY)
           assign_port_icon(ic)
 
-          bundle = ShareBundle.new(ic.shares.last(5))
-          @share_pool.transfer_shares(bundle, @share_pool)
-          ic.shares.each do |s|
-            s.buyable = false
-          end
+          market_bundle = ShareBundle.new(ic.shares.last(5))
+          @share_pool.transfer_shares(market_bundle, @share_pool)
+          ic.shares.each { |share| share.buyable = share.owner == @share_pool }
 
           stock_market.set_par(ic, @stock_market.par_prices.find do |p|
             p.price == IC_STARTING_PRICE
@@ -1746,7 +1793,7 @@ module Engine
           @bank.spend(IC_STARTING_PRICE * 5, ic)
           @merge_share_prices = [ic.share_price.price] # adds IC's share price to array to be averaged later
           @log << "#{ic.name} starts at an #{format_currency(IC_STARTING_PRICE)} share price and " \
-                  "receives #{format_currency(IC_STARTING_PRICE * 10)} from the bank"
+                  "receives #{format_currency(IC_STARTING_PRICE * 5)} from the bank"
 
           place_home_token(ic)
         end
@@ -1799,7 +1846,7 @@ module Engine
           cost = ic.share_price.price / 2
           # If there are no market shares OR corp can't afford the exchange, auto-sell
           auto_sell = @exchange_choice_corps.select do |corp|
-            ic.num_market_shares.zero? || corp.cash <= cost
+            ic.num_market_shares.zero? || corp.cash < cost
           end
 
           auto_sell.each { |corp| option_sell(corp) }

@@ -65,7 +65,7 @@ module Engine
               {
                 float_percent: 40,
                 sym: 'CBQ',
-                name: 'Chicago, Burlington and Quincy',
+                name: 'Chicago, Burlington and Quincy Railroad',
                 logo: '18_il/CBQ.alt',
                 simple_logo: '18_il/CBQ.alt',
                 shares: [40, 20, 20, 20],

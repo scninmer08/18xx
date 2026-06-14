@@ -52,7 +52,7 @@ module Engine
               @game.process_ic_line(action, beneficiary: action.entity.owner, round: @round) if @game.ic_line_hex?(hex)
 
               # closes GTL if Chicago is upgraded to brown
-              if !@game.intro_game? && tile.name == 'CHI3' && !@game.company_by_id('GTL').closed?
+              if !@game.intro_game? && action.tile.name == 'CHI3' && !@game.company_by_id('GTL').closed?
                 company = @game.company_by_id('GTL')
                 owner_str = company.owner ? " (#{company.owner.name})" : ''
                 @log << "#{company.name}#{owner_str} closes"

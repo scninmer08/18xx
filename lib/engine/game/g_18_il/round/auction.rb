@@ -7,8 +7,8 @@ module Engine
     module G18IL
       module Round
         class Auction < Engine::Round::Auction
-          def self.name = 'Concession'
-          def self.short_name = 'CR'
+          def self.name = 'Auction'
+          def self.short_name = 'AR'
         end
       end
     end

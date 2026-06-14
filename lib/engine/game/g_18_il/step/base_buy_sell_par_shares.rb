@@ -114,6 +114,7 @@ module Engine
           def process_par(action)
             @round.corp_started = action.corporation
             super
+            @game.restore_closed_concession_privates!(action.corporation)
             company = @game.company_by_id(action.corporation.name)
             @game.companies.delete(company)
             company.close!
@@ -135,6 +136,13 @@ module Engine
             corp = @round.corp_started
 
             return if @game.closed_corporations.delete(corp)
+
+            # Offer optional private acquisition before token buying.
+            if @game.private_assignment_on_par? && corp.total_shares > 2
+              player = corp.owner
+              eligible = @game.eligible_private_acquisitions(corp, player)
+              @round.assign_privates_on_par << { corp: corp, player: player } unless eligible.empty?
+            end
 
             case corp.total_shares
             when 10

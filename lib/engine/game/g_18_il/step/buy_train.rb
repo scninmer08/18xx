@@ -159,14 +159,9 @@ module Engine
             priced = variants.map { |v| [v, (v[:price] || train.price)] }
 
             affordable = priced.select { |_v, p| p <= cash }
-            chosen =
-              if affordable.any?
-                affordable.max_by { |_v, p| p }.first
-              else
-                priced.min_by { |_v, p| p }.first
-              end
+            return affordable.map(&:first) if affordable.any?
 
-            [chosen]
+            [priced.min_by { |_v, p| p }.first]
           end
 
           def process_sell_shares(action)

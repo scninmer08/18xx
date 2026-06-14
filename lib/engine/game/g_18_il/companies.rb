@@ -50,7 +50,7 @@ module Engine
               meta: { type: :concession, share_count: 5 },
             },
             {
-              name: 'Chicago, Burlington & Quincy',
+              name: 'Chicago, Burlington & Quincy Railroad',
               sym: 'CBQ',
               value: 10,
               revenue: 0,
@@ -163,7 +163,7 @@ module Engine
               name: 'Share Premium',
               value: 0,
               revenue: 0,
-              desc: 'During the “Issue a Share” step, it may close this company to issue a share for '\
+              desc: "During the corporation's “Issue a Share” step, it may close this company to issue a share for "\
                     'double its current share price.',
               sym: 'SP',
               meta: { type: :private, class: :A },
@@ -221,7 +221,7 @@ module Engine
               name: 'Station Subsidy',
               value: 0,
               revenue: 0,
-              desc: 'Whenever the corporation gains tokens from starting or converting, it receives them for '\
+              desc: 'Whenever the corporation gains station markers from starting or converting, it receives them for '\
                     'free (instead of paying $40 each).',
               sym: 'SS',
               meta: { type: :private, class: :A },
@@ -231,8 +231,6 @@ module Engine
                   desc_detail: 'Station Subsidy',
                   hexes: [],
                   owner_type: 'corporation',
-                  count: 4,
-                  closed_when_used_up: true,
                 },
               ],
             },
@@ -336,7 +334,8 @@ module Engine
               name: 'Central IL Boom',
               value: 0,
               revenue: 0,
-              desc: "In Phase D, during the corporation's tile-laying step, it may close this company to upgrade Peoria (E8) "\
+              desc: "In Phase 6 or later, during the corporation's tile-laying step, it may close this company to upgrade "\
+                    'Peoria (E8) '\
                     'or Springfield (E12) with the corresponding gray tile. This upgrade does not require a token connection, '\
                     'does not count as a tile lay, and may be done regardless of the city’s current color. The unused tile '\
                     'is removed from the game.',

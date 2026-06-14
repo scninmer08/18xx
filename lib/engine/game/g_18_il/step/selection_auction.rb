@@ -24,14 +24,18 @@ module Engine
           end
 
           def company_setup
-            if lots_first_turn?
-              @companies = @game.lot_proxies
-            else
-              concessions = @game.companies.select { |c| c.meta[:type] == :concession && !c.owner&.player? }
-              @companies = concessions.sort_by { |c| [c.meta[:share_count], c.sym] }
-              @companies.each { |c| change_private_description(c) }
-              prepare_ic_shares if @game.ic_formation_triggered? && !@game.ic.ipo_shares.empty?
+            concessions = @game.companies.select { |c| c.meta[:type] == :concession && !c.owner&.player? }
+            @companies = concessions.sort_by { |c| [c.meta[:share_count], c.sym] }
+            @companies.each { |c| change_private_description(c) }
+
+            if @game.privates_in_auction_pool?
+              undrafted = @game.companies.select do |c|
+                c.meta[:type] == :private && c.owner.nil? && !c.closed?
+              end
+              @companies += undrafted.sort_by { |c| [c.meta[:class].to_s, c.sym] }
             end
+
+            prepare_ic_shares if @game.ic_formation_triggered? && !@game.ic.ipo_shares.empty?
           end
 
           def change_private_description(company)
@@ -94,21 +98,15 @@ module Engine
           def actions(entity)
             return [] if entities.all?(&:passed?)
             return [] if @companies.empty?
-            return %w[bid] if lots_first_turn? && !@auctioning
-
             entity == current_entity ? ACTIONS : []
           end
 
-          def lots_first_turn?
-            @game.lots_variant? && @game.turn == 1
-          end
-
           def description
-            return (@auctioning ? 'Bid on Selected Lot' : 'Bid on Lot') if lots_first_turn?
             return 'Bid on Selected Concession' if @auctioning&.meta&.[](:type) == :concession
+            return 'Bid on Selected Private' if @auctioning&.meta&.[](:type) == :private
             return 'Bid on Selected Share' if @auctioning
 
-            @companies&.any? { |c| c.meta&.[](:type) == :share } ? 'Bid on Concession or Share' : 'Bid on Concession'
+            'Bid on Auction Pool Item'
           end
 
           def pass_description
@@ -124,12 +122,6 @@ module Engine
           def help
             str = []
             return str if @auctioning && @auctioning.meta[:type] != :concession
-
-            if lots_first_turn? && !@auctioning
-              str << 'Choose one Lot to start an auction. The winner receives all four concessions in that lot; ' \
-                     'the other player receives the remaining lot for free.'
-              return str
-            end
 
             if !@game.intro_game? &&
               @companies.any? do |c|
@@ -157,7 +149,15 @@ module Engine
             non_concessions = @companies - concessions
 
             tiers = [concessions]
-            tiers << non_concessions unless non_concessions.empty?
+
+            if @game.privates_in_auction_pool?
+              privates_in_row = non_concessions.select { |c| c.meta&.[](:type) == :private }
+              ic_shares = non_concessions - privates_in_row
+              tiers << privates_in_row unless privates_in_row.empty?
+              tiers << ic_shares unless ic_shares.empty?
+            else
+              tiers << non_concessions unless non_concessions.empty?
+            end
 
             tiers
           end
@@ -248,9 +248,6 @@ module Engine
             player = winner.entity
             price  = winner.price
             case company.meta[:type]
-            when :lot
-              @log << "#{player.name} wins the auction for #{company.name} with a bid of #{@game.format_currency(price)}"
-              player.spend(price, @game.bank)
             when :share, :presidents_share
               @log << "#{player.name} wins the auction for #{company.name} with a bid of #{@game.format_currency(price)}"
               @log << "#{@game.ic.name} receives #{@game.format_currency(price)}"
@@ -269,26 +266,7 @@ module Engine
             next_entity!
           end
 
-          def resolve_lot!(winner_player, lot_idx)
-            other_player = (@game.players - [winner_player]).first
-            lot_won  = @game.lots[lot_idx]
-            lot_free = @game.lots[1 - lot_idx]
-
-            lot_won.each  { |corp| assign_company(@game.company_by_id(corp.name), winner_player) }
-            lot_free.each { |corp| assign_company(@game.company_by_id(corp.name), other_player) }
-
-            @log << "#{winner_player.name} wins Lot #{lot_idx + 1} and receives: #{@game.list_with_and(lot_won.map(&:name))}"
-            @log << "#{other_player.name} receives Lot #{2 - lot_idx} with: #{@game.list_with_and(lot_free.map(&:name))}"
-
-            tokens = Array(@game.lot_proxies)
-            tokens.each(&:close!)
-            @companies&.delete_if { |c| tokens.include?(c) }
-            @game.companies.delete_if { |c| tokens.include?(c) }
-          end
-
           def post_win_bid(winner, company)
-            resolve_lot!(winner.entity, company.meta[:lot_index]) if company.meta[:type] == :lot
-
             player = winner.entity
             ic     = @game.ic
 
@@ -330,6 +308,8 @@ module Engine
 
               (@companies ||= []).delete(company)
               attached.each { |p| @companies.delete(p) }
+            when :private
+              @game.update_private_name!(company)
             end
           end
 
@@ -342,15 +322,26 @@ module Engine
           end
 
           def may_bid?(company = nil)
-            return false if company.meta&.[](:type) == :private
+            if company.meta&.[](:type) == :private
+              return @game.privates_in_auction_pool? && company.owner.nil?
+            end
 
             true
           end
 
           def starting_bid(company)
             return 10 if !company || company&.meta&.[](:type) == :concession
+            return 10 if @game.privates_in_auction_pool? && company&.meta&.[](:type) == :private
 
             company.min_bid
+          end
+
+          def min_bid(company)
+            if !@auctioning && @game.privates_in_auction_pool? && company&.meta&.[](:type) == :private
+              return 10
+            end
+
+            super
           end
 
           def max_bid(entity, _company)
