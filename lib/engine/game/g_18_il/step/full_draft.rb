@@ -64,7 +64,6 @@ module Engine
             @available.delete(company)
 
             @log << "#{player.name} drafts #{company.name} (#{category_name(category, 1)})"
-            @game.update_private_name!(company)
 
             if draft_complete?
               log_undrafted_items!
@@ -151,10 +150,10 @@ module Engine
             concessions = @available.select { |company| company.meta[:type] == :concession }
             privates = @available.select { |company| company.meta[:type] == :private }
             unless concessions.empty?
-              @log << "Undrafted concessions added to auction pool: #{@game.list_with_and(concessions.map(&:name))}"
+              @log << "Undrafted concessions added to Auction Pool: #{@game.list_with_and(concessions.map(&:name))}"
             end
             unless privates.empty?
-              @log << "Undrafted privates placed in development pool: #{@game.list_with_and(privates.map(&:name))}"
+              @log << "Undrafted privates placed in Development Pool: #{@game.list_with_and(privates.map(&:name))}"
             end
           end
 

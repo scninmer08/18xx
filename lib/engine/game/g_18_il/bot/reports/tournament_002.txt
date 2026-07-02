@@ -1,0 +1,14 @@
+18IL Bot Tournament
+Profiles: Balanced, Financier, Expansionist, Engineer
+Seeds: 103628-103652 | Games: 100
+Rules: regular game
+Status: error=1, finished=99
+
+Standings:
+  1. Engineer: 200 points, 42 wins, average rank 1.98, average value 86.1
+  2. Financier: 169 points, 32 wins, average rank 2.29, average value 77.11
+  3. Expansionist: 134 points, 3 wins, average rank 2.65, average value 34.9
+  4. Balanced: 91 points, 22 wins, average rank 3.08, average value 29.96
+
+Incomplete games:
+  Seed 103631, rotation 1: error - TypeError: can't convert Array to Array (Array#to_ary gives Array)

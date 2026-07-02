@@ -1,0 +1,11 @@
+18IL Bot Tournament
+Profiles: Balanced, Financier, Expansionist, Engineer
+Seeds: 616348-616372 | Games: 100
+Rules: regular game
+Status: finished=100
+
+Standings:
+  1. Engineer: 189 points, 38 wins, average rank 2.11, average value 81.36
+  2. Financier: 169 points, 30 wins, average rank 2.31, average value 85.5
+  3. Expansionist: 150 points, 14 wins, average rank 2.5, average value 48.68
+  4. Balanced: 92 points, 18 wins, average rank 3.08, average value 26.46

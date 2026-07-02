@@ -80,7 +80,7 @@ module Engine
           end
 
           def price(num)
-            return 0 if num.zero? || (!@game.intro_game? && pending_entity == @game.company_by_id('SS').owner)
+            return 0 if num.zero?
 
             pending_first_price + ((num - 1) * pending_price)
           end

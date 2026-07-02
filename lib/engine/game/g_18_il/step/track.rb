@@ -32,13 +32,8 @@ module Engine
 
             @game.process_ic_line(action, beneficiary: action.entity, round: @round) if @game.ic_line_hex?(hex)
 
-            # Close GTL if Chicago upgrades to brown
-            if !@game.intro_game? && tile_name == 'CHI3' && !@game.company_by_id('GTL').closed?
-              company = @game.company_by_id('GTL')
-              owner_str = company.owner ? " (#{company.owner.name})" : ''
-              @log << "#{company.name}#{owner_str} closes"
-              company.close!
-            end
+            # Flip GTL if Chicago upgrades to brown, including while GTL is unowned.
+            @game.flip_private!(@game.company_by_id('GTL')) if !@game.intro_game? && tile_name == 'CHI3'
 
             pass! unless can_lay_tile?(action.entity)
           end
@@ -171,18 +166,31 @@ module Engine
             !entity.tokens.empty? && (buying_power(entity) >= action[:cost]) && (action[:lay] || action[:upgrade])
           end
 
+          def tile_lay_abilities_should_block?(entity)
+            abilities = [type, 'owning_player_track'].flat_map do |time|
+              Array(abilities(entity, time: time, passive_ok: false))
+            end
+            special_track = @round.steps.find { |step| step.is_a?(G18IL::Step::SpecialTrack) }
+            abilities.reject! do |ability|
+              company = ability.owner
+              %w[CIB CVCC FWC].include?(company&.sym) && !special_track&.tile_lay_available?(company)
+            end
+
+            abilities.any? { |ability| !ability.consume_tile_lay }
+          end
+
           def available_hex(entity, hex, normal: false)
-            # Highlight the STL hexes only when corp has permit token
+            # Highlight the STL hexes only when the corporation has a permit token.
             return nil if @game.class::STL_HEXES.include?(hex.id) && !@game.stl_permit?(current_entity)
 
-            # Forces NC to lay in its home hex first if it is not yellow
+            # Force NC to lay in its home hex first if it is not yellow.
             if !@game.class::SPRINGFIELD_HEX.include?(hex.id) &&
                @game.hex_by_id(entity.coordinates).tile.color == :white &&
                entity == @game.corporation_by_id('NC')
               return nil
             end
 
-            super
+            super(entity, hex)
           end
 
           # Brown tiles along the IC line cannot be laid until IC has formed.

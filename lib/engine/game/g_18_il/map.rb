@@ -18,7 +18,7 @@ module Engine
           'D15' => 'Alton',
           'D17' => 'Belleville',
           'E2' => 'Freeport',
-          'E6' => 'Bureau Junction',
+          'E6' => 'La Salle',
           'E8' => 'Peoria',
           'E12' => 'Springfield',
           'E16' => 'Breese',
@@ -56,20 +56,21 @@ module Engine
             },
 
             white: {
-              %w[B13 C10 C8 C12 D3 D7 D11 E4 E10 E14 E18 F7 G18 H9 H13] => '',
+              %w[B13 C10 C8 C12 D3 D7 E4 E14 E18 F7 G18 H9 H13] => '',
               %w[E2 F3 F9 F11 G4 G16] => 'city=revenue:0',
               %w[D9 F13 E16 H11] => 'town=revenue:0',
-              ['B9'] => 'border=edge:1,type:water,cost:20',
               ['B11'] => 'city=revenue:0;border=edge:2,type:water,cost:20',
               ['C2'] => 'label=G;town=revenue:0,groups:Galena;upgrade=cost:60,terrain:mountain;'\
                         'border=edge:1,type:water,cost:20',
               ['C6'] => 'city=revenue:0;border=edge:2,type:water,cost:20',
               ['C14'] => 'border=edge:1,type:water,cost:20;border=edge:0,type:water,cost:20',
               ['D5'] => 'city=revenue:0',
+              ['D11'] => 'upgrade=cost:20,terrain:water',
               ['D15'] => 'city=revenue:0;border=edge:1,type:water,cost:20',
               ['D17'] => 'town=revenue:0;border=edge:2,type:water,cost:20',
               ['D19'] => 'border=edge:0',
               ['E6'] => 'town=revenue:0;upgrade=cost:20,terrain:water',
+              ['E10'] => 'upgrade=cost:20,terrain:water',
               ['E12'] => 'label=S;city=revenue:20;path=a:1,b:_0',
               ['E20'] => 'path=a:4,b:0,track:future;icon=image:18_il/ic_cube,sticky:1,loc:1.5',
               ['E22'] => 'label=C;city=revenue:0;path=a:3,b:_0,track:future;path=a:0,b:_0,track:future;'\
@@ -96,6 +97,7 @@ module Engine
             },
 
             yellow: {
+              ['B9'] => 'border=edge:1,type:water,cost:20;path=a:0,b:4',
               ['D13'] => 'label=J;town=revenue:10;path=a:4,b:_0',
               ['H3'] => 'label=Chi;city=revenue:10,loc:1.5;city=revenue:10,loc:3.5;city=revenue:10,loc:5.5;'\
                         'path=a:4,b:_1;path=a:0,b:_2',
@@ -108,7 +110,7 @@ module Engine
               ['D1'] => 'path=a:1,b:5',
               ['F1'] => 'path=a:1,b:0',
               ['H15'] => 'path=a:1,b:3',
-              ['H21'] => 'city=revenue:40;path=a:1,b:_0;path=a:2,b:_0;path=a:3,b:_0;border=edge:1,type:water,cost:20;'\
+              ['H21'] => 'city=revenue:30;path=a:1,b:_0;path=a:2,b:_0;path=a:3,b:_0;border=edge:1,type:water,cost:20;'\
                          'border=edge:2,type:water,cost:20',
             },
 

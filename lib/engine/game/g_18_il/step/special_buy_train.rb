@@ -15,7 +15,7 @@ module Engine
             train.variant = action.variant
             price = action.price
 
-            # Check if the train is actually buyable in the current situation
+            # Check whether the train is buyable in the current situation.
             if entity.cash < price && !entity.trains.empty?
               raise GameError, "#{entity.name} has #{@game.format_currency(entity.cash)} and "\
                                "cannot spend #{@game.format_currency(price)}"

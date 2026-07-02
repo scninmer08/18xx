@@ -8,9 +8,9 @@ module Engine
         MARKET = [
           %w[
             0c
-            10#r
-            20#r
-            30#r
+            10
+            20
+            30
             40p
             50
             60p
@@ -24,13 +24,13 @@ module Engine
             105
             110
             115
-            120p
+            120x
             125
             130
             135
             140
             145
-            150
+            150x
             158
             166
             174
@@ -62,10 +62,12 @@ module Engine
 
         STOCKMARKET_COLORS = Base::STOCKMARKET_COLORS.merge(
           par: :yellow,
+          par_1: :orange,
         ).freeze
 
         MARKET_TEXT = {
           par: 'Par value',
+          par_1: 'Par value (Phase 4A+)',
           close: 'Corporation closes',
           endgame: 'End game trigger',
         }.freeze
@@ -74,8 +76,7 @@ module Engine
           [
             ['Action', 'Share Price Change'],
             ['Dividend = 0', '1 ←'],
-            ['Dividend < 1/2 stock price', '1 ⤪'],
-            ['Dividend ≥ 1/2 stock price but < stock price', '1 ⤨'],
+            ['Pay dividends less than current share price', '1 ⤨'],
             ['Dividend ≥ stock price', '1 →'],
             ['Dividend ≥ 2X stock price', '2 →'],
             ['Dividend ≥ 3X stock price', '3 →'],

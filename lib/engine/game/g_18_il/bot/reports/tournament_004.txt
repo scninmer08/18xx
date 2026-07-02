@@ -1,0 +1,16 @@
+18IL Bot Tournament
+Profiles: Evolved Champion, Engineer, Financier, Balanced
+Seeds: 776074-776098 | Games: 100
+Rules: regular game
+Status: blocked=1, error=2, finished=97
+
+Standings:
+  1. Balanced: 178 points, 38 wins, average rank 2.16, average value 118.88
+  2. Evolved Champion: 169 points, 28 wins, average rank 2.26, average value 78.7
+  3. Engineer: 121 points, 19 wins, average rank 2.75, average value 48.74
+  4. Financier: 114 points, 12 wins, average rank 2.82, average value 37.82
+
+Incomplete games:
+  Seed 776076, rotation 3: error - no implicit conversion from nil to integer
+  Seed 776078, rotation 4: blocked - No baseline policy for buy_train; turn 4, Operating Round, Buy Trains, entity RI, actions: buy_train
+  Seed 776088, rotation 3: error - no implicit conversion from nil to integer

@@ -1,0 +1,885 @@
+{
+  "config": {
+    "games": 5,
+    "players": 4,
+    "optional_rules": [
+
+    ],
+    "first_seed": 505309
+  },
+  "aggregate": {
+    "status_counts": {
+      "finished": 5
+    },
+    "average_actions": 613.2,
+    "seats": [
+      {
+        "seat": 1,
+        "name": "Bot 1",
+        "wins": 1,
+        "average_value": 1866.8
+      },
+      {
+        "seat": 2,
+        "name": "Bot 2",
+        "wins": 1,
+        "average_value": 676.2
+      },
+      {
+        "seat": 3,
+        "name": "Bot 3",
+        "wins": 2,
+        "average_value": 2310.8
+      },
+      {
+        "seat": 4,
+        "name": "Bot 4",
+        "wins": 1,
+        "average_value": 1791.4
+      }
+    ],
+    "metrics": {
+      "corporations_started": 86,
+      "conversions": 40,
+      "share_purchases": 260,
+      "player_share_sales": 139,
+      "private_acquisitions": 40,
+      "train_purchases": 186,
+      "trains_borrowed": 0,
+      "track_lays": 538,
+      "token_placements": 94,
+      "private_ability_uses": 43,
+      "routes_run": 299,
+      "route_revenue": 65510
+    }
+  },
+  "games": [
+    {
+      "seed": 505309,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 551,
+      "turn": 6,
+      "players": [
+        {
+          "seat": 1,
+          "name": "Bot 3",
+          "rank": 2,
+          "value": 2161,
+          "cash": 599,
+          "share_value": 1562,
+          "presidencies": [
+            "CBQ"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 2,
+          "name": "Bot 4",
+          "rank": 4,
+          "value": 1325,
+          "cash": 539,
+          "share_value": 786,
+          "presidencies": [
+            "G&CU",
+            "V"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 3,
+          "name": "Bot 1",
+          "rank": 3,
+          "value": 1998,
+          "cash": 700,
+          "share_value": 1298,
+          "presidencies": [
+            "IRR"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 4,
+          "name": "Bot 2",
+          "rank": 1,
+          "value": 2524,
+          "cash": 980,
+          "share_value": 1544,
+          "presidencies": [
+            "IC"
+          ],
+          "privates": [
+
+          ]
+        }
+      ],
+      "corporations": [
+        {
+          "name": "CBQ",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 230,
+          "cash": 0,
+          "trains": [
+            "4"
+          ],
+          "privates": [
+            "Advanced Track",
+            "Goodrich Transit Line"
+          ]
+        },
+        {
+          "name": "G&CU",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 158,
+          "cash": 0,
+          "trains": [
+            "8"
+          ],
+          "privates": [
+            "Illinois Steel Bridge Co.",
+            "Interstate Commerce Corridor"
+          ]
+        },
+        {
+          "name": "IC",
+          "open": true,
+          "owner": "Bot 2",
+          "share_price": 182,
+          "cash": 40,
+          "trains": [
+            "D",
+            "D"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "name": "IRR",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 166,
+          "cash": 0,
+          "trains": [
+            "5"
+          ],
+          "privates": [
+            "Efficient Construction",
+            "Station Subsidy"
+          ]
+        },
+        {
+          "name": "V",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 120,
+          "cash": 0,
+          "trains": [
+            "5"
+          ],
+          "privates": [
+            "Central IL Boom",
+            "Union Stock Yards"
+          ]
+        }
+      ],
+      "metrics": {
+        "corporations_started": 18,
+        "conversions": 8,
+        "share_purchases": 44,
+        "player_share_sales": 20,
+        "private_acquisitions": 8,
+        "train_purchases": 32,
+        "trains_borrowed": 0,
+        "track_lays": 103,
+        "token_placements": 19,
+        "private_ability_uses": 8,
+        "routes_run": 55,
+        "route_revenue": 11170
+      },
+      "failure": null
+    },
+    {
+      "seed": 505310,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 586,
+      "turn": 6,
+      "players": [
+        {
+          "seat": 1,
+          "name": "Bot 3",
+          "rank": 1,
+          "value": 2663,
+          "cash": 1115,
+          "share_value": 1548,
+          "presidencies": [
+            "CBQ",
+            "RI"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 2,
+          "name": "Bot 4",
+          "rank": 4,
+          "value": 80,
+          "cash": 80,
+          "share_value": 0,
+          "presidencies": [
+
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 3,
+          "name": "Bot 1",
+          "rank": 3,
+          "value": 709,
+          "cash": 361,
+          "share_value": 348,
+          "presidencies": [
+            "IC",
+            "IRR"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 4,
+          "name": "Bot 2",
+          "rank": 2,
+          "value": 1336,
+          "cash": 608,
+          "share_value": 728,
+          "presidencies": [
+            "G&CU"
+          ],
+          "privates": [
+
+          ]
+        }
+      ],
+      "corporations": [
+        {
+          "name": "CBQ",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 210,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Goodrich Transit Line",
+            "Illinois Steel Bridge Co."
+          ]
+        },
+        {
+          "name": "G&CU",
+          "open": true,
+          "owner": "Bot 2",
+          "share_price": 182,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Interstate Commerce Corridor",
+            "Planned Obsolescence"
+          ]
+        },
+        {
+          "name": "IC",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 80,
+          "cash": 1720,
+          "trains": [
+            "5",
+            "D"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "name": "IRR",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 174,
+          "cash": 0,
+          "trains": [
+            "8"
+          ],
+          "privates": [
+            "Advanced Track",
+            "Station Subsidy"
+          ]
+        },
+        {
+          "name": "RI",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 166,
+          "cash": 374,
+          "trains": [
+            "5",
+            "4"
+          ],
+          "privates": [
+            "Central IL Boom",
+            "U.S. Mail Line"
+          ]
+        },
+        {
+          "name": "V",
+          "open": false,
+          "owner": null,
+          "share_price": null,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Chicago-Virden Coal Co.",
+            "Union Stock Yards"
+          ]
+        }
+      ],
+      "metrics": {
+        "corporations_started": 17,
+        "conversions": 8,
+        "share_purchases": 42,
+        "player_share_sales": 24,
+        "private_acquisitions": 8,
+        "train_purchases": 43,
+        "trains_borrowed": 0,
+        "track_lays": 108,
+        "token_placements": 19,
+        "private_ability_uses": 9,
+        "routes_run": 58,
+        "route_revenue": 13340
+      },
+      "failure": null
+    },
+    {
+      "seed": 505311,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 771,
+      "turn": 7,
+      "players": [
+        {
+          "seat": 1,
+          "name": "Bot 2",
+          "rank": 3,
+          "value": 2617,
+          "cash": 1081,
+          "share_value": 1536,
+          "presidencies": [
+            "NC"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 2,
+          "name": "Bot 3",
+          "rank": 4,
+          "value": 1082,
+          "cash": 512,
+          "share_value": 570,
+          "presidencies": [
+            "CBQ"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 3,
+          "name": "Bot 4",
+          "rank": 1,
+          "value": 5510,
+          "cash": 2241,
+          "share_value": 3269,
+          "presidencies": [
+            "G&CU",
+            "V"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 4,
+          "name": "Bot 1",
+          "rank": 2,
+          "value": 4029,
+          "cash": 1404,
+          "share_value": 2625,
+          "presidencies": [
+            "IC",
+            "IRR",
+            "RI"
+          ],
+          "privates": [
+
+          ]
+        }
+      ],
+      "corporations": [
+        {
+          "name": "CBQ",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 140,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Advanced Track",
+            "Interstate Commerce Corridor"
+          ]
+        },
+        {
+          "name": "G&CU",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 250,
+          "cash": 0,
+          "trains": [
+            "8"
+          ],
+          "privates": [
+            "Chicago-Virden Coal Co.",
+            "Rush Delivery"
+          ]
+        },
+        {
+          "name": "IC",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 145,
+          "cash": 60,
+          "trains": [
+            "D",
+            "D"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "name": "IRR",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 230,
+          "cash": 0,
+          "trains": [
+            "5"
+          ],
+          "privates": [
+            "Central IL Boom",
+            "Station Subsidy"
+          ]
+        },
+        {
+          "name": "NC",
+          "open": true,
+          "owner": "Bot 2",
+          "share_price": 150,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Illinois Steel Bridge Co.",
+            "Share Premium"
+          ]
+        },
+        {
+          "name": "RI",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 145,
+          "cash": 0,
+          "trains": [
+            "D",
+            "D"
+          ],
+          "privates": [
+            "Frink, Walker & Co.",
+            "Train Subsidy"
+          ]
+        },
+        {
+          "name": "V",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 166,
+          "cash": 0,
+          "trains": [
+            "4"
+          ],
+          "privates": [
+            "Engineering Mastery",
+            "Union Stock Yards"
+          ]
+        }
+      ],
+      "metrics": {
+        "corporations_started": 20,
+        "conversions": 8,
+        "share_purchases": 89,
+        "player_share_sales": 47,
+        "private_acquisitions": 8,
+        "train_purchases": 38,
+        "trains_borrowed": 0,
+        "track_lays": 116,
+        "token_placements": 23,
+        "private_ability_uses": 9,
+        "routes_run": 72,
+        "route_revenue": 16180
+      },
+      "failure": null
+    },
+    {
+      "seed": 505312,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 540,
+      "turn": 6,
+      "players": [
+        {
+          "seat": 1,
+          "name": "Bot 3",
+          "rank": 2,
+          "value": 252,
+          "cash": 82,
+          "share_value": 170,
+          "presidencies": [
+            "CBQ",
+            "IC"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 2,
+          "name": "Bot 4",
+          "rank": 1,
+          "value": 504,
+          "cash": 204,
+          "share_value": 300,
+          "presidencies": [
+            "V"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 3,
+          "name": "Bot 1",
+          "rank": 4,
+          "value": 5,
+          "cash": 5,
+          "share_value": 0,
+          "presidencies": [
+
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 4,
+          "name": "Bot 2",
+          "rank": 3,
+          "value": 230,
+          "cash": 145,
+          "share_value": 85,
+          "presidencies": [
+
+          ],
+          "privates": [
+
+          ]
+        }
+      ],
+      "corporations": [
+        {
+          "name": "CBQ",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 85,
+          "cash": 316,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Advanced Track",
+            "Goodrich Transit Line"
+          ]
+        },
+        {
+          "name": "G&CU",
+          "open": false,
+          "owner": null,
+          "share_price": null,
+          "cash": 153,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Central IL Boom",
+            "Interstate Commerce Corridor"
+          ]
+        },
+        {
+          "name": "IC",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 80,
+          "cash": 1300,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "name": "NC",
+          "open": false,
+          "owner": null,
+          "share_price": null,
+          "cash": 0,
+          "trains": [
+            "8"
+          ],
+          "privates": [
+            "Planned Obsolescence",
+            "Rush Delivery"
+          ]
+        },
+        {
+          "name": "V",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 150,
+          "cash": 960,
+          "trains": [
+            "5",
+            "4"
+          ],
+          "privates": [
+            "Chicago-Virden Coal Co.",
+            "U.S. Mail Line"
+          ]
+        }
+      ],
+      "metrics": {
+        "corporations_started": 15,
+        "conversions": 8,
+        "share_purchases": 37,
+        "player_share_sales": 25,
+        "private_acquisitions": 8,
+        "train_purchases": 42,
+        "trains_borrowed": 0,
+        "track_lays": 102,
+        "token_placements": 16,
+        "private_ability_uses": 9,
+        "routes_run": 48,
+        "route_revenue": 9020
+      },
+      "failure": null
+    },
+    {
+      "seed": 505313,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 618,
+      "turn": 6,
+      "players": [
+        {
+          "seat": 1,
+          "name": "Bot 2",
+          "rank": 2,
+          "value": 1641,
+          "cash": 711,
+          "share_value": 930,
+          "presidencies": [
+            "NC"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 2,
+          "name": "Bot 3",
+          "rank": 4,
+          "value": 390,
+          "cash": 180,
+          "share_value": 210,
+          "presidencies": [
+            "CBQ",
+            "IC"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 3,
+          "name": "Bot 4",
+          "rank": 1,
+          "value": 3332,
+          "cash": 1352,
+          "share_value": 1980,
+          "presidencies": [
+            "G&CU",
+            "V"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "seat": 4,
+          "name": "Bot 1",
+          "rank": 3,
+          "value": 838,
+          "cash": 388,
+          "share_value": 450,
+          "presidencies": [
+            "IRR"
+          ],
+          "privates": [
+
+          ]
+        }
+      ],
+      "corporations": [
+        {
+          "name": "CBQ",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 105,
+          "cash": 221,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Central IL Boom",
+            "Goodrich Transit Line"
+          ]
+        },
+        {
+          "name": "G&CU",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 240,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Illinois Steel Bridge Co.",
+            "Rush Delivery"
+          ]
+        },
+        {
+          "name": "IC",
+          "open": true,
+          "owner": "Bot 3",
+          "share_price": 80,
+          "cash": 1830,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+
+          ]
+        },
+        {
+          "name": "IRR",
+          "open": true,
+          "owner": "Bot 1",
+          "share_price": 150,
+          "cash": 0,
+          "trains": [
+            "D"
+          ],
+          "privates": [
+            "Chicago-Virden Coal Co.",
+            "Station Subsidy"
+          ]
+        },
+        {
+          "name": "NC",
+          "open": true,
+          "owner": "Bot 2",
+          "share_price": 150,
+          "cash": 427,
+          "trains": [
+            "5",
+            "5"
+          ],
+          "privates": [
+            "Planned Obsolescence",
+            "Share Premium"
+          ]
+        },
+        {
+          "name": "V",
+          "open": true,
+          "owner": "Bot 4",
+          "share_price": 135,
+          "cash": 0,
+          "trains": [
+            "4"
+          ],
+          "privates": [
+            "Advanced Track",
+            "Union Stock Yards"
+          ]
+        }
+      ],
+      "metrics": {
+        "corporations_started": 16,
+        "conversions": 8,
+        "share_purchases": 48,
+        "player_share_sales": 23,
+        "private_acquisitions": 8,
+        "train_purchases": 31,
+        "trains_borrowed": 0,
+        "track_lays": 109,
+        "token_placements": 17,
+        "private_ability_uses": 8,
+        "routes_run": 66,
+        "route_revenue": 15800
+      },
+      "failure": null
+    }
+  ]
+}

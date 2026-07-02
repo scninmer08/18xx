@@ -8,6 +8,9 @@ module Engine
       module Round
         class Stock < Engine::Round::Stock
           def finish_round
+            # Return previously unused concessions before price movement can close a corporation and return a new one.
+            @game.return_concessions!
+
             corporations_to_move_price.sort.each do |corp|
               next unless corp.share_price
 

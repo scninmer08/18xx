@@ -1,0 +1,230 @@
+T1 Auction Round | Bot 1 | Bid on Auction Pool Item | bid: Opens the minimum bid for 2-share concession IRR
+T1 Auction Round | Bot 2 | Bid on Selected Concession | pass: Concedes the auction for Illinois River Railroad
+T1 Auction Round | Bot 3 | Bid on Selected Concession | pass: Concedes the auction for Illinois River Railroad
+T1 Auction Round | Bot 4 | Bid on Selected Concession | pass: Concedes the auction for Illinois River Railroad
+T1 Auction Round | Bot 2 | Bid on Auction Pool Item | bid: Opens the minimum bid for 2-share concession NC
+T1 Auction Round | Bot 3 | Bid on Selected Concession | pass: Concedes the auction for Northern Cross Railroad
+T1 Auction Round | Bot 4 | Bid on Selected Concession | pass: Concedes the auction for Northern Cross Railroad
+T1 Auction Round | Bot 1 | Bid on Selected Concession | pass: Concedes the auction for Northern Cross Railroad
+T1 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T1 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T1 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T1 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T1 Stock Round | Bot 1 | Sell then Buy Shares | par: Starts IRR at the lowest available par, 40
+T1 Stock Round | Bot 2 | Sell then Buy Shares | par: Starts NC at the lowest available par, 40
+T1 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T1 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 58 on E6 with rotation 0
+T1 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 5 on D5 with rotation 4
+T1 Operating Round | IRR | Buy Trains | buy_train: Buys the cheapest mandatory train, 2 for 80
+T1 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T1 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile S1 on E12 with rotation 0
+T1 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 7 on E10 with rotation 0
+T1 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for Rogers (1+1)
+T1 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T1 Operating Round | NC | Buy Trains | buy_train: Buys the cheapest mandatory train, 2 for 80
+T1 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T1 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile J2 on D13 with rotation 0
+T1 Operating Round | NC | Run Routes | run_routes: Runs no route because no valid route was found for 2
+T1 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T1 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 15 on D5 with rotation 3
+T1 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T1 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T2 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T2 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T2 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T2 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T2 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T2 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 7 on D3 with rotation 5
+T2 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T2 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T2 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T2 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 80 on E10 with rotation 0
+T2 Operating Round | NC | Run Routes | run_routes: Runs no route because no valid route was found for 2
+T2 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T2 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 80 on D3 with rotation 4
+T2 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T2 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T2 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T2 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile S2 on E12 with rotation 0
+T2 Operating Round | NC | Run Routes | run_routes: Runs no route because no valid route was found for 2
+T3 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T3 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T3 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T3 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T3 Stock Round | Bot 2 | Sell then Buy Shares | par: Starts NC at the lowest available par, 40
+T3 Stock Round | NC | Place Home Token | place_token: Places the home token in E12
+T3 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T3 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 7 on D7 with rotation 2
+T3 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T3 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T3 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T3 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 7 on C12 with rotation 4
+T3 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 58 on D9 with rotation 3
+T3 Operating Round | NC | Run Routes | run_routes: Runs no route because no valid route was found for 2
+T3 Operating Round | NC | Buy Trains | pass: Baseline policy passes Buy Trains
+T3 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T3 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 80 on D7 with rotation 1
+T3 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T3 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T3 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T3 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 80 on C12 with rotation 3
+T3 Operating Round | NC | Lay Track | lay_tile: Lays tile 7 on C10 with rotation 0
+T3 Operating Round | NC | Run Routes | run_routes: Runs no route because no valid route was found for 2
+T4 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T4 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T4 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T4 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T4 Stock Round | Bot 2 | Sell then Buy Shares | par: Starts NC at the lowest available par, 40
+T4 Stock Round | NC | Place Home Token | place_token: Places the home token in E12
+T4 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T4 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 7 on C8 with rotation 3
+T4 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T4 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T4 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T4 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 80 on C10 with rotation 0
+T4 Operating Round | NC | Lay Track | lay_tile: Lays tile 5 on F11 with rotation 0
+T4 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T4 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T4 Operating Round | NC | Buy Trains | pass: Baseline policy passes Buy Trains
+T4 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T4 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 82 on C8 with rotation 3
+T4 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T4 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T4 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T4 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 14 on F11 with rotation 0
+T4 Operating Round | NC | Lay Track | lay_tile: Lays tile 58 on F13 with rotation 1
+T4 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 2
+T4 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T4 Operating Round | NC | Buy Trains | pass: Baseline policy passes Buy Trains
+T5 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T5 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T5 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T5 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T5 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T5 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 5 on E2 with rotation 0
+T5 Operating Round | IRR | Buy Trains | buy_train: Buys the cheapest mandatory train, 4 for 240
+T5 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T5 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 7 on E14 with rotation 3
+T5 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 5 on F9 with rotation 0
+T5 Operating Round | NC | Buy Trains | buy_train: Buys the cheapest mandatory train, 4 for 240
+T5 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T5 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 15 on E2 with rotation 4
+T5 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T5 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T5 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T5 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 14 on F9 with rotation 0
+T5 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T5 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T6 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T6 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T6 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T6 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T6 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T6 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 7 on E4 with rotation 0
+T6 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T6 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T6 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T6 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 82 on E14 with rotation 3
+T6 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T6 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T6 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T6 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 82 on E4 with rotation 0
+T6 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T6 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T6 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T6 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 58 on E16 with rotation 1
+T6 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T6 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T7 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T7 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T7 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T7 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T7 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T7 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 611 on D5 with rotation 3
+T7 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T7 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T7 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T7 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile J3 on D13 with rotation 0
+T7 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T7 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T7 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T7 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 611 on E2 with rotation 4
+T7 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T7 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T7 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T7 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 611 on F11 with rotation 0
+T7 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T7 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T8 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T8 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T8 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T8 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T8 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T8 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 545 on C10 with rotation 0
+T8 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T8 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T8 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T8 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 611 on F9 with rotation 0
+T8 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T8 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T8 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T8 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 545 on C12 with rotation 2
+T8 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T8 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T8 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T8 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 544 on C8 with rotation 0
+T8 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T8 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T9 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T9 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T9 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T9 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T9 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T9 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 546 on D3 with rotation 2
+T9 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T9 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T9 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T9 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 545 on D7 with rotation 0
+T9 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T9 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T9 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T9 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 545 on E10 with rotation 0
+T9 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T9 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T9 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T9 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile S3 on E12 with rotation 0
+T9 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T9 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T10 Auction Round | Bot 3 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T10 Auction Round | Bot 4 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T10 Auction Round | Bot 1 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T10 Auction Round | Bot 2 | Bid on Auction Pool Item | pass: Baseline policy passes Bid on Auction Pool Item
+T10 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T10 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile X17a on C10 with rotation 0
+T10 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T10 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T10 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T10 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile X17a on C12 with rotation 1
+T10 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T10 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T10 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T10 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 544 on E14 with rotation 0
+T10 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T10 Operating Round | IRR | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T10 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T10 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 544 on E4 with rotation 0
+T10 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for 4
+T10 Operating Round | NC | Pay or Withhold Dividends | dividend: Chooses the baseline dividend option, payout
+T10 Operating Round | IRR | Convert | pass: Baseline policy passes Convert
+T10 Operating Round | IRR | Lay/Upgrade Track | lay_tile: Lays tile 7 on B13 with rotation 3
+T10 Operating Round | IRR | Buy Trains | buy_train: Buys the cheapest mandatory train, D for 1000
+T10 Operating Round | NC | Convert | pass: Baseline policy passes Convert
+T10 Operating Round | NC | Lay/Upgrade Track | lay_tile: Lays tile 80 on B13 with rotation 3
+T10 Operating Round | NC | Buy Trains | buy_train: Buys the cheapest mandatory train, D for 1000
+T11 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for D
+T11 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for D
+T11 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for D
+T11 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for D
+T11 Operating Round | IRR | Run Routes | run_routes: Runs the highest-revenue route found for D
+T11 Operating Round | NC | Run Routes | run_routes: Runs the highest-revenue route found for D
+Bot run finished: Game completed (229 actions)

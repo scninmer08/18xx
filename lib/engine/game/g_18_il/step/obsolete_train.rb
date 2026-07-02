@@ -37,11 +37,12 @@ module Engine
           end
 
           def active?
-            @game.pending_rusting_event
+            @game.pending_rusting_event && po
           end
 
           def po
-            @po ||= @game.company_by_id('PO')
+            company = @game.company_by_id('PO')
+            company unless @game.private_used?(company)
           end
 
           def purchased_train
@@ -58,8 +59,7 @@ module Engine
                     'from rusting. It becomes obsolete instead'
             train.obsolete_on = purchased_train.sym
             train.rusts_on = nil
-            @log << "#{po.name} closes"
-            po.close!
+            @game.flip_private!(po)
             trigger_rusting_event
           end
 

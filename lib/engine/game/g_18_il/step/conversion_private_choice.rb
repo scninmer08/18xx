@@ -13,7 +13,8 @@ module Engine
 
           def actions(entity)
             return [] unless active?
-            return [] unless entity == current_entity
+            return [] unless entity == corporation
+            return [] if eligible_private_companies.empty?
 
             %w[acquire_company pass]
           end
@@ -23,7 +24,7 @@ module Engine
           end
 
           def choice_name
-            "Choose a Class #{private_class} private company to acquire"
+            "Choose a private company to acquire for #{corporation&.name}"
           end
 
           def choice_available?(_entity)
@@ -31,25 +32,28 @@ module Engine
           end
 
           def active?
-            @round.converted &&
-              !@chosen_for.include?(@round.converted) &&
-              available_companies.any?
+            corporation &&
+              !@chosen_for.include?(corporation)
           end
 
           def active_entities
             return [] unless active?
 
-            [@round.converted]
+            [corporation]
           end
 
           def description
-            "Choose Private Company for #{@round.converted&.name}"
+            "Choose Private Company for #{corporation&.name}"
+          end
+
+          def pass_description
+            'Pass (Acquire)'
           end
 
           def process_acquire_company(action)
-            corp = @round.converted
+            corp = corporation
             company = action.company
-            raise GameError, "Cannot acquire #{company.name}" unless available_companies.include?(company)
+            raise GameError, "Cannot acquire #{company.name}" unless eligible_private_companies.include?(company)
 
             from_development_pool = company.owner.nil?
 
@@ -59,42 +63,46 @@ module Engine
             end
 
             company.owner = corp
-            @game.update_private_name!(company)
             corp.companies << company
             @log << if from_development_pool
-                      "#{corp.name} acquires #{company.name} (Class #{private_class}) from the development pool"
+                      "#{corp.name} acquires #{company.name} from the Development Pool"
                     else
-                      "#{corp.name} receives #{company.name} (Class #{private_class}) from its president"
+                      "#{corp.name} receives #{company.name} from its president"
                     end
-            @chosen_for << corp
+            finish_private_choice!(corp) if eligible_private_companies.empty?
           end
 
           def process_pass(action)
-            @log << "#{action.entity.name} declines to assign a private company"
-            @chosen_for << @round.converted
+            @log << "#{action.entity.name} passes private acquisition"
+            finish_private_choice!(corporation)
           end
 
-          def companies_to_display
-            available_companies
+          def eligible_private_companies
+            corp = corporation
+            return [] unless corp
+
+            president = corp.owner
+            @game.eligible_private_acquisitions(corp, president)
           end
 
-          def log_skip(_entity); end
+          def skip!
+            corp = corporation
+            @log << "#{corp.name} skips private acquisition" if corp
+            finish_private_choice!(corp)
+          end
 
           private
 
-          # Medium (5-share) corporations receive class B privates; large (10-share) receive class A.
-          def private_class
-            medium_share_count = @game.class::CORPORATION_SIZES.key(:medium)
-            @round.converted&.total_shares == medium_share_count ? :B : :A
+          def corporation
+            @round.private_choice_corporation
           end
 
-          def available_companies
-            return [] unless @round.converted
+          def finish_private_choice!(corp)
+            return unless corp
 
-            corp = @round.converted
-            president = corp.owner
-            @game.eligible_private_acquisitions(corp, president)
-              .select { |company| company.meta[:class] == private_class }
+            @chosen_for << corp
+            @round.private_choice_corporation = nil if @round.private_choice_corporation == corp
+            @round.clear_cache!
           end
         end
       end

@@ -34,9 +34,9 @@ module Engine
           def choices
             price = @game.ic.share_price.price / 2
             choices = []
-            choices << ["Sell for #{@game.format_currency(price)}"]
+            choices << "Sell for #{@game.format_currency(price)}"
             if current_entity.cash >= price && @game.ic.num_market_shares.positive?
-              choices << ["Pay #{@game.format_currency(price)} for #{@game.ic.name} share"]
+              choices << "Pay #{@game.format_currency(price)} for #{@game.ic.name} share"
             end
             choices
           end
@@ -54,18 +54,14 @@ module Engine
               @game.option_exchange(corp)
             end
 
-            # Advance/refresh the queue
+            # Advance or refresh the queue.
             @game.exchange_choice_corps.shift
             @game.exchange_choice_corp = @game.exchange_choice_corps.first
 
-            # auto-resolve any remaining corps that can no longer exchange
+            # Automatically resolve any remaining corporations that can no longer exchange.
             @game.resolve_auto_one_cube_sales!
 
-            if @game.exchange_choice_corps.empty?
-              @game.finalize_ic_formation_if_ready!
-            else
-              @round.goto_entity!(@game.exchange_choice_corp)
-            end
+            @game.finalize_ic_formation_if_ready! if @game.exchange_choice_corps.empty?
           end
         end
       end

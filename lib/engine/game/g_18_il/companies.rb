@@ -10,11 +10,11 @@ module Engine
         def game_companies
           companies = [
             {
-              name: 'Peoria and Bureau Valley Railroad',
-              sym: 'P&BV',
-              value: 10,
+              name: 'Illinois River Railroad',
+              sym: 'IR',
+              value: 0,
               revenue: 0,
-              corporation: 'P&BV',
+              corporation: 'IR',
               color: '#2165ae',
               text_color: 'white',
               meta: { type: :concession, share_count: 2 },
@@ -22,7 +22,7 @@ module Engine
             {
               name: 'Northern Cross Railroad',
               sym: 'NC',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'NC',
               color: '#694a98',
@@ -32,7 +32,7 @@ module Engine
             {
               name: 'Galena and Chicago Union Railroad',
               sym: 'G&CU',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'G&CU',
               color: '#e0c6ae',
@@ -42,7 +42,7 @@ module Engine
             {
               name: 'Rock Island Line',
               sym: 'RI',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'RI',
               color: '#e84b1c',
@@ -52,7 +52,7 @@ module Engine
             {
               name: 'Chicago, Burlington & Quincy Railroad',
               sym: 'CBQ',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'CBQ',
               color: '#8dc8e7',
@@ -62,7 +62,7 @@ module Engine
             {
               name: 'Vandalia Railroad',
               sym: 'V',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'V',
               color: '#fdc600',
@@ -72,7 +72,7 @@ module Engine
             {
               name: 'Wabash Railroad',
               sym: 'WAB',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'WAB',
               color: '#7e8892',
@@ -82,7 +82,7 @@ module Engine
             {
               name: 'Chicago and Eastern Illinois Railroad',
               sym: 'C&EI',
-              value: 10,
+              value: 0,
               revenue: 0,
               corporation: 'C&EI',
               color: '#7d3b2c',
@@ -160,88 +160,13 @@ module Engine
 
           companies.concat([
             {
-              name: 'Share Premium',
-              value: 0,
-              revenue: 0,
-              desc: "During the corporation's “Issue a Share” step, it may close this company to issue a share for "\
-                    'double its current share price.',
-              sym: 'SP',
-              meta: { type: :private, class: :A },
-              abilities: [
-                { type: 'description', owner_type: 'corporation', count: 1, closed_when_used_up: true, when: 'issue_share' },
-              ],
-            },
-            {
-              name: 'U.S. Mail Line',
-              value: 0,
-              revenue: 0,
-              desc: 'The owning corporation receives a $10 subsidy per city visited by its trains. '\
-                    'Each city is counted only once, regardless of how many trains visit it.',
-              sym: 'USML',
-              meta: { type: :private, class: :A },
-              abilities: [
-                { type: 'description' },
-              ],
-            },
-            {
-              name: 'Train Subsidy',
-              value: 0,
-              revenue: 0,
-              desc: 'When the corporation buys trains from the bank, it may close this company to receive a 25% discount on all '\
-                    'purchases this turn.',
-              sym: 'TS',
-              meta: { type: :private, class: :A },
-              abilities: [
-                {
-                  type: 'train_discount',
-                  discount: 0.25,
-                  owner_type: 'corporation',
-                  use_across_ors: false,
-                  trains: self.class::TRAINS.reject { |t| t[:reserved] }
-                             .flat_map { |t| [t[:name]] + (t[:variants]&.map { |v| v[:name] } || []) },
-                  count: 99,
-                  closed_when_used_up: true,
-                  when: 'buy_train',
-                },
-              ],
-            },
-            {
-              name: 'Interstate Commerce Corridor',
-              sym: 'ICC',
-              value: 0,
-              revenue: 0,
-              desc: 'When running trains, the corporation earns an additional $20 from the bank for each train '\
-                    'that qualifies for a N/S or E/W bonus.',
-              meta: { type: :private, class: :A },
-              abilities: [
-                { type: 'description', owner_type: 'corporation' },
-              ],
-            },
-            {
-              name: 'Station Subsidy',
-              value: 0,
-              revenue: 0,
-              desc: 'Whenever the corporation gains station markers from starting or converting, it receives them for '\
-                    'free (instead of paying $40 each).',
-              sym: 'SS',
-              meta: { type: :private, class: :A },
-              abilities: [
-                {
-                  type: 'description',
-                  desc_detail: 'Station Subsidy',
-                  hexes: [],
-                  owner_type: 'corporation',
-                },
-              ],
-            },
-            {
               name: 'Goodrich Transit Line',
               value: 0,
               revenue: 0,
-              desc: "At any time during the corporation's operating turn, it may close this company to place "\
+              desc: "(10 SHARE) At any time during the corporation's operating turn, it may flip this company to place "\
                     "an available token from the corporation's charter in Chicago (H3) in the GTL slot. "\
                     'This does not count as a token action. The corporation gains a port marker for free. '\
-                    'This company closes immediately if it remains open when Chicago upgrades to a brown tile.',
+                    'This company flips immediately if it has not been used when Chicago upgrades to a brown tile.',
               sym: 'GTL',
               meta: { type: :private, class: :A },
               abilities: [
@@ -256,16 +181,100 @@ module Engine
                   from_owner: true,
                   count: 1,
                   extra_action: true,
-                  closed_when_used_up: true,
                 },
                 { type: 'reservation', remove: 'sold', hex: self.class::CHICAGO_HEX.first, city: 1 },
+              ],
+            },
+            {
+              name: 'Interstate Commerce Corridor',
+              sym: 'ICC',
+              value: 0,
+              revenue: 0,
+              desc: '(10 SHARE) When running trains, the corporation’s revenue is increased by an additional $100 if at least '\
+                    'one of its trains qualifies for a N/S or E/W bonus.',
+              meta: { type: :private, class: :A },
+              abilities: [
+                { type: 'description', owner_type: 'corporation' },
+              ],
+            },
+            {
+              name: 'Route Extension',
+              value: 0,
+              revenue: 0,
+              desc: '(10 SHARE) When the owning corporation runs trains, it may add one additional city or offboard stop to one '\
+                    'of its trains.',
+              sym: 'RE',
+              meta: { type: :private, class: :A },
+              abilities: [
+                {
+                  type: 'description',
+                  desc_detail: 'Route Extension',
+                  hexes: [],
+                  owner_type: 'corporation',
+                },
+              ],
+            },
+            {
+              name: 'Rush Delivery',
+              value: 0,
+              revenue: 0,
+              desc: "(10 SHARE) Before the corporation's “Run Trains” step, it may flip this company to buy one train from the bank. "\
+                    'Emergency money raising may be used if it has no train.',
+              sym: 'RD',
+              meta: { type: :private, class: :A },
+              abilities: [
+                { type: 'train_buy', owner_type: 'corporation', count: 1, when: 'buy_train' },
+              ],
+            },
+            {
+              name: 'Share Premium',
+              value: 0,
+              revenue: 0,
+              desc: "(10 SHARE) During the corporation's “Issue a Share” step, it may flip this company to issue a share for "\
+                    'double its current share price.',
+              sym: 'SP',
+              meta: { type: :private, class: :A },
+              abilities: [
+                { type: 'description', owner_type: 'corporation', count: 1, when: 'issue_share' },
+              ],
+            },
+            {
+              name: 'Train Subsidy',
+              value: 0,
+              revenue: 0,
+              desc: '(10 SHARE) When the corporation buys trains from the bank, it may flip this company to receive a 25% discount on all '\
+                    'purchases this turn.',
+              sym: 'TS',
+              meta: { type: :private, class: :A },
+              abilities: [
+                { type: 'description', owner_type: 'corporation', count: 1, when: 'buy_train' },
+                {
+                  type: 'train_discount',
+                  discount: 0.25,
+                  owner_type: 'corporation',
+                  trains: self.class::TRAINS.reject { |t| t[:reserved] }
+                             .flat_map { |t| [t[:name]] + (t[:variants]&.map { |v| v[:name] } || []) },
+                  when: 'buy_train',
+                },
+              ],
+            },
+            {
+              name: 'U.S. Mail Line',
+              value: 0,
+              revenue: 0,
+              desc: '(10 SHARE) The owning corporation receives a $10 subsidy per city visited by its trains. '\
+                    'Each city is counted only once, regardless of how many trains visit it.',
+              sym: 'USML',
+              meta: { type: :private, class: :A },
+              abilities: [
+                { type: 'description' },
               ],
             },
             {
               name: 'Union Stock Yards',
               value: 0,
               revenue: 0,
-              desc: "During the corporation's token placement step, it may close this company to place a token in any connected "\
+              desc: "(10 SHARE) During the corporation's token placement step, it may flip this company to place a token in any connected "\
                     'city except Chicago (H3), St. Louis (C18), or IC-Line cities (H7, G10, F17, E22). This token is '\
                     'non-blocking and does not use a city slot. This counts as its token placement for the turn.',
               sym: 'USY',
@@ -279,7 +288,6 @@ module Engine
                   from_owner: true,
                   extra_slot: true,
                   special_only: true,
-                  closed_when_used_up: true,
                   price: 0,
                   count: 1,
                   hexes: self.class::USY_CITY_HEXES,
@@ -287,54 +295,34 @@ module Engine
               ],
             },
             {
-              name: 'Rush Delivery',
+              name: 'Advanced Track',
               value: 0,
               revenue: 0,
-              desc: "Before the corporation's “Run Trains” step, it may close this company to buy one train from the bank. "\
-                    'Emergency money raising may be used if it has no train.',
-              sym: 'RD',
-              meta: { type: :private, class: :A },
-              abilities: [
-                { type: 'train_buy', owner_type: 'corporation', count: 1, when: 'buy_train' },
-              ],
-            },
-            {
-              name: 'Chicago-Virden Coal Co.',
-              value: 0,
-              revenue: 0,
-              desc: "During the corporation's tile-laying step, it may close this company to lay or upgrade a town hex/tile "\
-                    '(except Galena or Jacksonville) with the #838 tile, paying any terrain costs. It must connect to one of '\
-                    'its tokens, but this action does not count as the tile lay.',
-              sym: 'CVCC',
+              desc: '(5 SHARE) During the corporation’s tile-laying step, it may lay or upgrade one additional tile '\
+                    'for free (terrain costs still apply). This can include a tile already acted upon that turn. This ability '\
+                    'may only be used once per turn. This company flips after its second use.',
+              sym: 'AT',
               meta: { type: :private, class: :B },
               abilities: [
                 {
                   type: 'tile_lay',
-                  tiles: %w[838],
-                  hexes: self.class::CVCC_TOWN_HEXES,
                   when: 'track',
                   owner_type: 'corporation',
-                  count: 1,
+                  tiles: [],
+                  hexes: [],
+                  count: 2,
+                  count_per_or: 1,
                   consume_tile_lay: false,
                   reachable: true,
-                  closed_when_used_up: true,
+                  special: false,
                 },
               ],
-            },
-            {
-              name: 'Planned Obsolescence',
-              value: 0,
-              revenue: 0,
-              desc: 'When a rusting event occurs, the corporation may close this company to delay the rusting of one of '\
-                    'its trains. The train is removed from play at the end of its next “Run Trains” step.',
-              sym: 'PO',
-              meta: { type: :private, class: :B },
             },
             {
               name: 'Central IL Boom',
               value: 0,
               revenue: 0,
-              desc: "In Phase 6 or later, during the corporation's tile-laying step, it may close this company to upgrade "\
+              desc: "(5 SHARE) In Phase 8 or later, during the corporation's tile-laying step, it may flip this company to upgrade "\
                     'Peoria (E8) '\
                     'or Springfield (E12) with the corresponding gray tile. This upgrade does not require a token connection, '\
                     'does not count as a tile lay, and may be done regardless of the city’s current color. The unused tile '\
@@ -352,16 +340,58 @@ module Engine
                   count: 1,
                   consume_tile_lay: false,
                   reachable: false,
-                  closed_when_used_up: true,
                   special: false,
                 },
               ],
             },
             {
+              name: 'Chicago-Virden Coal Co.',
+              value: 0,
+              revenue: 0,
+              desc: "(5 SHARE) During the corporation's tile-laying step, it may flip this company to lay or upgrade a town hex/tile "\
+                    '(except Galena or Jacksonville) with the #838 tile, paying any terrain costs. It must connect to one of '\
+                    'its tokens, but this action does not count as the tile lay.',
+              sym: 'CVCC',
+              meta: { type: :private, class: :B },
+              abilities: [
+                {
+                  type: 'tile_lay',
+                  tiles: %w[838],
+                  hexes: self.class::CVCC_TOWN_HEXES,
+                  when: 'track',
+                  owner_type: 'corporation',
+                  count: 1,
+                  consume_tile_lay: false,
+                  reachable: true,
+                },
+              ],
+            },
+            {
+              name: 'Efficient Construction',
+              value: 0,
+              revenue: 0,
+              desc: '(5 SHARE) Whenever the corporation performs two tile actions in a turn, the second '\
+                    'action is free instead of $20 (terrain costs still apply).',
+              sym: 'EC',
+              meta: { type: :private, class: :B },
+              abilities: [
+                { type: 'description' },
+              ],
+            },
+            {
+              name: 'Engineering Mastery',
+              value: 0,
+              revenue: 0,
+              desc: "(5 SHARE) During the corporation's tile-laying step, it may upgrade two tiles for $20 (instead of the usual two lays "\
+                    'or lay + upgrade).',
+              sym: 'EM',
+              meta: { type: :private, class: :B },
+            },
+            {
               name: 'Frink, Walker & Co.',
               value: 0,
               revenue: 0,
-              desc: "During the corporation's tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, "\
+              desc: "(5 SHARE) During the corporation's tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, "\
                     'ignoring terrain costs. This does not require a token connection and does not count as the tile lay. '\
                     'While the corporation is open, it receives a $10 subsidy whenever any other corporation runs at least '\
                     'one train to Galena (C2).',
@@ -376,53 +406,6 @@ module Engine
                   free: true,
                   owner_type: 'corporation',
                   count: 1,
-                  closed_when_used_up: false,
-                },
-              ],
-            },
-            {
-              name: 'Efficient Construction',
-              value: 0,
-              revenue: 0,
-              desc: 'Whenever the corporation performs two tile actions in a turn, the second '\
-                    'action is free instead of $20 (terrain costs still apply).',
-              sym: 'EE',
-              meta: { type: :private, class: :B },
-              abilities: [
-                { type: 'description' },
-              ],
-            },
-            {
-              name: 'Engineering Mastery',
-              value: 0,
-              revenue: 0,
-              desc: "During the corporation's tile-laying step, it may upgrade two tiles for $20 (instead of the usual two lays "\
-                    'or lay + upgrade).',
-              sym: 'EM',
-              meta: { type: :private, class: :B },
-            },
-            {
-              name: 'Advanced Track',
-              value: 0,
-              revenue: 0,
-              desc: 'During the corporation’s tile-laying step, it may lay or upgrade one additional tile '\
-                    'for free (terrain costs still apply). This can include a tile already acted upon that turn. This ability '\
-                    'may only be used once per turn. This company closes after its second use.',
-              sym: 'AT',
-              meta: { type: :private, class: :B },
-              abilities: [
-                {
-                  type: 'tile_lay',
-                  when: 'track',
-                  owner_type: 'corporation',
-                  tiles: [],
-                  hexes: [],
-                  count: 2,
-                  count_per_or: 1,
-                  consume_tile_lay: false,
-                  reachable: true,
-                  closed_when_used_up: true,
-                  special: false,
                 },
               ],
             },
@@ -430,7 +413,7 @@ module Engine
               name: 'Illinois Steel Bridge Co.',
               value: 0,
               revenue: 0,
-              desc: 'The corporation ignores terrain costs for rivers and lakes. Each time it lays a yellow tile on a '\
+              desc: '(5 SHARE) The corporation ignores terrain costs for rivers and lakes. Each time it lays a yellow tile on a '\
                     'lake or across a river, it receives a $10 subsidy.',
               sym: 'ISBC',
               meta: { type: :private, class: :B },
@@ -438,6 +421,15 @@ module Engine
                 { type: 'tile_discount', terrain: :water, owner_type: 'corporation', discount: 20 },
                 { type: 'tile_income', terrain: :water, income: 10, owner_type: 'corporation', owner_only: true },
               ],
+            },
+            {
+              name: 'Planned Obsolescence',
+              value: 0,
+              revenue: 0,
+              desc: '(5 SHARE) When a rusting event occurs, the corporation may flip this company to delay the rusting of one of '\
+                    'its trains. The train is removed from play at the end of its next “Run Trains” step.',
+              sym: 'PO',
+              meta: { type: :private, class: :B },
             },
           ])
           companies

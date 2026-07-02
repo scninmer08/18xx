@@ -14,7 +14,7 @@ module Engine
             return [] if @game.last_set
             return [] if @game.will_buy_other_train
             return [] unless entity == current_entity
-            return [] unless @game.company_by_id('RD')&.owner == entity
+            return [] unless rush_delivery&.owner == entity
             return [] if @round.premature_trains_bought.include?(entity)
             return [] if entity.cash < @depot.min_depot_price && entity.trains.any?
 
@@ -37,7 +37,6 @@ module Engine
           def must_sell_shares?(corporation)
             return false if @game.will_buy_other_train
             return false if corporation.cash > @game.depot.min_depot_price
-            return false unless @game.emergency_issuable_cash(corporation) < @game.depot.min_depot_price
 
             must_issue_before_ebuy?(corporation)
           end
@@ -53,7 +52,7 @@ module Engine
           end
 
           def active_entities
-            return [] unless @game.company_by_id('RD')&.owner == @round.current_operator
+            return [] unless rush_delivery&.owner == @round.current_operator
 
             [@round.current_operator]
           end
@@ -66,8 +65,8 @@ module Engine
             @round.bought_trains << action.entity if @round.respond_to?(:bought_trains)
             @round.premature_trains_bought << action.entity
 
-            @log << "#{@game.company_by_id('RD').name} (#{action.entity.name}) closes"
-            @game.company_by_id('RD').close!
+            company = @game.company_by_id('RD')
+            @game.flip_private!(company)
 
             return if @game.pending_rusting_event
 
@@ -141,9 +140,14 @@ module Engine
           end
 
           def ability(entity)
-            return if !@game.company_by_id('RD') || !entity || @game.company_by_id('RD')&.owner != entity
+            return if !rush_delivery || !entity || rush_delivery.owner != entity
 
-            @game.abilities(@game.company_by_id('RD'), :train_buy)
+            @game.abilities(rush_delivery, :train_buy)
+          end
+
+          def rush_delivery
+            company = @game.company_by_id('RD')
+            company unless @game.private_used?(company)
           end
 
           def do_after_buy_train_action(action, entity)

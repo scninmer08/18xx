@@ -27,7 +27,9 @@ module Engine
 
             actions = []
             actions << 'corporate_sell_shares' if entity.cash < @game.depot.min_depot_price && entity.trains.empty?
-            actions << 'pass' if !other_trains(entity).empty? && !@acted && !entity.cash.zero?
+            if !@game.emr_active? && !other_trains(entity).empty? && !@acted && !entity.cash.zero?
+              actions << 'pass'
+            end
             actions
           end
 
@@ -41,7 +43,8 @@ module Engine
 
           def help
             str = []
-            if @game.company_by_id('RD')&.owner == @round.current_operator
+            if @game.company_by_id('RD')&.owner == @round.current_operator &&
+               !@game.private_used?(@game.company_by_id('RD'))
               str << "#{@game.company_by_id('RD')&.name} allows the corporation to buy one train from the Depot "\
                      'prior to running trains.'
             end
@@ -52,7 +55,7 @@ module Engine
 
           def process_pass(entity)
             # will_buy_other_train flag is set to true if corporation indicates that they are buying
-            # from another corporation and will not EMR for a train
+            # from another corporation and will not use EMR for a train.
             @game.will_buy_other_train = true
             super
           end

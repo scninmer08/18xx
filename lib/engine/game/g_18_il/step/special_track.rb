@@ -7,6 +7,20 @@ module Engine
     module G18IL
       module Step
         class SpecialTrack < Engine::Step::SpecialTrack
+          def actions(entity)
+            return [] if entity == @game.company_by_id('CIB') && !@game.phase.tiles.include?(:gray)
+
+            super
+          end
+
+          def tile_lay_available?(company)
+            return false if actions(company).empty?
+
+            @game.hexes.any? do |hex|
+              available_hex(company, hex) && potential_tiles(company, hex).any?
+            end
+          end
+
           def potential_tiles(entity_or_entities, hex)
             entities = Array(entity_or_entities)
             entity = entities.first
@@ -51,13 +65,8 @@ module Engine
               hex = action.hex
               @game.process_ic_line(action, beneficiary: action.entity.owner, round: @round) if @game.ic_line_hex?(hex)
 
-              # closes GTL if Chicago is upgraded to brown
-              if !@game.intro_game? && action.tile.name == 'CHI3' && !@game.company_by_id('GTL').closed?
-                company = @game.company_by_id('GTL')
-                owner_str = company.owner ? " (#{company.owner.name})" : ''
-                @log << "#{company.name}#{owner_str} closes"
-                company.close!
-              end
+              # Flip GTL if Chicago upgrades to brown, including while GTL is unowned.
+              @game.flip_private!(@game.company_by_id('GTL')) if !@game.intro_game? && action.tile.name == 'CHI3'
 
               ability.laid_hexes << action.hex.id
               @round.laid_hexes << action.hex
@@ -65,17 +74,13 @@ module Engine
             end
             ability.use!(upgrade: %i[green brown gray].include?(action.tile.color))
 
-            # Record any track laid after the dividend step
+            # Record any track laid after the dividend step.
             if owner&.corporation? && (operating_info = owner.operating_history[[@game.turn, @round.round_num]])
               operating_info.laid_hexes = @round.laid_hexes
             end
 
             if ability.type == :tile_lay
-              if ability.count&.zero? && ability.closed_when_used_up
-                company = ability.owner
-                @game.company_closing_after_using_ability(company)
-                company.close!
-              end
+              @game.flip_private!(ability.owner) if ability.count&.zero?
               @company = ability.count.positive? ? action.entity : nil if ability.must_lay_together
             end
 

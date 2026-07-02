@@ -11,6 +11,7 @@ module Engine
           def actions(entity)
             return [] if @game.last_set
             return [] if !entity.corporation? || entity != current_entity || entity == @round.converts[-1]
+            return [] if @round.private_choice_corporation == entity
 
             actions = []
             actions << 'convert' if [2, 5].include?(entity.total_shares)
@@ -34,11 +35,6 @@ module Engine
 
           def process_convert(action)
             corporation = action.entity
-
-            if corporation.share_price.price < 40
-              raise GameError, "#{corporation.name} cannot convert when its share price is below #{@game.format_currency(40)}"
-            end
-
             before = corporation.total_shares
 
             @game.convert(corporation)
@@ -49,6 +45,17 @@ module Engine
             @round.converted = corporation
           end
 
+          def process_pass(action)
+            corporation = action.entity
+            queue_private_choice(corporation)
+            super
+          end
+
+          def skip!
+            queue_private_choice(current_entity)
+            super
+          end
+
           def show_other_players
             false
           end
@@ -57,7 +64,20 @@ module Engine
             {
               converted: nil,
               converts: [],
+              private_choice_corporation: nil,
             }
+          end
+
+          private
+
+          def queue_private_choice(corporation)
+            return unless corporation&.corporation? && corporation.ipoed && !corporation.closed? && corporation.total_shares > 2
+            return if @round.converted
+            return if @round.converts.include?(corporation)
+            return if @round.private_choice_corporation
+
+            @round.private_choice_corporation = corporation
+            @round.clear_cache!
           end
         end
       end

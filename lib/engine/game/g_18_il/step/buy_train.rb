@@ -39,7 +39,6 @@ module Engine
             return false if @game.will_buy_other_train
             return false if corporation.cash > @game.depot.min_depot_price
             return false unless must_buy_train?(corporation)
-            return false unless @game.emergency_issuable_cash(corporation) < @game.depot.min_depot_price
 
             must_issue_before_ebuy?(corporation)
           end
@@ -52,19 +51,19 @@ module Engine
 
           def must_buy_train?(entity)
             if entity == @game.ic
-              # If IC already bought once this OR, the must-buy is lifted
+              # Lift the must-buy requirement if IC already bought once this OR.
               return false if @round.respond_to?(:bought_trains) && @round.bought_trains.include?(entity)
 
-              # Never force a buy if IC is already at its train limit
+              # Never force a purchase if IC is already at its train limit.
               return false if entity.trains.size >= @game.train_limit(entity)
 
               return false if @game.will_buy_other_train
 
-              # Must buy iff there's at least one buyable train and IC can afford the min depot price
+              # IC must buy if a train is available and it can afford the minimum Depot price.
               return entity.cash >= @game.depot.min_depot_price && !buyable_trains(entity).empty?
             end
 
-            # For everyone else: only must-buy if trainless
+            # Other corporations must buy only when trainless.
             entity.trains.empty?
           end
 
@@ -98,10 +97,10 @@ module Engine
             return if @game.intro_game?
 
             company = @game.company_by_id('TS')
-            return if company.ability_uses.first == 99
+            ability = company.all_abilities.find { |item| item.type == :train_discount }
+            return unless ability&.used?
 
-            @log << "#{company.name} (#{@round.current_operator.name}) closes" unless company.closed?
-            company.close!
+            @game.flip_private!(company)
           end
 
           def check_spend(action)
@@ -139,15 +138,18 @@ module Engine
 
             depot_trains << @depot.min_depot_train unless depot_trains.include?(@depot.min_depot_train)
 
-            if depot_trains.any? { |t| t.name == '6' } && ((d = depot_trains.find { |t| t.name == 'D' }) && entity.cash < d.price)
+            if depot_trains.any? { |t| t.name == '8' } && ((d = depot_trains.find { |t| t.name == 'D' }) && entity.cash < d.price)
               depot_trains.delete(d)
+            end
+
+            if entity == @game.ic && @game.ic_in_receivership?
+              return [depot_trains.min_by { |train| min_variant_price.call(train) }].compact
             end
 
             other_trains = @game.can_buy_train_from_others? ? other_trains(entity) : []
             other_trains.reject! { |t| @game.operated_this_round?(t.owner) && t.owner.trains.size == 1 } if @game.last_set_pending
             other_trains.reject! { |t| t.owner == @game.ic } if @game.ic_in_receivership?
             other_trains = [] if @game.emr_active?
-            return depot_trains if entity == @game.ic && @game.ic_in_receivership?
             return other_trains if @game.will_buy_other_train
 
             depot_trains + other_trains
@@ -155,6 +157,13 @@ module Engine
 
           def train_variant_helper(train, entity)
             variants = train.variants.values
+            if entity == @game.ic && @game.ic_in_receivership?
+              min_price = variants.map { |variant| variant[:price] || train.price }.min
+              return variants.select { |variant| (variant[:price] || train.price) == min_price }
+            end
+
+            return variants if train.owned_by_corporation?
+
             cash = entity.cash
             priced = variants.map { |v| [v, (v[:price] || train.price)] }
 

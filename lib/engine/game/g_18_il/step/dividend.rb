@@ -36,11 +36,16 @@ module Engine
             DIVIDEND_TYPES
           end
 
+          def half_pay_withhold_amount(entity, revenue)
+            return super unless entity.total_shares == 10
+
+            (revenue / 2 / 10).to_i * 10
+          end
+
           def share_price_change(entity, revenue = 0)
             price = entity.share_price.price
             return { share_direction: :down, share_times: 1 } if revenue.zero? && price == @game.lowest_stock_price
             return { share_direction: :left, share_times: 1 } if revenue.zero?
-            return { share_direction: :down, share_times: 1 } if revenue < price / 2
             return { share_direction: :up, share_times: 1 } if revenue < price
             return { share_direction: :right, share_times: 1 } if revenue < price * 2
             return { share_direction: :right, share_times: 2 } if revenue < price * 3
@@ -79,7 +84,7 @@ module Engine
             revenue = total_revenue / 2 if @game.train_borrowed
             dividend_types.to_h do |type|
               payout = send(type, entity, revenue)
-              # Shares remaining in the auction pool do not pay dividends to IC
+              # Shares remaining in the Auction Pool do not pay dividends to IC.
               payout[:divs_to_corporation] = entity == @game.ic ? 0 : corporation_dividends(entity, payout[:per_share])
               [type, payout.merge(share_price_change(entity, revenue - payout[:corporation]))]
             end
@@ -95,7 +100,7 @@ module Engine
 
             payouts = {}
             (@game.players + @game.corporations).each do |payee|
-              # Shares remaining in the auction pool do not pay to IC
+              # Shares remaining in the Auction Pool do not pay dividends to IC.
               next if payee == @game.ic && entity == @game.ic
 
               payout_entity(entity, payee, per_share, payouts)
@@ -109,12 +114,12 @@ module Engine
           end
 
           def skip!
+            return unless current_entity
             return super unless @game.last_set
 
-            revenue = @game.routes_revenue(routes)
             process_dividend(Action::Dividend.new(
               current_entity,
-              kind: revenue.positive? ? 'payout' : 'withhold',
+              kind: dividend_types.first.to_s,
             ))
 
             return unless current_entity.receivership?

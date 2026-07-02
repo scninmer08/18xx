@@ -1,0 +1,6265 @@
+{
+  "config": {
+    "profiles": [
+      {
+        "name": "Balanced",
+        "settings": {
+          "token_score_threshold": 25,
+          "auction_cash_reserve": 180,
+          "concession_cash_reserve": 160,
+          "concession_values": {
+            "2": 20,
+            "5": 35,
+            "10": 45
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": 0,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 30,
+          "train_capacity_weight": 25,
+          "train_permanent_bonus": 80,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 25,
+          "track_new_exit_weight": 10,
+          "track_revenue_weight": 2,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 40,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      },
+      {
+        "name": "Financier",
+        "settings": {
+          "token_score_threshold": 25,
+          "auction_cash_reserve": 180,
+          "concession_cash_reserve": 220,
+          "concession_values": {
+            "2": 15,
+            "5": 25,
+            "10": 40
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": 60,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 70,
+          "train_capacity_weight": 25,
+          "train_permanent_bonus": 100,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 25,
+          "track_new_exit_weight": 10,
+          "track_revenue_weight": 2,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 40,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      },
+      {
+        "name": "Expansionist",
+        "settings": {
+          "token_score_threshold": 25,
+          "auction_cash_reserve": 140,
+          "concession_cash_reserve": 160,
+          "concession_values": {
+            "2": 30,
+            "5": 50,
+            "10": 70
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": -40,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 20,
+          "train_capacity_weight": 25,
+          "train_permanent_bonus": 80,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 25,
+          "track_new_exit_weight": 10,
+          "track_revenue_weight": 2,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 40,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      },
+      {
+        "name": "Engineer",
+        "settings": {
+          "token_score_threshold": 15,
+          "auction_cash_reserve": 180,
+          "concession_cash_reserve": 160,
+          "concession_values": {
+            "2": 20,
+            "5": 35,
+            "10": 45
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": 0,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 30,
+          "train_capacity_weight": 30,
+          "train_permanent_bonus": 110,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 35,
+          "track_new_exit_weight": 18,
+          "track_revenue_weight": 3,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 55,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      }
+    ],
+    "seeds": 25,
+    "first_seed": 705891,
+    "optional_rules": [
+
+    ],
+    "games": 100
+  },
+  "status_counts": {
+    "finished": 76,
+    "error": 24
+  },
+  "standings": [
+    {
+      "profile": "Engineer",
+      "games": 76,
+      "wins": 36,
+      "points": 152,
+      "average_rank": 2.0,
+      "average_value": 85.38
+    },
+    {
+      "profile": "Financier",
+      "games": 76,
+      "wins": 20,
+      "points": 130,
+      "average_rank": 2.29,
+      "average_value": 97.01
+    },
+    {
+      "profile": "Expansionist",
+      "games": 76,
+      "wins": 9,
+      "points": 119,
+      "average_rank": 2.43,
+      "average_value": 61.14
+    },
+    {
+      "profile": "Balanced",
+      "games": 76,
+      "wins": 11,
+      "points": 55,
+      "average_rank": 3.28,
+      "average_value": 14.84
+    }
+  ],
+  "games": [
+    {
+      "seed": 705891,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 272,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 9
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705891,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 270,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 4
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705891,
+      "rotation": 3,
+      "status": "error",
+      "detail": "undefined method `+' for nil:NilClass",
+      "actions_taken": 21,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 300
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 3,
+          "value": 360
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 360
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 360
+        }
+      ],
+      "last_action": {
+        "turn": 1,
+        "round": "Auction Round",
+        "step": "Bid on Selected Concession",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "bid",
+        "reason": "Bids 40 for Wabash Railroad, valued at 60",
+        "company": "Wabash Railroad",
+        "price": 40
+      },
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/step/selection_auction.rb:35:in `active_entities'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/selection_auction.rb:132:in `active_entities'",
+        "/mnt/nas/18xx-server/lib/engine/step/base.rb:73:in `current_entity'",
+        "/mnt/nas/18xx-server/lib/engine/step/base.rb:66:in `current_actions'",
+        "/mnt/nas/18xx-server/lib/engine/step/base.rb:85:in `blocking?'",
+        "/mnt/nas/18xx-server/lib/engine/round/base.rb:212:in `block in skip_steps'",
+        "/mnt/nas/18xx-server/lib/engine/round/base.rb:210:in `each'",
+        "/mnt/nas/18xx-server/lib/engine/round/base.rb:210:in `skip_steps'",
+        "/mnt/nas/18xx-server/lib/engine/round/base.rb:100:in `process_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:882:in `process_single_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1828:in `process_single_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:842:in `process_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/runner.rb:43:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot.rb:34:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:16:in `run_game'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "-e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705891,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 223,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 4
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 68
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 49
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705892,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 221,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 80
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 40
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705892,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 219,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 80
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705892,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 444,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 1,
+          "value": 35
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 19
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 10
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705892,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 197,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705893,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 209,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705893,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 208,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705893,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705893,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 200,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705894,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 257,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705894,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 253,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705894,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 497,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 40
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 76
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 14
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705894,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 251,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705895,
+      "rotation": 1,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705895,
+      "rotation": 2,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705895,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705895,
+      "rotation": 4,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705896,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 272,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705896,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 343,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 6
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 1,
+          "value": 14
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 3,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "IC",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705896,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/part/edge.rb:30: [BUG] Segmentation fault at 0x000000000000001d",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:30: [BUG] Segmentation fault at 0x000000000000001d",
+        "ruby 3.2.0 (2022-12-25 revision a528908271) [x86_64-linux]",
+        "",
+        "-- Control frame information -----------------------------------------------",
+        "c:0028 p:0040 s:0183 e:000182 METHOD /mnt/nas/18xx-server/lib/engine/part/edge.rb:30",
+        "c:0027 p:0009 s:0177 e:000175 METHOD /mnt/nas/18xx-server/lib/engine/part/path.rb:299",
+        "c:0026 p:0006 s:0170 e:000169 BLOCK  /mnt/nas/18xx-server/lib/engine/tile.rb:343 [FINISH]",
+        "c:0025 p:---- s:0166 e:000165 CFUNC  :all?",
+        "c:0024 p:0006 s:0162 e:000161 BLOCK  /mnt/nas/18xx-server/lib/engine/tile.rb:342 [FINISH]",
+        "c:0023 p:---- s:0158 e:000157 CFUNC  :any?",
+        "c:0022 p:0036 s:0154 e:000153 METHOD /mnt/nas/18xx-server/lib/engine/tile.rb:341",
+        "c:0021 p:0026 s:0148 e:000147 METHOD /mnt/nas/18xx-server/lib/engine/game/base.rb:1804",
+        "c:0020 p:0143 s:0139 e:000138 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1010",
+        "c:0019 p:0011 s:0130 e:000129 BLOCK  /mnt/nas/18xx-server/lib/engine/step/tracker.rb:379 [FINISH]",
+        "c:0018 p:---- s:0126 e:000125 CFUNC  :select",
+        "c:0017 p:0041 s:0122 e:000121 METHOD /mnt/nas/18xx-server/lib/engine/step/tracker.rb:379",
+        "c:0016 p:0018 s:0112 e:000111 METHOD /mnt/nas/18xx-server/lib/engine/step/tracker.rb:385",
+        "c:0015 p:0022 s:0104 e:000103 BLOCK  /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:709 [FINISH]",
+        "c:0014 p:---- s:0100 e:000099 IFUNC",
+        "c:0013 p:---- s:0097 e:000096 CFUNC  :each"
+      ]
+    },
+    {
+      "seed": 705896,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 257,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705897,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 340,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 82
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 84
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "IC",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705897,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 343,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 7
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 84
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "IC",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705897,
+      "rotation": 3,
+      "status": "error",
+      "detail": "TypeError: wrong instance allocation",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:27:in `new'",
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:27:in `rotate'",
+        "/mnt/nas/18xx-server/lib/engine/part/path.rb:299:in `rotate'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:343:in `block (2 levels) in paths_are_subset_of?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:342:in `all?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:342:in `block in paths_are_subset_of?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:341:in `any?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:341:in `paths_are_subset_of?'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1804:in `upgrades_to?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1010:in `upgrades_to?'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:379:in `block in potential_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:379:in `select'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:379:in `potential_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:385:in `upgradeable_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:709:in `block in track_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `each'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `flat_map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `track_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:39:in `choose'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/policy_roster.rb:20:in `choose'"
+      ]
+    },
+    {
+      "seed": 705897,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 264,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 4,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 2,
+          "value": 38
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 3,
+          "value": 19
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 85
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705898,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 266,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705898,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 262,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705898,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 531,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 31
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 260
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 14
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 408
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705898,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 248,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705899,
+      "rotation": 1,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/train.rb:116: [BUG] Segmentation fault at 0x0000000000003135",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/train.rb:116: [BUG] Segmentation fault at 0x0000000000003135",
+        "ruby 3.2.0 (2022-12-25 revision a528908271) [x86_64-linux]",
+        "",
+        "-- Control frame information -----------------------------------------------",
+        "c:0016 p:0015 s:0118 e:000113 METHOD /mnt/nas/18xx-server/lib/engine/train.rb:116",
+        "c:0015 p:0017 s:0110 e:000108 METHOD /mnt/nas/18xx-server/lib/engine/phase.rb:20",
+        "c:0014 p:0049 s:0102 e:000101 METHOD /mnt/nas/18xx-server/lib/engine/depot.rb:31",
+        "c:0013 p:0018 s:0094 e:000093 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1541",
+        "c:0012 p:0019 s:0090 e:000089 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/round/operating.rb:42",
+        "c:0011 p:0187 s:0086 e:000085 METHOD /mnt/nas/18xx-server/lib/engine/game/base.rb:889",
+        "c:0010 p:0022 s:0078 e:000077 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1828",
+        "c:0009 p:0080 s:0070 e:000069 METHOD /mnt/nas/18xx-server/lib/engine/game/base.rb:842",
+        "c:0008 p:0146 s:0059 e:000058 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/runner.rb:43",
+        "c:0007 p:0158 s:0051 e:000050 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot.rb:34",
+        "c:0006 p:0044 s:0029 e:000028 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:16",
+        "c:0005 p:0005 s:0021 e:000020 BLOCK  /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11 [FINISH]",
+        "c:0004 p:---- s:0017 e:000016 CFUNC  :map",
+        "c:0003 p:0009 s:0013 e:000012 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11",
+        "c:0002 p:0036 s:0008 e:000005 EVAL   -e:5 [FINISH]",
+        "c:0001 p:0000 s:0003 E:002170 DUMMY  [FINISH]"
+      ]
+    },
+    {
+      "seed": 705899,
+      "rotation": 2,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/train.rb:116: [BUG] Segmentation fault at 0x0000000000003036",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/train.rb:116: [BUG] Segmentation fault at 0x0000000000003036",
+        "ruby 3.2.0 (2022-12-25 revision a528908271) [x86_64-linux]",
+        "",
+        "-- Control frame information -----------------------------------------------",
+        "c:0016 p:0015 s:0118 e:000113 METHOD /mnt/nas/18xx-server/lib/engine/train.rb:116",
+        "c:0015 p:0017 s:0110 e:000108 METHOD /mnt/nas/18xx-server/lib/engine/phase.rb:20",
+        "c:0014 p:0049 s:0102 e:000101 METHOD /mnt/nas/18xx-server/lib/engine/depot.rb:31",
+        "c:0013 p:0018 s:0094 e:000093 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1541",
+        "c:0012 p:0019 s:0090 e:000089 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/round/operating.rb:42",
+        "c:0011 p:0187 s:0086 e:000085 METHOD /mnt/nas/18xx-server/lib/engine/game/base.rb:889",
+        "c:0010 p:0022 s:0078 e:000077 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1828",
+        "c:0009 p:0080 s:0070 e:000069 METHOD /mnt/nas/18xx-server/lib/engine/game/base.rb:842",
+        "c:0008 p:0146 s:0059 e:000058 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/runner.rb:43",
+        "c:0007 p:0158 s:0051 e:000050 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot.rb:34",
+        "c:0006 p:0044 s:0029 e:000028 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:16",
+        "c:0005 p:0005 s:0021 e:000020 BLOCK  /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11 [FINISH]",
+        "c:0004 p:---- s:0017 e:000016 CFUNC  :map",
+        "c:0003 p:0009 s:0013 e:000012 METHOD /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11",
+        "c:0002 p:0036 s:0008 e:000005 EVAL   -e:5 [FINISH]",
+        "c:0001 p:0000 s:0003 E:001a20 DUMMY  [FINISH]"
+      ]
+    },
+    {
+      "seed": 705899,
+      "rotation": 3,
+      "status": "error",
+      "detail": "TypeError: can't create instance of singleton class",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:27:in `new'",
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:27:in `rotate'",
+        "/mnt/nas/18xx-server/lib/engine/part/path.rb:299:in `rotate'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:343:in `block (2 levels) in paths_are_subset_of?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:342:in `all?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:342:in `block in paths_are_subset_of?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:341:in `any?'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:341:in `paths_are_subset_of?'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1804:in `upgrades_to?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1010:in `upgrades_to?'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:379:in `block in potential_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:379:in `select'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:379:in `potential_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:385:in `upgradeable_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:709:in `block in track_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `each'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `flat_map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `track_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:39:in `choose'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/policy_roster.rb:20:in `choose'"
+      ]
+    },
+    {
+      "seed": 705899,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 254,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 4,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 36
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 33
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705900,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 277,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 9
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705900,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 275,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 4
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705900,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 630,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 492
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 3
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 100
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705900,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 228,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 4
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 68
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 49
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705901,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 271,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 90
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 79
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705901,
+      "rotation": 2,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705901,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705901,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 368,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 222
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 290
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705902,
+      "rotation": 1,
+      "status": "error",
+      "detail": "TypeError: initialize_copy should take same class object",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/route_finder.rb:42:in `initialize_copy'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/route_finder.rb:42:in `initialize_dup'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/route_finder.rb:42:in `dup'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/route_finder.rb:42:in `block in routes_for'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/route_finder.rb:39:in `each'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/route_finder.rb:39:in `routes_for'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:893:in `block in best_route_combination'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:892:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:892:in `best_route_combination'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:876:in `route_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:46:in `choose'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/policy_roster.rb:20:in `choose'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/runner.rb:37:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot.rb:34:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:16:in `run_game'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "-e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705902,
+      "rotation": 2,
+      "status": "error",
+      "detail": "TypeError: can't create instance of singleton class",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:27:in `new'",
+        "/mnt/nas/18xx-server/lib/engine/part/edge.rb:27:in `rotate'",
+        "/mnt/nas/18xx-server/lib/engine/part/path.rb:299:in `rotate'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:292:in `block in paths'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:292:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:292:in `paths'",
+        "/mnt/nas/18xx-server/lib/engine/tile.rb:410:in `city_town_edges'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:422:in `legal_tile_rotation?'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:469:in `block in legal_tile_rotations'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:467:in `select'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:467:in `legal_tile_rotations'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:387:in `block in upgradeable_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:385:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/step/tracker.rb:385:in `upgradeable_tiles'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:709:in `block in track_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `each'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `flat_map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:706:in `track_decision'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:39:in `choose'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/policy_roster.rb:20:in `choose'"
+      ]
+    },
+    {
+      "seed": 705902,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 487,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 166
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 382
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 10
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 347
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705902,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 262,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 4,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 36
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 33
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705903,
+      "rotation": 1,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705903,
+      "rotation": 2,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705903,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705903,
+      "rotation": 4,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705904,
+      "rotation": 1,
+      "status": "error",
+      "detail": "can't create instance of singleton class",
+      "actions_taken": 119,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 3,
+          "value": 190
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 310
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 4,
+          "value": 105
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 275
+        }
+      ],
+      "last_action": {
+        "turn": 1,
+        "round": "Operating Round",
+        "step": "Buy Trains",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "buy_train",
+        "reason": "Buys the best-valued optional train, 2 for 80 (train score 53)",
+        "corporation": "C&EI",
+        "train": "2",
+        "price": 80
+      },
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:2283:in `new'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:2283:in `rust_trains!'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:981:in `rust_trains!'",
+        "/mnt/nas/18xx-server/lib/engine/phase.rb:22:in `buying_train!'",
+        "/mnt/nas/18xx-server/lib/engine/depot.rb:31:in `export_all!'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1541:in `export_train'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/round/operating.rb:42:in `finished?'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:889:in `process_single_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1828:in `process_single_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:842:in `process_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/runner.rb:43:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot.rb:34:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:16:in `run_game'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "-e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705904,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 371,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 1,
+          "value": 279
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 222
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705904,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 708,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 95
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 528
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 1025
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "WAB",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "WAB",
+        "route_revenue": 140,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705904,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 367,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 222
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 290
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705905,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 284,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 13
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 16
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705905,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 276,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 8
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 16
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705905,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 536,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 83
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 4,
+          "value": 60
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 88
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 554
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705905,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 260,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 4,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 36
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 33
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705906,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 249,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705906,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 245,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705906,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 579,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 32
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 220
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 87
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 140
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705906,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 247,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 2,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 73
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705907,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 253,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705907,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 249,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705907,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 532,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 76
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 320
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 31
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 259
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 140,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705907,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 256,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705908,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 340,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 476
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 405
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 3,
+          "value": 222
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705908,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 336,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 476
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 400
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 3,
+          "value": 222
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705908,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705908,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 356,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 222
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 290
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705909,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 208,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705909,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 207,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705909,
+      "rotation": 3,
+      "status": "error",
+      "detail": "undefined method `amount=' for #<Engine::Loan:0x00007f74fb39b738 @id=<Engine::Corporation: G&CU>, @amount=324>",
+      "actions_taken": 397,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 736
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 403
+        }
+      ],
+      "last_action": {
+        "turn": 6,
+        "round": "Operating Round",
+        "step": "Buy Trains",
+        "entity": "G&CU",
+        "entity_type": "five_share",
+        "action": "buy_train",
+        "reason": "Buys the cheapest emergency train, 5+1C for 740 (train score 163)",
+        "corporation": "G&CU",
+        "train": "5+1C",
+        "price": 740
+      },
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1785:in `take_loan'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/buy_train.rb:268:in `try_take_loan'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/buy_train.rb:238:in `buy_train_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/buy_train.rb:191:in `process_buy_train'",
+        "/mnt/nas/18xx-server/lib/engine/round/base.rb:95:in `process_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:882:in `process_single_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/game.rb:1828:in `process_single_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:842:in `process_action'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/runner.rb:43:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot.rb:34:in `run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:16:in `run_game'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "-e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705909,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 196,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705910,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 327,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 456
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 405
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 3,
+          "value": 222
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705910,
+      "rotation": 2,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705910,
+      "rotation": 3,
+      "status": "error",
+      "detail": "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `index': stack level too deep (SystemStackError)",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `with_index'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1579:in `block (3 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `all?'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1578:in `block (2 levels) in compute_stops'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `combination'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `each'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/base.rb:1570:in `block in compute_stops'",
+        "... 8994 levels...",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `block in run'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `map'",
+        "from /mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/tournament_worker.rb:11:in `run'",
+        "from -e:5:in `<main>'"
+      ]
+    },
+    {
+      "seed": 705910,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 354,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 222
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 290
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705911,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 285,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 1
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 16
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705911,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 286,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 16
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705911,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 492,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 125
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 874
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 30
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 274
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705911,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 250,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705912,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 260,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 22
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705912,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 259,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 22
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705912,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 466,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 170
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 7
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 20
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 140,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705912,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 249,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705913,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 345,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 2,
+          "value": 10
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 2
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 4,
+          "value": 1
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 97
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Buy Trains",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "pass",
+        "reason": "Baseline policy passes Buy Trains"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705913,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 340,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 2
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 97
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Buy Trains",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "pass",
+        "reason": "Baseline policy passes Buy Trains"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705913,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 498,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 17
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 3
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "IC",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705913,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 384,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 2,
+          "value": 300
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 482
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 12,
+        "round": "Operating Round",
+        "step": "Borrow Train",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "borrow_train",
+        "reason": "Borrows the cheapest available train, D",
+        "corporation": "IC",
+        "train": "D"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705914,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 258,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705914,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 254,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705914,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 605,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 60
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 560
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 23
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 40
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705914,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 251,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705915,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 266,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705915,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 262,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705915,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 611,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 3
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 80
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 13
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 164
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "WAB",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "WAB",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 705915,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 256,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    }
+  ]
+}

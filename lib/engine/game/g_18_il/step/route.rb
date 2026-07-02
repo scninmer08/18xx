@@ -33,6 +33,8 @@ module Engine
             super
             @game.pay_fwc_bonus!(@round.routes, action.entity) unless @game.intro_game?
             @game.rust_rogers! if action.routes.any? { |route| route.train.name == @game.class::ROGERS_NAME }
+          ensure
+            restore_route_extension!
           end
 
           def scrap_button_text(_train)
@@ -51,6 +53,20 @@ module Engine
             raise GameError, 'Can only scrap trains owned by the corporation' if action.entity != action.train.owner
 
             @game.scrap_train(action.train)
+          end
+
+          private
+
+          def restore_route_extension!
+            train = @round.route_extension_train
+            original = @round.route_extension_original
+            return unless train
+            return unless original
+
+            train.name = original[:name]
+            train.distance = original[:distance]
+            @round.route_extension_train = nil
+            @round.route_extension_original = nil
           end
         end
       end

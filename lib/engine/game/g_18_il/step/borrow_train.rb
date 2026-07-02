@@ -35,7 +35,7 @@ module Engine
               a.train_types.map { |typ| @game.depot.depot_trains.find { |t| t.sym == typ } }.compact
             end.uniq
 
-            trains.reject! { |t| t.name == 'D' } if trains.any? { |t| t.name == '6' }
+            trains.reject! { |t| t.name == 'D' } if trains.any? { |t| t.name == '8' }
 
             trains
           end

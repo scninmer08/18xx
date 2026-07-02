@@ -11,6 +11,8 @@ module Engine
           def setup
             @game.players.each(&:unpass!)
             @bought_shares = []
+            @big_lot_winner = nil
+            @big_lot_current_entity = nil
             setup_auction
             company_setup
 
@@ -24,6 +26,13 @@ module Engine
           end
 
           def company_setup
+            if @game.big_lots_first_turn?
+              @companies = @game.lot_proxies.reject(&:closed?)
+              @big_lot_current_entity = initial_auction_entities.first
+              auction_entity(@game.lot_choice_proxy)
+              return
+            end
+
             concessions = @game.companies.select { |c| c.meta[:type] == :concession && !c.owner&.player? }
             @companies = concessions.sort_by { |c| [c.meta[:share_count], c.sym] }
             @companies.each { |c| change_private_description(c) }
@@ -77,6 +86,8 @@ module Engine
 
           def prepare_ic_shares
             ic = @game.ic
+            return unless ic.share_price
+
             ic_shares = assign_share_values(:share, ic.share_price.price)
             ic_presidents_share = assign_share_values(:presidents_share, ic.share_price.price * 2)
 
@@ -96,12 +107,42 @@ module Engine
           end
 
           def actions(entity)
+            return entity == @big_lot_winner ? %w[bid] : [] if @big_lot_winner
             return [] if entities.all?(&:passed?)
             return [] if @companies.empty?
+
             entity == current_entity ? ACTIONS : []
           end
 
+          def active_entities
+            if @game.big_lots_first_turn?
+              return [@big_lot_winner] if @big_lot_winner
+              return [] if @companies.empty?
+
+              if @auctioning == @game.lot_choice_proxy
+                if (winning_bid = highest_bid(@auctioning))
+                  index = @active_bidders.index(winning_bid.entity)
+                  return [@active_bidders[(index + 1) % @active_bidders.size]] if index && @active_bidders.any?
+                end
+
+                return [@big_lot_current_entity || @active_bidders.first || entities.first].compact
+              end
+            end
+
+            return super unless auctioning
+            return [] if @active_bidders.empty?
+
+            if (winning_bid = highest_bid(@auctioning))
+              index = @active_bidders.index(winning_bid.entity)
+              return [@active_bidders[(index + 1) % @active_bidders.size]] if index
+            end
+
+            [@active_bidders.first]
+          end
+
           def description
+            return 'Choose a Lot' if @big_lot_winner
+            return 'Bid for the Right to Choose a Lot' if @game.big_lots_first_turn?
             return 'Bid on Selected Concession' if @auctioning&.meta&.[](:type) == :concession
             return 'Bid on Selected Private' if @auctioning&.meta&.[](:type) == :private
             return 'Bid on Selected Share' if @auctioning
@@ -110,6 +151,7 @@ module Engine
           end
 
           def pass_description
+            return 'Decline' if @game.big_lots_first_turn?
             return 'Decline' unless @auctioning
 
             if @auctioning.meta[:type] == :concession
@@ -121,6 +163,20 @@ module Engine
 
           def help
             str = []
+            if @game.big_lots_first_turn?
+              str << if @big_lot_winner
+                       if @game.available_big_lot_indices.size == 2
+                         'Choose one lot. The final player receives the remaining lot for free.'
+                       else
+                         'Choose one of the available lots. The remaining players will bid again.'
+                       end
+                     else
+                       'Bid for the right to choose a lot, or decline. If everyone still eligible declines before '\
+                         'anyone bids, the available lots are assigned randomly among them.'
+                     end
+              return str
+            end
+
             return str if @auctioning && @auctioning.meta[:type] != :concession
 
             if !@game.intro_game? &&
@@ -128,7 +184,7 @@ module Engine
                 c.meta[:type] == :concession &&
                 @game.corporations.find { |corp| corp.name == c.sym }.companies.any?
               end
-              str << ['The attached Class A and Class B privates are described on each concession card.']
+              str << ['The assigned Class A and Class B privates are described on each concession card.']
             end
 
             unless @auctioning
@@ -143,6 +199,15 @@ module Engine
           end
 
           def tiered_auction_companies
+            if @game.big_lots_first_turn?
+              privates = @game.lots.flatten.select { |company| company.meta[:type] == :private }
+              return [
+                @game.lot_proxies.reject(&:closed?),
+                privates.select { |company| company.meta[:class] == :A },
+                privates.select { |company| company.meta[:class] == :B },
+              ].reject(&:empty?)
+            end
+
             return [@companies] if @companies.nil? || @companies.empty? || @game.intro_game?
 
             concessions     = @companies.select { |c| c.meta&.[](:type) == :concession }
@@ -184,7 +249,10 @@ module Engine
           def process_pass(action, reason = nil)
             entity = action.entity
 
-            if auctioning
+            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy
+              pass_auction(entity)
+              resolve_bids
+            elsif auctioning
               pass_auction(entity)
               resolve_bids
             else
@@ -192,6 +260,12 @@ module Engine
               msg += " (#{reason})" if reason
               @log << msg
               entity.pass!
+              if entities.all?(&:passed?) && @game.big_lots_first_turn?
+                @log << 'All remaining players pass without making an opening bid; the remaining lots are assigned randomly'
+                @game.resolve_big_lots_randomly!
+                @companies.clear
+                return pass!
+              end
               return pass! if entities.all?(&:passed?) || @companies.empty?
 
               next_entity!
@@ -213,8 +287,63 @@ module Engine
             next_entity! if entity&.passed?
           end
 
+          def process_bid(action)
+            if @big_lot_winner
+              company = action.company
+              raise GameError, 'Only the auction winner may choose a lot' unless action.entity == @big_lot_winner
+              raise GameError, 'Choose an available lot' unless available_big_lot_proxies.include?(company)
+
+              lot_index = company.meta[:lot_index]
+              winner = @big_lot_winner
+              @big_lot_winner = nil
+              finish_big_lot_choice(winner, lot_index)
+              return
+            end
+
+            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy
+              if @bids[@auctioning].empty?
+                entities.each(&:unpass!)
+                @active_bidders = entities.dup
+              end
+              action.entity.unpass!
+              add_bid(action)
+              resolve_bids if @active_bidders.one?
+              return
+            end
+
+            entities.each(&:unpass!) if @game.big_lots_first_turn? && !auctioning
+            super
+          end
+
+          def pass_auction(entity)
+            if @game.big_lots_first_turn?
+              if @bids[@auctioning].empty?
+                @log << "#{entity.name} declines to make an opening bid"
+              else
+                @log << "#{entity.name} declines to bid"
+              end
+              @bids[@auctioning]&.reject! { |bid| bid.entity == entity }
+              @active_bidders.delete(entity)
+              entity.pass!
+              @big_lot_current_entity = @active_bidders.first
+              return
+            end
+
+            super
+          end
+
+          def bid_target(bid)
+            return @game.lot_choice_proxy if @game.big_lots_first_turn?
+
+            super
+          end
+
           def add_bid(bid)
             company = bid_target(bid)
+            if @game.big_lots_first_turn? && company.meta[:type] != :lot_choice
+              raise GameError, 'Only the right to choose a lot may be bid on during the Big Lots auction'
+            end
+
             entity = bid.entity
             price  = bid.price
             min    = min_bid(company)
@@ -232,7 +361,11 @@ module Engine
             bids.reject! { |b| b.entity == entity }
             bids << bid
 
-            @log << "#{entity.name} bids #{@game.format_currency(price)} for #{company.name}"
+            if @game.big_lots_first_turn? && company.meta[:type] == :lot_choice
+              @log << "#{entity.name} bids #{@game.format_currency(price)}"
+            else
+              @log << "#{entity.name} bids #{@game.format_currency(price)} for #{company.name}"
+            end
 
             return unless @auctioning
 
@@ -248,6 +381,9 @@ module Engine
             player = winner.entity
             price  = winner.price
             case company.meta[:type]
+            when :lot_choice
+              @log << "#{player.name} wins the right to choose a lot with a bid of #{@game.format_currency(price)}"
+              player.spend(price, @game.bank)
             when :share, :presidents_share
               @log << "#{player.name} wins the auction for #{company.name} with a bid of #{@game.format_currency(price)}"
               @log << "#{@game.ic.name} receives #{@game.format_currency(price)}"
@@ -258,7 +394,32 @@ module Engine
           end
 
           def resolve_bids
+            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy
+              if @active_bidders.none? && @bids[@auctioning].empty?
+                @log << 'All remaining players decline to make an opening bid; the remaining lots are assigned randomly'
+                @bids.clear
+                @active_bidders.clear
+                @auctioning = nil
+                @game.resolve_big_lots_randomly!
+                @companies.clear
+                return pass!
+              end
+
+              return unless @active_bidders.one? && @bids[@auctioning].any?
+
+              winner = highest_bid(@auctioning)
+              company = @auctioning
+              win_bid(winner, company)
+
+              @bids.clear
+              @active_bidders.clear
+              @auctioning = nil
+              post_win_bid(winner, company)
+              return
+            end
+
             super
+            return if @big_lot_winner
             return pass! if @companies.none?
 
             entities.each(&:unpass!)
@@ -271,6 +432,10 @@ module Engine
             ic     = @game.ic
 
             case company.meta[:type]
+            when :lot_choice
+              @big_lot_winner = player
+              @round.goto_entity!(player)
+              return
             when :share
               @game.share_pool.transfer_shares(ShareBundle.new(ic.shares.last), player)
 
@@ -302,14 +467,12 @@ module Engine
               corp = @game.corporations.find { |c| c.name == company.sym }
               return unless corp
 
-              attached = corp.companies.select do |p|
+              assigned = corp.companies.select do |p|
                 p.meta&.[](:type) == :private && %i[A B].include?(p.meta[:class])
               end
 
               (@companies ||= []).delete(company)
-              attached.each { |p| @companies.delete(p) }
-            when :private
-              @game.update_private_name!(company)
+              assigned.each { |p| @companies.delete(p) }
             end
           end
 
@@ -322,6 +485,20 @@ module Engine
           end
 
           def may_bid?(company = nil)
+            if @big_lot_winner
+              return false unless company
+
+              return available_big_lot_proxies.include?(company)
+            end
+
+            if @game.big_lots_first_turn?
+              return false if company
+
+              return true
+            end
+
+            return true if company.meta&.[](:type) == :lot
+
             if company.meta&.[](:type) == :private
               return @game.privates_in_auction_pool? && company.owner.nil?
             end
@@ -330,6 +507,7 @@ module Engine
           end
 
           def starting_bid(company)
+            return 10 if company&.meta&.[](:type) == :lot_choice
             return 10 if !company || company&.meta&.[](:type) == :concession
             return 10 if @game.privates_in_auction_pool? && company&.meta&.[](:type) == :private
 
@@ -337,6 +515,10 @@ module Engine
           end
 
           def min_bid(company)
+            if @big_lot_winner && @game.lot_proxies.include?(company)
+              return 0
+            end
+
             if !@auctioning && @game.privates_in_auction_pool? && company&.meta&.[](:type) == :private
               return 10
             end
@@ -345,6 +527,8 @@ module Engine
           end
 
           def max_bid(entity, _company)
+            return 0 if @big_lot_winner
+
             raw = entity.cash
             inc = @game.class::MIN_BID_INCREMENT
             raw - (raw % inc)
@@ -353,11 +537,97 @@ module Engine
           def min_company
             return nil if @companies.nil? || @companies.empty?
 
-            # concessions always start at $10 minimum
+            # Concessions always start at the $10 minimum.
             min_value_company = @companies.min_by(&:value)
             min_value = [min_value_company.value, 10].min
 
             @companies.find { |c| c.value == min_value } || min_value_company
+          end
+
+          def auctioning
+            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy && !@big_lot_winner
+              return :turn
+            end
+
+            super
+          end
+
+          def may_choose?(company)
+            return false unless @big_lot_winner
+
+            available_big_lot_proxies.include?(company)
+          end
+
+          def min_player_bid
+            min_bid(@game.lot_choice_proxy)
+          end
+
+          def max_player_bid(entity)
+            max_bid(entity, @game.lot_choice_proxy)
+          end
+
+          def choice_available?(entity)
+            entity == @big_lot_winner
+          end
+
+          def choice_name
+            'Choose a lot'
+          end
+
+          def choices
+            return {} unless @big_lot_winner
+
+            available_big_lot_proxies.to_h { |lot| [lot.meta[:lot_index].to_s, lot.name] }
+          end
+
+          def process_choose(action)
+            raise GameError, 'Only the auction winner may choose a lot' unless action.entity == @big_lot_winner
+
+            unless choices.key?(action.choice)
+              raise GameError, "Invalid lot choice: #{action.choice}"
+            end
+
+            lot_index = action.choice.to_i
+            winner = @big_lot_winner
+            @big_lot_winner = nil
+            finish_big_lot_choice(winner, lot_index)
+          end
+
+          def initial_auction_entities
+            players = super
+            return players unless @game.big_lots_first_turn?
+
+            players.select { |player| @game.big_lot_unassigned_players.include?(player) }
+          end
+
+          private
+
+          def available_big_lot_proxies
+            @game.lot_proxies.reject(&:closed?)
+          end
+
+          def finish_big_lot_choice(winner, lot_index)
+            if @game.resolve_big_lots!(winner, lot_index)
+              @companies.clear
+              pass!
+              return
+            end
+
+            @companies = available_big_lot_proxies
+            entities.each do |entity|
+              if @game.big_lot_unassigned_players.include?(entity)
+                entity.unpass!
+              else
+                entity.pass!
+              end
+            end
+
+            remaining = @game.big_lot_unassigned_players
+            winner_index = entities.index(winner)
+            next_player = entities.rotate(winner_index + 1).find { |entity| remaining.include?(entity) }
+            @big_lot_current_entity = next_player
+            @round.goto_entity!(next_player)
+            auction_entity(@game.lot_choice_proxy)
           end
         end
       end

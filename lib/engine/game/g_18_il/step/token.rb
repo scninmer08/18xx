@@ -59,7 +59,9 @@ module Engine
               !available_tokens(entity).empty? &&
               (@game.graph.can_token?(entity) || can_token_stl?(entity))) ||
               entity.tokens.any? { |t| t.status == :flipped } ||
-              (!@game.intro_game? && entity == @game.company_by_id('USY').owner)
+              (!@game.intro_game? &&
+               !@game.private_used?(@game.company_by_id('USY')) &&
+               entity == @game.company_by_id('USY').owner)
           end
 
           def can_token_stl?(entity) = !@game.stl_permit?(entity) && stl_reachable?(entity)

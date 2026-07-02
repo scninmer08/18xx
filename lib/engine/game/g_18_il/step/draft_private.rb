@@ -59,7 +59,6 @@ module Engine
             @available.delete(company)
 
             @log << "#{player.name} drafts #{company.name} (Class #{company.meta[:class]})"
-            @game.update_private_name!(company)
 
             if draft_complete?
               pass!

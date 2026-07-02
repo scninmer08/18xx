@@ -6,7 +6,7 @@ module Engine
   module Game
     module G18IL
       module Step
-        class GeneralDraftPrivate < DraftPrivate
+        class PrivateDraft < DraftPrivate
           def draft_cap
             case @game.players.count
             when 2 then 4

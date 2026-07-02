@@ -29,6 +29,11 @@ module Engine
           def pass!
             super
             post_convert_pass_step! if @round.converted
+            corp = @round.converted
+            if corp
+              @round.private_choice_corporation = corp
+              @round.clear_cache!
+            end
             @round.converted = nil
           end
 
@@ -122,8 +127,11 @@ module Engine
           def active_entities
             return [] unless corporation
 
-            players_in_order = @game.players.rotate(@game.players.index(corporation.owner))
-            eligible = players_in_order.find { |p| p.active? && (can_buy_any?(p) || can_sell?(p, nil)) }
+            @conversion_order ||= begin
+              owner_index = @game.players.index(corporation.owner) || 0
+              @game.players.rotate(owner_index)
+            end
+            eligible = @conversion_order.find { |p| p.active? && (can_buy_any?(p) || can_sell?(p, nil)) }
             eligible ? [eligible] : []
           end
 
@@ -138,7 +146,6 @@ module Engine
             }
 
             min, max = token_counts[corp.total_shares] || [0, 0]
-            @log << "#{corp.name} may buy tokens"
             price = @game.class::TOKEN_COST
             @round.buy_tokens << { entity: corp, type: :convert, first_price: price, price: price, min: min, max: max }
           end

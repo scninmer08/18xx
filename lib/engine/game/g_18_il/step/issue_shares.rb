@@ -28,13 +28,14 @@ module Engine
             if entity.company? &&
                entity == @game.company_by_id('SP') &&
                entity.owner == current_entity &&
-               issuable_share_available(current_entity) &&
+               !@game.private_used?(entity) &&
+               sp_issuable_share_available?(current_entity) &&
                !@game.intro_game? &&
                !@round.sp_issue_toggle[current_entity]
               return ['choose_ability']
             end
 
-            # Only the current operating corp can issue
+            # Only the current operating corporation can issue.
             return [] unless entity == current_entity
             return [] if entity == @game.ic
 
@@ -61,7 +62,14 @@ module Engine
           end
 
           def issuable_shares(entity)
-            @game.issuable_shares(entity)
+            shares = @game.issuable_shares(entity)
+            return shares unless shares.empty?
+
+            reserve = @game.reserved_share_for(entity)
+            return [] unless reserve&.owner == entity
+            return [] if @issued
+
+            [ShareBundle.new(reserve)]
           end
 
           def choices_ability(company)
@@ -69,10 +77,10 @@ module Engine
 
             corp = current_entity
             return {} if @round.sp_issue_toggle[corp]
-            return {} unless issuable_share_available(corp)
+            return {} unless sp_issuable_share_available?(corp)
 
             {
-              'sp_on' => "Enable Share Premium (issue at #{@game.format_currency(corp.share_price.price * 2)})",
+              'sp_on' => 'Activate',
             }
           end
 
@@ -83,14 +91,18 @@ module Engine
 
             corp = current_entity
             @round.sp_issue_toggle[corp] = true
-            @log << "#{corp.name} can issue at double current price (#{company.name})"
+            @log << "#{corp.name} activates #{company.name}"
+          end
 
-            @game.reserved_share_for(current_entity)&.buyable = true
+          def sp_issuable_share_available?(corp)
+            issuable_share_available(corp) || @game.reserved_share_for(corp)&.owner == corp
           end
 
           def process_sell_shares(action)
             corp = action.entity
             old_price = corp.share_price.price
+            reserve = @game.reserved_share_for(corp)
+            reserve.buyable = true if action.bundle.shares.include?(reserve)
 
             @game.sell_shares_and_change_price(
               action.bundle,
@@ -104,8 +116,7 @@ module Engine
 
             if @round.sp_issue_toggle[corp]
               if (sp = @game.company_by_id('SP'))&.owner == corp
-                sp.close!
-                @log << "#{sp.name} (#{corp.name}) closes"
+                @game.flip_private!(sp)
               end
               @round.sp_issue_toggle[corp] = false
             end

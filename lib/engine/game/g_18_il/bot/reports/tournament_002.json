@@ -1,0 +1,6502 @@
+{
+  "config": {
+    "profiles": [
+      {
+        "name": "Balanced",
+        "settings": {
+          "token_score_threshold": 25,
+          "auction_cash_reserve": 180,
+          "concession_cash_reserve": 160,
+          "concession_values": {
+            "2": 20,
+            "5": 35,
+            "10": 45
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": 0,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 30,
+          "train_capacity_weight": 25,
+          "train_permanent_bonus": 80,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 25,
+          "track_new_exit_weight": 10,
+          "track_revenue_weight": 2,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 40,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      },
+      {
+        "name": "Financier",
+        "settings": {
+          "token_score_threshold": 25,
+          "auction_cash_reserve": 180,
+          "concession_cash_reserve": 220,
+          "concession_values": {
+            "2": 15,
+            "5": 25,
+            "10": 40
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": 60,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 70,
+          "train_capacity_weight": 25,
+          "train_permanent_bonus": 100,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 25,
+          "track_new_exit_weight": 10,
+          "track_revenue_weight": 2,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 40,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      },
+      {
+        "name": "Expansionist",
+        "settings": {
+          "token_score_threshold": 25,
+          "auction_cash_reserve": 140,
+          "concession_cash_reserve": 160,
+          "concession_values": {
+            "2": 30,
+            "5": 50,
+            "10": 70
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": -40,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 20,
+          "train_capacity_weight": 25,
+          "train_permanent_bonus": 80,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 25,
+          "track_new_exit_weight": 10,
+          "track_revenue_weight": 2,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 40,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      },
+      {
+        "name": "Engineer",
+        "settings": {
+          "token_score_threshold": 15,
+          "auction_cash_reserve": 180,
+          "concession_cash_reserve": 160,
+          "concession_values": {
+            "2": 20,
+            "5": 35,
+            "10": 45
+          },
+          "attached_private_value": 5,
+          "private_values": {
+            "A": 55,
+            "B": 40
+          },
+          "par_values": {
+            "40": 0,
+            "60": 0,
+            "80": 0,
+            "100": 0,
+            "120": 0,
+            "150": 0
+          },
+          "presidency_penalty": 0,
+          "train_count_penalty": 0,
+          "conversion_values": {
+            "2": 0,
+            "5": 0
+          },
+          "dividend_values": {
+            "payout": 0,
+            "half": 0,
+            "withhold": 0
+          },
+          "private_acquisition_threshold": 0,
+          "private_president_bonus": 0,
+          "stock_own_corporation_bonus": 0,
+          "stock_market_bonus": 0,
+          "stock_treasury_bonus": 0,
+          "stock_price_weight": 0,
+          "train_cash_reserve": 30,
+          "train_capacity_weight": 30,
+          "train_permanent_bonus": 110,
+          "train_price_divisor": 11,
+          "train_exchange_bonus": 20,
+          "track_neighbor_weight": 35,
+          "track_new_exit_weight": 18,
+          "track_revenue_weight": 3,
+          "track_city_weight": 15,
+          "track_ic_line_weight": 55,
+          "track_home_bonus": 400,
+          "token_revenue_weight": 2,
+          "token_path_weight": 8,
+          "token_slot_weight": 5,
+          "token_chicago_bonus": 45,
+          "token_st_louis_bonus": 40,
+          "token_ic_line_bonus": 25,
+          "token_replacement_bonus": 10
+        }
+      }
+    ],
+    "seeds": 25,
+    "first_seed": 103628,
+    "optional_rules": [
+
+    ],
+    "games": 100
+  },
+  "status_counts": {
+    "finished": 99,
+    "error": 1
+  },
+  "standings": [
+    {
+      "profile": "Engineer",
+      "games": 99,
+      "wins": 42,
+      "points": 200,
+      "average_rank": 1.98,
+      "average_value": 86.1
+    },
+    {
+      "profile": "Financier",
+      "games": 99,
+      "wins": 32,
+      "points": 169,
+      "average_rank": 2.29,
+      "average_value": 77.11
+    },
+    {
+      "profile": "Expansionist",
+      "games": 99,
+      "wins": 3,
+      "points": 134,
+      "average_rank": 2.65,
+      "average_value": 34.9
+    },
+    {
+      "profile": "Balanced",
+      "games": 99,
+      "wins": 22,
+      "points": 91,
+      "average_rank": 3.08,
+      "average_value": 29.96
+    }
+  ],
+  "games": [
+    {
+      "seed": 103628,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 213,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103628,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 212,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103628,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 472,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 5
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 1,
+          "value": 57
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 25
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103628,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 198,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103629,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 263,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103629,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 259,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103629,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 482,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 221
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 362
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 10
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 360
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103629,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 258,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103630,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 257,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103630,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 253,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103630,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 566,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 3
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 3,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 120
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 300
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103630,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 259,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103631,
+      "rotation": 1,
+      "status": "error",
+      "detail": "TypeError: can't convert Array to Array (Array#to_ary gives Array)",
+      "actions_taken": 0,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+
+      ],
+      "last_action": null,
+      "backtrace": [
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:3381:in `Array'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:3381:in `ability_right_time?'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:2108:in `block in abilities'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:2104:in `select'",
+        "/mnt/nas/18xx-server/lib/engine/game/base.rb:2104:in `abilities'",
+        "/mnt/nas/18xx-server/lib/engine/step/special_track.rb:159:in `block in abilities'",
+        "/mnt/nas/18xx-server/lib/engine/step/special_track.rb:158:in `each'",
+        "/mnt/nas/18xx-server/lib/engine/step/special_track.rb:158:in `abilities'",
+        "/mnt/nas/18xx-server/lib/engine/step/special_track.rb:113:in `hex_neighbors'",
+        "/mnt/nas/18xx-server/lib/engine/step/special_track.rb:109:in `available_hex'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/special_track.rb:20:in `block in tile_lay_available?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/special_track.rb:19:in `any?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/special_track.rb:19:in `tile_lay_available?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/track.rb:176:in `block in tile_lay_abilities_should_block?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/track.rb:174:in `reject!'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/track.rb:174:in `tile_lay_abilities_should_block?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/track.rb:160:in `can_lay_tile?'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/step/track.rb:15:in `actions'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/baseline_policy.rb:29:in `choose'",
+        "/mnt/nas/18xx-server/lib/engine/game/g_18_il/bot/policy_roster.rb:20:in `choose'"
+      ]
+    },
+    {
+      "seed": 103631,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 323,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 138
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 17
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 24
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "IC",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103631,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 698,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 400
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 318
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 70
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103631,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 254,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 4,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 36
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 33
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103632,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 245,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 30
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 49
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 78
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103632,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 241,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 30
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 44
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 78
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103632,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 484,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 106
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 3,
+          "value": 100
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 10
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 215
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103632,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 228,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 4
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 68
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 49
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103633,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 277,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 90
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 79
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103633,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 273,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 90
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 74
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 3,
+          "value": 50
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103633,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 453,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 5
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 7
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103633,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 368,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 222
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 1,
+          "value": 290
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "C&EI",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103634,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 297,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 1
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 16
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103634,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 390,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 17
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 14
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 14
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "IC",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "IC",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103634,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 614,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 30
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 366
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 23
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 190
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "C&EI",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "C&EI",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103634,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 254,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103635,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 223,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 40
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103635,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 221,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 80
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103635,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 505,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 3,
+          "value": 35
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 1,
+          "value": 464
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 120
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103635,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 201,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103636,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 210,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103636,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 209,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103636,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 576,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 5
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 46
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 100,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103636,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 198,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103637,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 238,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 108
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 64
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103637,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 235,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 128
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 64
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103637,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 436,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 428
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 17
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 17
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 140,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103637,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 203,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103638,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 284,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 1
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 12
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103638,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 422,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 94
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 154
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "WAB",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "WAB",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103638,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 592,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 1,
+          "value": 456
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 3,
+          "value": 80
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 322
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 8,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103638,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 249,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103639,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 273,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 13
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 16
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103639,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 265,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 0
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 8
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 16
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103639,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 442,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 31
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 618
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 10
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 292
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103639,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 261,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 4,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 36
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 33
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103640,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 278,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 1
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 6
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103640,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 279,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 1,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 3,
+          "value": 6
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103640,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 540,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 3
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 230
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 103
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 226
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103640,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 259,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103641,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 210,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103641,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 209,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103641,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 529,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 440
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 20
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 412
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "WAB",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "WAB",
+        "route_revenue": 140,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103641,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 198,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103642,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 259,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 9
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 3,
+          "value": 8
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103642,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 255,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 4
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 8
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103642,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 620,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 882
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 32
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 391
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103642,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 231,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 4,
+          "value": 4
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 1,
+          "value": 68
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 49
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103643,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 249,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103643,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 245,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103643,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 628,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 35
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 440
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 34
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103643,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 245,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103644,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 214,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103644,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 213,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103644,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 441,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 37
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 26
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 100,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103644,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 200,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103645,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 262,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103645,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 258,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103645,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 516,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 35
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 3,
+          "value": 100
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 182
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 462
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103645,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 247,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103646,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 285,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 1
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 16
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103646,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 286,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 10
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 16
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 1",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103646,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 511,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 4,
+          "value": 142
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 268
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 258
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 494
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103646,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 252,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103647,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 262,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 32
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103647,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 258,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 2,
+          "value": 28
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 32
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103647,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 544,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 81
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 508
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 77
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 2,
+          "value": 245
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 140,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103647,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 247,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103648,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 258,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103648,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 254,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103648,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 523,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 109
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 4,
+          "value": 60
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 3,
+          "value": 74
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 642
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "WAB",
+        "entity_type": "ten_share",
+        "action": "run_routes",
+        "reason": "Runs no route because no valid route combination was found",
+        "corporation": "WAB",
+        "route_revenue": 0,
+        "subsidy": 0,
+        "trains_run": 0
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103648,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 251,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103649,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 257,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103649,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 253,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103649,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 507,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 2,
+          "value": 37
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 4,
+          "value": 25
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "CBQ",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "CBQ",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103649,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 260,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103650,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 254,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103650,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 250,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103650,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 615,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 60
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 160
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 11
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 282
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103650,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 252,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103651,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 245,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 2,
+          "value": 21
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 1,
+          "value": 22
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103651,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 241,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 3,
+          "value": 8
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 2,
+          "value": 16
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 2",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103651,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 590,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 3,
+          "value": 107
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 2,
+          "value": 308
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 4
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 1,
+          "value": 394
+        }
+      ],
+      "last_action": {
+        "turn": 9,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 90,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103651,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 247,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 22
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 4,
+          "value": 12
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 2,
+          "value": 21
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103652,
+      "rotation": 1,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 210,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 2,
+          "profile": "Financier"
+        },
+        {
+          "seat": 3,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 4,
+          "profile": "Engineer"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Balanced",
+          "seat": 1,
+          "rank": 4,
+          "value": 0
+        },
+        {
+          "profile": "Financier",
+          "seat": 2,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 3,
+          "rank": 3,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 4,
+          "rank": 2,
+          "value": 30
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 4",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103652,
+      "rotation": 2,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 209,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Financier"
+        },
+        {
+          "seat": 2,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 3,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 4,
+          "profile": "Balanced"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Financier",
+          "seat": 1,
+          "rank": 1,
+          "value": 60
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 2,
+          "rank": 3,
+          "value": 20
+        },
+        {
+          "profile": "Engineer",
+          "seat": 3,
+          "rank": 2,
+          "value": 30
+        },
+        {
+          "profile": "Balanced",
+          "seat": 4,
+          "rank": 4,
+          "value": 0
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103652,
+      "rotation": 3,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 516,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Expansionist"
+        },
+        {
+          "seat": 2,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 3,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 4,
+          "profile": "Financier"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Expansionist",
+          "seat": 1,
+          "rank": 2,
+          "value": 25
+        },
+        {
+          "profile": "Engineer",
+          "seat": 2,
+          "rank": 1,
+          "value": 692
+        },
+        {
+          "profile": "Balanced",
+          "seat": 3,
+          "rank": 4,
+          "value": 9
+        },
+        {
+          "profile": "Financier",
+          "seat": 4,
+          "rank": 3,
+          "value": 10
+        }
+      ],
+      "last_action": {
+        "turn": 10,
+        "round": "Operating Round",
+        "step": "Run Routes",
+        "entity": "V",
+        "entity_type": "five_share",
+        "action": "run_routes",
+        "reason": "Runs the highest-revenue combination found for 1 train",
+        "corporation": "V",
+        "route_revenue": 80,
+        "subsidy": 0,
+        "trains_run": 1
+      },
+      "backtrace": null
+    },
+    {
+      "seed": 103652,
+      "rotation": 4,
+      "status": "finished",
+      "detail": "Game completed",
+      "actions_taken": 198,
+      "seats": [
+        {
+          "seat": 1,
+          "profile": "Engineer"
+        },
+        {
+          "seat": 2,
+          "profile": "Balanced"
+        },
+        {
+          "seat": 3,
+          "profile": "Financier"
+        },
+        {
+          "seat": 4,
+          "profile": "Expansionist"
+        }
+      ],
+      "results": [
+        {
+          "profile": "Engineer",
+          "seat": 1,
+          "rank": 3,
+          "value": 15
+        },
+        {
+          "profile": "Balanced",
+          "seat": 2,
+          "rank": 1,
+          "value": 40
+        },
+        {
+          "profile": "Financier",
+          "seat": 3,
+          "rank": 2,
+          "value": 20
+        },
+        {
+          "profile": "Expansionist",
+          "seat": 4,
+          "rank": 4,
+          "value": 5
+        }
+      ],
+      "last_action": {
+        "turn": 11,
+        "round": "Auction Round",
+        "step": "Bid on Auction Pool Item",
+        "entity": "Bot 3",
+        "entity_type": "player",
+        "action": "pass",
+        "reason": "Baseline policy passes Bid on Auction Pool Item"
+      },
+      "backtrace": null
+    }
+  ]
+}

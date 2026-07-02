@@ -1,0 +1,25 @@
+18IL Bot Batch Report
+Games: 5 | Players: 4 | Seeds: 505309-505313
+Rules: regular game
+Status: finished=5
+Average actions: 613.2
+
+Seat results:
+  Bot 1: 1 wins, average value 1866.8
+  Bot 2: 1 wins, average value 676.2
+  Bot 3: 2 wins, average value 2310.8
+  Bot 4: 1 wins, average value 1791.4
+
+Decision totals:
+  Corporations started: 86
+  Conversions: 40
+  Share purchases: 260
+  Player share sales: 139
+  Private acquisitions: 40
+  Train purchases: 186
+  Trains borrowed: 0
+  Track lays: 538
+  Token placements: 94
+  Private ability uses: 43
+  Routes run: 299
+  Route revenue: 65510
