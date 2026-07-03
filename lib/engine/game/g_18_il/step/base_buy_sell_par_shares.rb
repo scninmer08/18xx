@@ -152,14 +152,27 @@ module Engine
 
           def can_buy_any?(entity)
             can_buy_any_from_market?(entity) ||
-            can_buy_any_from_ipo?(entity)
+              can_buy_any_from_ipo?(entity) ||
+              can_buy_any_corporate_ic?(entity)
+          end
+
+          def can_buy_any_corporate_ic?(entity)
+            return false if bought?
+
+            @game.corporations.any? do |seller|
+              seller.president?(entity) && seller.shares_of(@game.ic).any? do |share|
+                can_buy?(entity, share.to_bundle)
+              end
+            end
           end
 
           def can_gain?(entity, bundle, exchange: false)
             return false if !entity || !bundle
-            return false unless bundle.buyable
 
             corporation = bundle.corporation
+            corporate_ic_purchase = corporation == @game.ic &&
+              bundle.owner.corporation? && bundle.owner.president?(entity)
+            return false unless bundle.buyable || corporate_ic_purchase
 
             # Disallow buying from a player, but allow buying from the Market, IPO, or Treasury.
             return false if bundle.owner.player?

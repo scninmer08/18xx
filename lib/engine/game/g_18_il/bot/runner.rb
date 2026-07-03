@@ -4,7 +4,7 @@ module Engine
   module Game
     module G18IL
       module Bot
-        Result = Struct.new(:status, :game, :actions_taken, :detail, :trace, :error_backtrace, keyword_init: true)
+        Result = Struct.new(:status, :game, :actions_taken, :detail, :trace, :events, :error_backtrace, keyword_init: true)
 
         class Runner
           attr_reader :game, :policy, :max_actions, :on_action
@@ -23,11 +23,13 @@ module Engine
 
           def run
             trace = []
+            @events = []
+            @presidencies = presidency_state
             actions_taken = 0
 
             until game.finished
               while game.round.finished? && !game.finished
-                game.transition_to_next_round!
+                observe_train_exports { game.transition_to_next_round! }
               end
 
               if actions_taken >= max_actions
@@ -40,7 +42,7 @@ module Engine
               entry = trace_entry(decision)
               trace << entry
               on_action&.call(entry)
-              game.process_action(decision.action)
+              observe_train_exports { game.process_action(decision.action) }
               actions_taken += 1
 
               if game.exception
@@ -66,6 +68,7 @@ module Engine
               actions_taken: actions_taken,
               detail: detail,
               trace: trace,
+              events: @events,
               error_backtrace: error_backtrace,
             )
           end
@@ -109,7 +112,14 @@ module Engine
             when Engine::Action::AcquireCompany
               { corporation: action.entity.name, company: action.company.name }
             when Engine::Action::BuyTrain
-              { corporation: action.entity.name, train: action.variant || action.train.name, price: action.price }
+              {
+                corporation: train_buyer(action.entity).name,
+                train: action.variant || action.train.name,
+                price: action.price,
+                seller: action.train.owned_by_corporation? ? action.train.owner.name : 'Depot',
+                buyer_president: train_buyer(action.entity).owner&.name,
+                seller_president: action.train.owned_by_corporation? ? action.train.owner.owner&.name : nil,
+              }
             when Engine::Action::BorrowTrain
               { corporation: action.entity.name, train: action.train.name }
             when Engine::Action::LayTile
@@ -119,12 +129,84 @@ module Engine
             when Engine::Action::RunRoutes
               {
                 corporation: action.entity.name,
+                president: action.entity.owner&.name,
                 route_revenue: game.routes_revenue(action.routes),
                 subsidy: action.subsidy,
                 trains_run: action.routes.size,
+                routes: action.routes.map do |route|
+                  { train: route.train.name, revenue: route.revenue }
+                end,
               }
+            when Engine::Action::Dividend
+              dividend_details(action)
             else
               {}
+            end
+          end
+
+          def dividend_details(action)
+            step = game.round.active_step
+            revenue = step.total_revenue
+            payout = step.dividend_options(action.entity)[action.kind.to_sym]
+            per_share = payout[:per_share]
+            player_payouts = game.players.to_h do |player|
+              [player.name, step.dividends_for_entity(action.entity, player, per_share)]
+            end.reject { |_player, amount| amount.zero? }
+
+            {
+              corporation: action.entity.name,
+              president: action.entity.owner&.name,
+              kind: action.kind,
+              revenue: revenue,
+              corporation_withheld: payout[:corporation],
+              player_payouts: player_payouts,
+              routes: step.routes.map { |route| { train: route.train.name, revenue: route.revenue } },
+            }
+          end
+
+          def train_buyer(entity)
+            return entity unless entity.company?
+
+            entity.owner&.corporation? ? entity.owner : entity
+          end
+
+          def observe_train_exports
+            before = game.depot.upcoming.dup
+            yield
+            game.depot.upcoming.tap do |after|
+              (before - after).each do |train|
+                next unless train.owner.nil? || train.owner == game.depot
+
+                @events << {
+                  event: 'train_export',
+                  train: train.name,
+                  turn: game.turn,
+                  round: game.round&.name,
+                }
+              end
+            end
+            observe_presidency_changes
+          end
+
+          def observe_presidency_changes
+            current = presidency_state
+            current.each do |corporation, player|
+              next if player.nil? || @presidencies[corporation] == player
+
+              @events << {
+                event: 'presidency',
+                corporation: corporation,
+                player: player,
+                turn: game.turn,
+                round: game.round&.name,
+              }
+            end
+            @presidencies = current
+          end
+
+          def presidency_state
+            (game.corporations + game.closed_corporations).uniq.to_h do |corporation|
+              [corporation.name, corporation.owner&.player? ? corporation.owner.name : nil]
             end
           end
 

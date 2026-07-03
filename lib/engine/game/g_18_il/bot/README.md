@@ -13,9 +13,10 @@ Lots. All legal par prices are scored independently; no par price is designated 
 Conversion, dividends, private acquisition, train count, and stock-source preferences are also part of the policy
 profile rather than fixed strategic rules.
 
-Route search samples a bounded set of legal routes for each train and scores compatible combinations through the game
-engine. The limits keep late-game simulations responsive; this is a baseline policy rather than an exhaustive
-revenue-maximizing autorouter. Other optional decisions are declined until their policies are implemented.
+Route selection uses the engine's Auto-button path generator and a Ruby branch-and-bound search to maximize total
+revenue across all trains. Path generation is capped at two seconds and 500 candidates per train, and combination
+search at one second, so pathological late-game networks cannot stall a simulation. The former sampled router remains
+as an error fallback. Other optional decisions are declined until their policies are implemented.
 
 Track choices favor new neighboring connections, revenue centers, home development, and IC Line progress while
 accounting for cost. Optional tokens favor high-revenue and strategic cities, and are not purchased when doing so would
@@ -23,6 +24,7 @@ leave a trainless corporation unable to afford the next Depot train. Route path 
 
 Emergency train purchases take the cheapest legal train. Cash-funded purchases instead compare route capacity,
 permanence, price, exchanges, existing fleet size, and an evolvable cash reserve.
+Bot corporations consider another corporation's train only when both corporations have the same president.
 
 The policy actively uses eligible private abilities for share issuance, train discounts, special track, and special
 tokens. It also uses Planned Obsolescence when its corporation has a rusting train. Passive private benefits continue to
@@ -74,10 +76,17 @@ The selected seeds are recorded in both reports. With `report_dir:`, repeated ru
 the `tournament_###` and `evolution_###` prefixes. Explicit `text_path:` and `json_path:` remain available when a
 particular filename is desired.
 
-The batch report includes final rankings and wealth, seat win counts, auction bids, action totals, par and train-purchase
-mixes, conversions, share transactions, private acquisitions, route revenue, and details for incomplete games. Set
+The batch report includes final rankings and wealth, seat win counts, auction bids, action totals, conversions, share
+transactions, private acquisitions, route revenue, and details for incomplete games. Its game-balance section also
+reports corporation-specific par prices, corporations opened per game and per player, purchased versus exported train cards,
+route count and average route revenue by train type, winner dividend receipts allocated across the trains that earned
+them, and corporations whose presidency was held by the winner at any point. The JSON report retains the underlying par, train,
+route, and dividend events for further analysis without rerunning the batch. Set
 `verbose: false` to suppress per-game progress while retaining the final report. Pass `output: nil` to suppress terminal
 output entirely.
+
+On CRuby, each batch game runs in a separate child process and an incomplete game is retried once. A native Ruby crash
+therefore affects only that seed; if the retry also fails, the report records it as an incomplete game and continues.
 
 Results have one of four statuses:
 

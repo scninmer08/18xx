@@ -286,7 +286,8 @@ module Engine
       bitfield[entry] |= mask
     end
 
-    %x{
+    if RUBY_ENGINE == 'opal'
+      %x{
       class Autorouter {
         constructor(router, trains_to_routes_map, update_callback) {
           this.router = router;
@@ -516,6 +517,7 @@ module Engine
         "use strict";
         return new Promise(resolve => requestAnimationFrame(resolve));
       }
-    }
+      }
+    end
   end
 end

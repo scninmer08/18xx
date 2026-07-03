@@ -1,0 +1,52 @@
+18IL Bot Batch Report
+Games: 100 | Players: 4 | Seeds: 622963-623062
+Rules: regular game
+Status: error=2, finished=98
+Average actions: 348.8
+
+Seat results:
+  Bot 1: 19 wins, average value 31.1
+  Bot 2: 34 wins, average value 45.7
+  Bot 3: 32 wins, average value 28.2
+  Bot 4: 15 wins, average value 30.3
+
+Decision totals:
+  Auction bids: 6430
+  Corporations started: 463
+  Conversions: 0
+  Share purchases: 1180
+  Player share sales: 464
+  Private acquisitions: 0
+  Train purchases: 1104
+  Trains borrowed: 0
+  Track lays: 5570
+  Token placements: 587
+  Private ability uses: 363
+  Routes run: 3146
+  Route revenue: 68140
+
+Par values: 40=104, 60=5, 80=53, 100=300, 120=1
+Train purchases by type: 2=640, 3=185, 4=211, 4+2C=23, 5=7, 5+1C=3, 8=3, D=32
+
+Game balance:
+  Average corporations opened per game: 4.6
+  Average corporations opened per player: 1.2
+  Train lifecycle: 2 bought=640 exported=0; 3 bought=185 exported=0; 4 bought=211 exported=0; 4+2C bought=23 exported=0; 5 bought=7 exported=0; 5+1C bought=3 exported=0; 8 bought=3 exported=0; D bought=32 exported=0
+  Train route revenue: 2 runs=293 avg=57.1; 3 runs=219 avg=64.7; 4 runs=348 avg=78.3; 4+2C runs=20 avg=130.0; 5 runs=10 avg=97.0; 5+1C runs=1 avg=230.0; D runs=69 avg=89.6
+  Winner dividend receipts by train: 2=1887.0 (149 payouts), 3=1635.0 (162 payouts), 4=7160.0 (220 payouts), 4+2C=208.0 (8 payouts), 5+1C=46.0 (1 payouts), D=32.0 (1 payouts)
+  Winner-controlled corporations (operated): C&EI=20, CBQ=10, RI=2, V=35, WAB=16
+
+Par prices by corporation:
+  C&EI: 80=1, 100=100
+  CBQ: 40=1, 80=18
+  IR: 40=100
+  NC: 80=1
+  RI: 80=13
+  V: 40=2, 60=2, 80=2, 100=100
+  WAB: 40=1, 60=3, 80=18, 100=100, 120=1
+
+Incomplete games:
+  Seed 623003: error - undefined method `status=' for nil:NilClass
+    Last action: T7 Stock Round | WAB | Place Home Token | place_token
+  Seed 623029: error - undefined method `status=' for nil:NilClass
+    Last action: T8 Stock Round | WAB | Place Home Token | place_token

@@ -85,6 +85,7 @@ module Engine
         OBSOLETE_TRAINS_COUNT_FOR_LIMIT = false
 
         PORT_HEXES = %w[H1].freeze
+        PORT_MARKER_HEX = 'I4'
         TOWN_HEXES = %w[C2 D9 D13 D17 E6 E14 E16 F5 F13 F21 G22 H11].freeze
         CITY_HEXES = %w[B11 C6 C18 D5 D15 E2 E8 E12 E22 F3 F9 F11 F17 G4 G6 G10 G16 H3 H7 H21 I6].freeze
         STL_HEXES = %w[B15 B17 C16 C18].freeze
@@ -94,7 +95,6 @@ module Engine
         CORPORATION_SIZES = { 2 => :small, 5 => :medium, 10 => :large }.freeze
         IC_STARTING_PRICE = 80.freeze
         IC_LINE_CITY_HEXES = %w[H7 G10 F17 E22].freeze
-        IC_LINE_BROWN_TILES = %w[K31 C31 C32].freeze
         BOOM_HEXES = %w[E8 E12].freeze
         BOOM_TILES = %w[P4 S4].freeze
         GALENA_HEX = %w[C2].freeze
@@ -901,6 +901,9 @@ module Engine
           @ic_line_completed_hexes = []
           @operated_mergees = []
 
+          port_marker_city.add_reservation!(company_by_id('GTL'), 0) unless intro_game?
+          port_marker_city.add_reservation!(ic, 1)
+
           @corporations.select { |corp| corp.type == :two_share }.each { |c| c.max_ownership_percent = 100 }
 
           @reserved_shares = {}
@@ -988,13 +991,21 @@ module Engine
         end
 
         def owns_port_marker?(corporation)
-          return true if corporation.assignments.include?(PORT_ICON)
-
-          false
+          port_marker_city.tokened_by?(corporation)
         end
 
         def assign_port_icon(corp)
-          corp.assign!(PORT_ICON)
+          return if owns_port_marker?(corp)
+
+          city = port_marker_city
+          token = Token.new(corp, price: 0)
+          reserved_slot = city.find_reservation(corp)
+          city.place_token(corp, token, free: true, check_tokenable: false)
+          city.reservations[reserved_slot] = nil if reserved_slot
+        end
+
+        def port_marker_city
+          hex_by_id(PORT_MARKER_HEX).tile.cities.first
         end
 
         def rust_trains!(train, entity)
@@ -1040,7 +1051,9 @@ module Engine
         end
 
         def eligible_tokens?(corporation)
-          corporation.tokens.find { |t| t.used && !STL_TOKEN_HEX.include?(t.hex.id) }
+          corporation.tokens.find do |token|
+            token.used && token.status == :flipped && !STL_TOKEN_HEX.include?(token.hex.id)
+          end
         end
 
         def place_home_token(corporation)
@@ -1063,7 +1076,10 @@ module Engine
         def home_token_locations(corporation)
           # A reopened corporation may flip one of its map tokens, except in STL.
           if eligible_tokens?(corporation)
-            hexes.select { |hex| hex.tile.cities.find { |c| c.tokened_by?(corporation) && !STL_TOKEN_HEX.include?(hex.id) } }
+            corporation.tokens
+              .select { |token| token.used && token.status == :flipped && !STL_TOKEN_HEX.include?(token.hex.id) }
+              .map(&:hex)
+              .uniq
           else
             # Otherwise, it may place a token in any available city slot except in Chicago or STL.
             hexes.select do |hex|
@@ -1774,7 +1790,7 @@ module Engine
         def check_port(route, visits)
           return if visits.none? { |v| PORT_HEXES.find { |h| v.hex == hex_by_id(h) } } || owns_port_marker?(route.corporation)
 
-          raise GameError, 'Corporation must own a port marker to visit a port'
+          raise GameError, 'Corporation must own a port permit to visit a port'
         end
 
         def check_other(route)
@@ -1902,7 +1918,7 @@ module Engine
 
           if action.entity == company_by_id('GTL')
             assign_port_icon(corp)
-            log << "#{corp.name} receives a port marker"
+            log << "#{corp.name} receives a port permit"
           end
 
           return unless action.entity == company_by_id('CIB')
@@ -2388,6 +2404,8 @@ module Engine
           @slot_open = true
           count = ic.tokens.count(&:city) - 1
 
+          # A cheater token placed on a full yellow city will move into IC's reserved slot when that city
+          # upgrades to green, so it ceases to occupy an additional slot after the upgrade.
           # Place tokens in the city until IC has two.
           while count < 2
             # Add a new token to the corporation.

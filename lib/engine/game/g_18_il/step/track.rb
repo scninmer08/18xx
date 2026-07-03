@@ -20,13 +20,7 @@ module Engine
 
           def process_lay_tile(action)
             hex       = action.hex
-            hex_name  = hex.name
             tile_name = action.tile.name
-
-            if !@game.ic.ipoed && ic_line_upgrade_blocked?(hex_name, tile_name)
-              raise GameError,
-                    "Cannot upgrade tile in #{hex.location_name} (#{hex_name}) until Illinois Central has started"
-            end
 
             lay_tile_action(action)
 
@@ -191,12 +185,6 @@ module Engine
             end
 
             super(entity, hex)
-          end
-
-          # Brown tiles along the IC line cannot be laid until IC has formed.
-          def ic_line_upgrade_blocked?(hex_name, tile_name)
-            @game.class::IC_LINE_CITY_HEXES.include?(hex_name) &&
-              @game.class::IC_LINE_BROWN_TILES.include?(tile_name)
           end
 
           def pay_terrain_tile_income(company, ability, terrain, entity, spender)

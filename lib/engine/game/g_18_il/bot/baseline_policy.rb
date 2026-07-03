@@ -584,7 +584,9 @@ module Engine
             return unless step.is_a?(G18IL::Step::BuyTrain)
             return unless actions.include?('buy_train')
 
-            candidates = step.buyable_trains(entity).flat_map do |train|
+            candidates = step.buyable_trains(entity).select do |train|
+              bot_may_buy_train?(entity, train)
+            end.flat_map do |train|
               step.train_variant_helper(train, entity).map do |variant|
                 price = train_purchase_price(step, entity, train, variant)
                 [train, variant, price, nil] if price
@@ -627,6 +629,12 @@ module Engine
               ),
               reason: train_purchase_reason(emergency, mandatory, variant, price, exchange, score),
             )
+          end
+
+          def bot_may_buy_train?(buyer, train)
+            return true unless train.owned_by_corporation?
+
+            buyer.owner && train.owner.owner.equal?(buyer.owner)
           end
 
           def train_candidate_score(train, variant, price, exchange, entity)
@@ -835,10 +843,6 @@ module Engine
           def ic_line_tile_valid?(game, hex, tile)
             exits = game.class::IC_LINE_ORIENTATION[hex.id]
             return true unless exits
-            if !game.ic.ipoed && game.class::IC_LINE_CITY_HEXES.include?(hex.id) &&
-               game.class::IC_LINE_BROWN_TILES.include?(tile.name)
-              return false
-            end
 
             connections = ic_line_connections(game, hex, tile)
             return connections.positive? if tile.color == :yellow
@@ -912,6 +916,15 @@ module Engine
 
           def best_route_combination(game, corporation, trains)
             finder = RouteFinder.new(game)
+            routes = finder.maximum_routes(corporation)
+            return routes unless routes.empty?
+
+            sampled_route_combination(game, corporation, trains, finder)
+          rescue StandardError
+            sampled_route_combination(game, corporation, trains, finder)
+          end
+
+          def sampled_route_combination(game, corporation, trains, finder)
             candidates = trains.map do |train|
               [nil, *finder.routes_for(corporation, train, limit: ROUTES_PER_TRAIN)]
             end

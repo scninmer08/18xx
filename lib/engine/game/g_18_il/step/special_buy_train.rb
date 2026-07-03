@@ -7,6 +7,12 @@ module Engine
     module G18IL
       module Step
         class SpecialBuyTrain < Engine::Step::SpecialBuyTrain
+          def process_buy_train(action)
+            discount = ability(action.entity, train: action.train)
+            super
+            discount.add_count!(1) if discount&.used? && discount.count.zero?
+          end
+
           def buy_train_action(action, entity = nil, borrow_from: nil)
             @ic_bought_train = true if action.entity == @game.ic
 

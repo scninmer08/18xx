@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../../../auto_router'
+
 module Engine
   module Game
     module G18IL
@@ -10,6 +12,9 @@ module Engine
           ROUTE_LIMIT = 100
           VALIDATION_LIMIT = 8
           MAX_STOPS = 8
+          AUTO_PATH_TIMEOUT = 2
+          AUTO_ROUTE_TIMEOUT = 1
+          AUTO_ROUTE_LIMIT = 500
 
           attr_reader :rejections
 
@@ -22,12 +27,24 @@ module Engine
             routes_for(corporation, train, limit: 1).first
           end
 
+          def maximum_routes(corporation)
+            router = Engine::AutoRouter.new(@game)
+            trains = @game.route_trains(corporation).sort_by(&:price)
+            train_routes, = router.path(
+              trains,
+              corporation,
+              path_timeout: AUTO_PATH_TIMEOUT,
+              route_limit: AUTO_ROUTE_LIMIT,
+            )
+            maximum_route_combination(router, train_routes)
+          end
+
           def routes_for(corporation, train, limit: 20)
             connections = {}
             connections_to_evaluate = []
             all_paths = @game.hexes.flat_map { |hex| hex.tile.paths }
             adjacency = {}
-            queue = starting_paths(corporation).map { |path| [[path], { path.id => true }] }
+            queue = starting_paths(corporation).map { |path| [[path], [path.id]] }
             queue_index = 0
 
             while queue_index < queue.size && queue_index < MAX_STATES && connections_to_evaluate.size < ROUTE_LIMIT
@@ -37,11 +54,11 @@ module Engine
               next if paths.size >= MAX_PATHS
 
               neighboring_paths(paths.last, corporation, all_paths, adjacency).each do |neighbor|
-                next if visited[neighbor.id]
+                next if visited.include?(neighbor.id)
 
-                next_visited = visited.dup
-                next_visited[neighbor.id] = true
-                queue << [paths + [neighbor], next_visited]
+                # Keep queued traversal state immutable. Some engine graph operations freeze
+                # shared metadata, so a fresh array avoids Hash copy/update behavior entirely.
+                queue << [paths + [neighbor], visited + [neighbor.id]]
               end
             end
 
@@ -53,6 +70,56 @@ module Engine
           end
 
           private
+
+          def maximum_route_combination(router, train_routes)
+            candidates = train_routes.values.reverse
+            return [] if candidates.empty?
+
+            remaining_maximum = Array.new(candidates.size + 1, 0)
+            (candidates.size - 1).downto(0) do |index|
+              remaining_maximum[index] = remaining_maximum[index + 1] + candidates[index].first&.revenue.to_i
+            end
+
+            deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + AUTO_ROUTE_TIMEOUT
+            best_routes = []
+            best_revenue = 0
+            search = lambda do |index, selected, bitfield, estimated_revenue|
+              return if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+              return if estimated_revenue + remaining_maximum[index] <= best_revenue
+
+              if index == candidates.size
+                revenue = router.real_revenue(selected)
+                if revenue > best_revenue
+                  best_revenue = revenue
+                  best_routes = selected.dup
+                end
+                return
+              end
+
+              candidates[index].each do |route|
+                next if bitfield_conflict?(bitfield, route.bitfield)
+
+                search.call(
+                  index + 1,
+                  selected + [route],
+                  merge_bitfields(bitfield, route.bitfield),
+                  estimated_revenue + route.revenue,
+                )
+              end
+              search.call(index + 1, selected, bitfield, estimated_revenue)
+            end
+            search.call(0, [], [], 0)
+            router.real_revenue(best_routes)
+            best_routes
+          end
+
+          def bitfield_conflict?(left, right)
+            [left.size, right.size].min.times.any? { |index| (left[index] & right[index]) != 0 }
+          end
+
+          def merge_bitfields(left, right)
+            Array.new([left.size, right.size].max) { |index| left[index].to_i | right[index].to_i }
+          end
 
           def starting_paths(corporation)
             corporation.tokens.filter_map(&:city).uniq.flat_map(&:paths).uniq

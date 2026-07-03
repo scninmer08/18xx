@@ -165,7 +165,7 @@ module Engine
               revenue: 0,
               desc: "(10 SHARE) At any time during the corporation's operating turn, it may flip this company to place "\
                     "an available token from the corporation's charter in Chicago (H3) in the GTL slot. "\
-                    'This does not count as a token action. The corporation gains a port marker for free. '\
+                    'This does not count as a token action. The corporation gains a port permit for free. '\
                     'This company flips immediately if it has not been used when Chicago upgrades to a brown tile.',
               sym: 'GTL',
               meta: { type: :private, class: :A },
@@ -247,11 +247,12 @@ module Engine
               sym: 'TS',
               meta: { type: :private, class: :A },
               abilities: [
-                { type: 'description', owner_type: 'corporation', count: 1, when: 'buy_train' },
                 {
                   type: 'train_discount',
                   discount: 0.25,
                   owner_type: 'corporation',
+                  count: 1,
+                  remove_when_used_up: false,
                   trains: self.class::TRAINS.reject { |t| t[:reserved] }
                              .flat_map { |t| [t[:name]] + (t[:variants]&.map { |v| v[:name] } || []) },
                   when: 'buy_train',
@@ -275,7 +276,7 @@ module Engine
               value: 0,
               revenue: 0,
               desc: "(10 SHARE) During the corporation's token placement step, it may flip this company to place a token in any connected "\
-                    'city except Chicago (H3), St. Louis (C18), or IC-Line cities (H7, G10, F17, E22). This token is '\
+                    'city except IC-Line cities (H3, H7, G10, F17, E22). This token is '\
                     'non-blocking and does not use a city slot. This counts as its token placement for the turn.',
               sym: 'USY',
               meta: { type: :private, class: :A },

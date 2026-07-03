@@ -20,7 +20,7 @@ module Engine
           end
 
           def short_description
-            'Port Marker'
+            'Port Permit'
           end
 
           def process_special_buy(action)
@@ -28,7 +28,7 @@ module Engine
             raise GameError, "Cannot buy unknown item: #{action.item.description}" if action.item != @port_marker
 
             cost = @game.class::PORT_MARKER_COST
-            @log << "#{corp.name} buys a port marker for #{@game.format_currency(cost)}"
+            @log << "#{corp.name} buys a port permit for #{@game.format_currency(cost)}"
             corp.spend(cost, @game.bank)
             @game.assign_port_icon(corp)
           end
