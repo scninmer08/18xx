@@ -24,6 +24,7 @@ module View
     needs :optional_rules, default: [], store: true
     needs :is_async, default: nil, store: true
     needs :keywords, default: nil, store: true
+    needs :bot_hotseat, default: false, store: true
 
     # hashmap, game title to min/max player count
     needs :min_p, default: {}, store: false
@@ -32,6 +33,27 @@ module View
     # int, min/max player count for the currently selected title
     needs :min_players, default: nil, store: true
     needs :max_players, default: nil, store: true
+
+    BOT_PERSONALITY_OPTIONS = [
+      ['balanced', 'Balanced'],
+      ['operator', 'Operator'],
+      ['investor', 'Investor'],
+      ['aggressive', 'Aggressive'],
+      ['conservative', 'Conservative'],
+      ['opportunist', 'Opportunist'],
+      ['founder', 'Founder'],
+    ].freeze
+    BOT_PERSONALITY_KEYS = BOT_PERSONALITY_OPTIONS.map(&:first).freeze
+    DEFAULT_BOT_PERSONALITY_KEYS = %w[balanced operator investor aggressive conservative opportunist].freeze
+    BOT_PERSONALITY_DESCRIPTIONS = {
+      'balanced' => 'General-purpose play with no strong bias.',
+      'operator' => 'Prioritizes its own corporations over others and improves their routes, trains, track, and tokens.',
+      'investor' => 'Leans toward market shares and cross-investing over extra presidencies.',
+      'aggressive' => 'Starts and buys more freely, with lower cash reserves.',
+      'conservative' => 'Keeps more cash and avoids risky commitments.',
+      'opportunist' => 'Chases bargains, private abilities, discounts, and tactical pivots.',
+      'founder' => 'More willing to open multiple corporations when the plan is healthy.',
+    }.freeze
 
     def render_create_button(check_options: true)
       error = check_options &&
@@ -92,10 +114,23 @@ module View
               )
             end
           when :hotseat
+            if selected_game_or_variant.title == '18IL'
+              inputs << render_input(
+                'Play against bots (Player 1 is human)',
+                id: :bot_hotseat,
+                type: :checkbox,
+                container_style: { paddingLeft: '0.5rem', marginBottom: '0.75rem' },
+                attrs: { checked: @bot_hotseat },
+                on: { input: -> { update_bot_hotseat } },
+              )
+              inputs.concat(render_bot_hotseat_options) if @bot_hotseat
+            end
             inputs << h(:label, { style: @label_style }, 'Player Names')
             (1..(@max_players || @max_p[selected_game_or_variant.title])).each do |n|
-              inputs << render_input('', id: "player_#{n}", attrs: { value: "Player #{n}" })
+              name = @bot_hotseat && n > 1 ? bot_personality_label(default_bot_personality_key(n)) : "Player #{n}"
+              inputs << render_input('', id: "player_#{n}", attrs: { value: name })
             end
+            inputs << render_bot_personality_descriptions if @bot_hotseat
           end
 
           inputs << render_random_seed
@@ -126,6 +161,11 @@ module View
 
       game_max_players = @max_p[title]
       game_min_players = selected_game_or_variant.min_players(@optional_rules, game_max_players)
+      player_attrs = {
+        value: @max_players || @max_p[title],
+        required: true,
+      }
+      player_label = @mode == :hotseat ? 'Players' : "Max Players (#{game_max_players})"
 
       inputs = [
         render_input('Description', id: :description, placeholder: 'Add a title', label_style: @label_style),
@@ -143,13 +183,10 @@ module View
           on: { input: -> { update_inputs } },
         ),
         render_input(
-          @mode == :hotseat ? 'Players' : "Max Players (#{game_max_players})",
+          player_label,
           id: :max_players,
           type: :number,
-          attrs: {
-            value: @max_players || @max_p[title],
-            required: true,
-          },
+          attrs: player_attrs,
           input_style: { width: '3.5rem' },
           label_style: @label_style,
           on: { input: -> { update_inputs } },
@@ -454,6 +491,25 @@ module View
           },
           title: game_params[:title],
         }
+        bot_hotseat = game_params.delete(:bot_hotseat)
+        bot_random_order = false
+        bot_personality_keys = {}
+        if bot_hotseat
+          delay_value = game_params.delete(:bot_action_delay)
+          delay = delay_value.to_s.empty? ? 1.5 : delay_value.to_f
+          delay = 1.5 if delay.negative?
+          delay = 60 if delay > 60
+
+          bot_random_order = !!game_params.delete(:bot_random_order)
+          (2..game_params[:max_players].to_i).each do |player_number|
+            key = game_params.delete("bot_personality_#{player_number}")
+            bot_personality_keys[player_number - 1] = normalize_bot_personality_key(
+              key || default_bot_personality_key(player_number),
+            )
+          end
+          game_data[:settings][:bot_action_delay] = delay
+          game_data[:settings][:bot_auto_run] = !!game_params.delete(:bot_auto_run)
+        end
         game_data[:settings][:seed] = game_params[:seed] if game_params[:seed]
 
       when :json
@@ -464,11 +520,32 @@ module View
         end
       end
 
+      max_players = game_params[:max_players].to_i
       players = game_params
-      .select { |k, _| k.start_with?('player_') }
-      .map { |_, name| name.gsub(/\s+/, ' ').strip }
+                .select { |k, _| k.start_with?('player_') }
+                .sort_by { |k, _| k.delete_prefix('player_').to_i }
+                .first(max_players)
+                .map { |_, name| name.gsub(/\s+/, ' ').strip }
 
+      players = bot_hotseat ? bot_hotseat_player_names(players, bot_personality_keys) : players
       return store(:flash_opts, 'Cannot have duplicate player names') if players.uniq.size != players.size
+
+      player_entries = players.map.with_index do |name, i|
+        { name: name, human: i.zero?, personality: bot_personality_keys[i] }
+      end
+      player_entries.shuffle! if bot_hotseat && bot_random_order
+      if bot_hotseat
+        bot_player_ids = []
+        bot_personalities = {}
+        player_entries.each_with_index do |entry, i|
+          next if entry[:human]
+
+          bot_player_ids << i
+          bot_personalities[i.to_s] = entry[:personality] || default_bot_personality_key(i + 1)
+        end
+        game_data[:settings][:bot_player_ids] = bot_player_ids
+        game_data[:settings][:bot_personalities] = bot_personalities
+      end
 
       checked_options = Engine.meta_by_title(game_data[:title])
                           .check_options(game_data[:settings][:optional_rules],
@@ -479,7 +556,7 @@ module View
 
       create_hotseat(
         id: Time.now.to_i,
-        players: players.map.with_index { |name, i| { name: name, id: i } },
+        players: player_entries.map.with_index { |entry, i| { name: entry[:name], id: i } },
         title: game_params[:title],
         description: game_params[:description],
         min_players: game_params[:max_players],
@@ -583,6 +660,7 @@ module View
       uncheck_game_variant
       @selected_variant = nil
       @game_variants = {}
+      @bot_hotseat = false unless meta.title == '18IL'
 
       uncheck_optional_rules
       @optional_rules = []
@@ -609,6 +687,117 @@ module View
             }
           ),
         ])
+    end
+
+    def render_bot_hotseat_options
+      [
+        render_input(
+          'Seconds between bot actions',
+          id: :bot_action_delay,
+          type: :number,
+          attrs: {
+            value: 1.5,
+            min: 0,
+            max: 60,
+            step: 0.5,
+          },
+          input_style: { width: '4rem' },
+        ),
+        render_input(
+          'Automatically run bot turns',
+          id: :bot_auto_run,
+          type: :checkbox,
+          attrs: { checked: true },
+        ),
+        render_input(
+          'Randomize player order',
+          id: :bot_random_order,
+          type: :checkbox,
+          attrs: { checked: true },
+        ),
+      ] + [
+        h(:div, { style: { display: 'block', width: '100%', marginTop: '0.5rem' } }, render_bot_personality_options),
+      ]
+    end
+
+    def update_bot_hotseat
+      @bot_hotseat = Native(@inputs[:bot_hotseat]).elm&.checked
+
+      store(:bot_hotseat, @bot_hotseat, skip: true)
+      update_inputs
+    end
+
+    def render_bot_personality_options
+      max_players = @max_players || @max_p[selected_game_or_variant.title]
+      (2..max_players).map do |player_number|
+        key = default_bot_personality_key(player_number)
+        render_input(
+          "Player #{player_number} bot personality",
+          id: "bot_personality_#{player_number}",
+          el: :select,
+          attrs: { value: key },
+          input_style: { width: '10rem' },
+          on: { input: -> { sync_bot_player_names } },
+          children: BOT_PERSONALITY_OPTIONS.map do |option_key, label|
+            h(:option, { attrs: { value: option_key, selected: option_key == key } }, label)
+          end,
+        )
+      end
+    end
+
+    def render_bot_personality_descriptions
+      h(
+        :div,
+        {
+          style: {
+            display: 'block',
+            width: '100%',
+            marginTop: '0.5rem',
+            marginBottom: '0.75rem',
+            fontSize: '0.9rem',
+            lineHeight: '1.35',
+          },
+        },
+        BOT_PERSONALITY_OPTIONS.map do |key, label|
+          h(:div, [h(:strong, "#{label}: "), BOT_PERSONALITY_DESCRIPTIONS[key]])
+        end,
+      )
+    end
+
+    def sync_bot_player_names
+      return unless @bot_hotseat
+
+      max_players = @max_players || @max_p[selected_game_or_variant.title]
+      (2..max_players).each do |player_number|
+        personality = Native(@inputs["bot_personality_#{player_number}"]).elm&.value
+        name = bot_personality_label(personality)
+        input = Native(@inputs["player_#{player_number}"]).elm
+        input.value = name if input
+      end
+    end
+
+    def default_bot_personality_key(player_number)
+      DEFAULT_BOT_PERSONALITY_KEYS[(player_number - 2) % DEFAULT_BOT_PERSONALITY_KEYS.size]
+    end
+
+    def normalize_bot_personality_key(key)
+      key = key.to_s
+      BOT_PERSONALITY_KEYS.include?(key) ? key : 'balanced'
+    end
+
+    def bot_personality_label(key)
+      key = normalize_bot_personality_key(key)
+      BOT_PERSONALITY_OPTIONS.find { |option_key, _| option_key == key }&.last || 'Balanced'
+    end
+
+    def bot_hotseat_player_names(players, bot_personality_keys)
+      seen = {}
+      players.map.with_index do |name, i|
+        label = i.zero? ? name : bot_personality_label(bot_personality_keys[i])
+        seen[label] ||= 0
+        seen[label] += 1
+        seen[label] == 1 ? label : "#{label} #{seen[label]}"
+      end
     end
 
     def game_rows_data

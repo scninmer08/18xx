@@ -80,6 +80,7 @@ module Engine
           def eligible_private_companies
             corp = corporation
             return [] unless corp
+            return [] if corp == @game.ic
 
             president = corp.owner
             @game.eligible_private_acquisitions(corp, president)

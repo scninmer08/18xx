@@ -47,6 +47,7 @@ module Engine
             bundle      = action.bundle
             corporation = bundle.corporation
             ic          = @game.ic
+            cash_recipient = bundle.owner if bundle.owner&.corporation?
 
             @round.players_bought[entity][corporation] += bundle.percent
             @round.bought_from_ipo = true if bundle.owner == corporation
@@ -56,8 +57,9 @@ module Engine
                        allow_president_change: allow_president_change?(corporation),
                        discounter: action.discounter)
             track_action(action, corporation)
+            @game.payoff_loan(cash_recipient) if cash_recipient&.loans&.any?
 
-            if entity == ic.owner && @game.ic_in_receivership?
+            if corporation == ic && entity == @game.ic_operator && @game.ic_in_receivership?
               ic_shares = entity.shares_of(ic)[0, 2]
               ic_shares.each { |share| share.buyable = false }
 
@@ -124,16 +126,13 @@ module Engine
           end
 
           def can_sell?(entity, bundle)
-            return false if bundle.corporation == @game.ic && @game.ic_in_receivership?
-            return false if @game.insolvent_corporations.include?(bundle.corporation)
-
             super
           end
 
           def can_dump?(entity, bundle)
             return true unless bundle.presidents_share
 
-            sh = bundle.corporation.player_share_holders(corporate: false)
+            sh = bundle.corporation.player_share_holders(corporate: false).dup
             (sh.reject { |k, _| k == entity }.values.max || 0) >= bundle.presidents_share.percent
           end
 
@@ -172,22 +171,27 @@ module Engine
             corporation = bundle.corporation
             corporate_ic_purchase = corporation == @game.ic &&
               bundle.owner.corporation? && bundle.owner.president?(entity)
-            return false unless bundle.buyable || corporate_ic_purchase
+            return false if corporation == @game.ic && bundle.owner.corporation? && !corporate_ic_purchase
+
+            return false if !bundle.buyable && !corporate_ic_purchase
 
             # Disallow buying from a player, but allow buying from the Market, IPO, or Treasury.
             return false if bundle.owner.player?
-
-            # Shares of insolvent corporations cannot be purchased.
-            return false if @game.insolvent_corporations.include?(corporation)
 
             has_cash = available_cash(entity) >= modify_purchase_price(bundle)
             not_sold = !(@round.players_sold[entity] && @round.players_sold[entity][corporation])
             return false if !has_cash || !not_sold || bought?
 
-            can_hold = bundle.owner == @game.share_pool || corporation.holding_ok?(entity, bundle.common_percent)
+            can_hold = bundle.owner == @game.share_pool || holding_limit_ok?(entity, bundle)
             at_limit = @game.num_certs(entity) >= @game.cert_limit(entity)
 
             !at_limit && can_hold
+          end
+
+          def holding_limit_ok?(entity, bundle)
+            return true if bundle.corporation == @game.ic
+
+            bundle.corporation.holding_ok?(entity, bundle.common_percent)
           end
 
           def must_sell?(entity)

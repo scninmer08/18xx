@@ -41,6 +41,8 @@ module View
 
           if !entity.company? &&
              @game.purchasable_companies(entity).empty? &&
+             @selected_company &&
+             round.actions_for(@selected_company).empty? &&
              !@game.abilities(@selected_company)
             store(:selected_company, nil, skip: true)
           end

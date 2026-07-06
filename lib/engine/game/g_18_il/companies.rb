@@ -163,10 +163,10 @@ module Engine
               name: 'Goodrich Transit Line',
               value: 0,
               revenue: 0,
-              desc: "(10 SHARE) At any time during the corporation's operating turn, it may flip this company to place "\
-                    "an available token from the corporation's charter in Chicago (H3) in the GTL slot. "\
-                    'This does not count as a token action. The corporation gains a port permit for free. '\
-                    'This company flips immediately if it has not been used when Chicago upgrades to a brown tile.',
+              desc: "(10 SHARE) At any time during the corporation's operating turn, it may flip this company to gain a port " \
+                    "permit for free, then optionally place an available token from the corporation's charter in Chicago (H3). " \
+                    'This does not count as a token action. Chicago has a reserved sta-tion slot for GTL when the tile is '\
+                    'yellow or green; this reservation is not present when Chicago is upgraded to a brown or gray tile.',
               sym: 'GTL',
               meta: { type: :private, class: :A },
               abilities: [
@@ -190,7 +190,7 @@ module Engine
               sym: 'ICC',
               value: 0,
               revenue: 0,
-              desc: '(10 SHARE) When running trains, the corporation’s revenue is increased by an additional $100 if at least '\
+              desc: '(10 SHARE) When running trains, the corporation’s revenue is increased by an additional $60 if at least '\
                     'one of its trains qualifies for a N/S or E/W bonus.',
               meta: { type: :private, class: :A },
               abilities: [
@@ -218,8 +218,8 @@ module Engine
               name: 'Rush Delivery',
               value: 0,
               revenue: 0,
-              desc: "(10 SHARE) Before the corporation's “Run Trains” step, it may flip this company to buy one train from the bank. "\
-                    'Emergency money raising may be used if it has no train.',
+              desc: "(10 SHARE) Before the corporation's “Run Trains” step, it may flip this company to buy one train " \
+                    'from the bank. Emergency money raising may be used if it has no train.',
               sym: 'RD',
               meta: { type: :private, class: :A },
               abilities: [
@@ -242,8 +242,8 @@ module Engine
               name: 'Train Subsidy',
               value: 0,
               revenue: 0,
-              desc: '(10 SHARE) When the corporation buys trains from the bank, it may flip this company to receive a 25% discount on all '\
-                    'purchases this turn.',
+              desc: '(10 SHARE) When the corporation buys trains from the bank, it may flip this company to receive a 25% '\
+                    'discount on all purchases this turn.',
               sym: 'TS',
               meta: { type: :private, class: :A },
               abilities: [
@@ -275,9 +275,9 @@ module Engine
               name: 'Union Stock Yards',
               value: 0,
               revenue: 0,
-              desc: "(10 SHARE) During the corporation's token placement step, it may flip this company to place a token in any connected "\
-                    'city except IC-Line cities (H3, H7, G10, F17, E22). This token is '\
-                    'non-blocking and does not use a city slot. This counts as its token placement for the turn.',
+              desc: "(10 SHARE) During the corporation's token placement step, it may flip this company to place "\
+                    'a token in any city to which it is connected by route, except the IC-Line cities (H3, H7, G10, F17, E22). '\
+                    'This token is non-blocking and does not use a city slot. This counts as its token placement for the turn.',
               sym: 'USY',
               meta: { type: :private, class: :A },
               abilities: [
@@ -323,11 +323,10 @@ module Engine
               name: 'Central IL Boom',
               value: 0,
               revenue: 0,
-              desc: "(5 SHARE) In Phase 8 or later, during the corporation's tile-laying step, it may flip this company to upgrade "\
-                    'Peoria (E8) '\
-                    'or Springfield (E12) with the corresponding gray tile. This upgrade does not require a token connection, '\
-                    'does not count as a tile lay, and may be done regardless of the city’s current color. The unused tile '\
-                    'is removed from the game.',
+              desc: "(5 SHARE) In Phase 8 or later, during the corporation's tile-laying step, it may flip this company to "\
+                    'upgrade Peoria (E8) or Springfield (E12) with the corresponding gray tile. This upgrade does not need to '\
+                    'be connected by route, does not count as a tile lay, and may be done regardless of the city’s current '\
+                    'color. The unused tile is removed from the game.',
               sym: 'CIB',
               meta: { type: :private, class: :B },
               abilities: [
@@ -349,9 +348,9 @@ module Engine
               name: 'Chicago-Virden Coal Co.',
               value: 0,
               revenue: 0,
-              desc: "(5 SHARE) During the corporation's tile-laying step, it may flip this company to lay or upgrade a town hex/tile "\
-                    '(except Galena or Jacksonville) with the #838 tile, paying any terrain costs. It must connect to one of '\
-                    'its tokens, but this action does not count as the tile lay.',
+              desc: "(5 SHARE) During the corporation's tile-laying step, it may flip this company to lay or upgrade a town "\
+                    'hex/tile (except Galena or Jacksonville) with the #838 tile, paying any terrain costs. It must be '\
+                    'connected by route but this action does not count as the tile lay.',
               sym: 'CVCC',
               meta: { type: :private, class: :B },
               abilities: [
@@ -383,8 +382,8 @@ module Engine
               name: 'Engineering Mastery',
               value: 0,
               revenue: 0,
-              desc: "(5 SHARE) During the corporation's tile-laying step, it may upgrade two tiles for $20 (instead of the usual two lays "\
-                    'or lay + upgrade).',
+              desc: "(5 SHARE) During the corporation's tile-laying step, it may upgrade two tiles for $20 (instead of the "\
+                    'usual two lays or lay + upgrade).',
               sym: 'EM',
               meta: { type: :private, class: :B },
             },
@@ -392,10 +391,10 @@ module Engine
               name: 'Frink, Walker & Co.',
               value: 0,
               revenue: 0,
-              desc: "(5 SHARE) During the corporation's tile-laying step, the corporation may place the G1 tile in Galena (C2) for free, "\
-                    'ignoring terrain costs. This does not require a token connection and does not count as the tile lay. '\
-                    'While the corporation is open, it receives a $10 subsidy whenever any other corporation runs at least '\
-                    'one train to Galena (C2).',
+              desc: "(5 SHARE) During the corporation's tile-laying step, the corporation may place the G1 tile in Galena (C2) "\
+                    'for free, ignoring terrain costs. This does not need to be connected by route and does not count as the '\
+                    'tile lay. While the corporation is open, it receives a $10 subsidy whenever any other corporation runs at '\
+                    'least one train to Galena (C2).',
               sym: 'FWC',
               meta: { type: :private, class: :B },
               abilities: [
@@ -406,6 +405,7 @@ module Engine
                   when: 'track',
                   free: true,
                   owner_type: 'corporation',
+                  reachable: false,
                   count: 1,
                 },
               ],
@@ -427,8 +427,8 @@ module Engine
               name: 'Planned Obsolescence',
               value: 0,
               revenue: 0,
-              desc: '(5 SHARE) When a rusting event occurs, the corporation may flip this company to delay the rusting of one of '\
-                    'its trains. The train is removed from play at the end of its next “Run Trains” step.',
+              desc: '(5 SHARE) When a rusting event occurs, the corporation may flip this company to delay the rusting '\
+                    'of one of its trains. The train is removed from play at the end of its next “Run Trains” step.',
               sym: 'PO',
               meta: { type: :private, class: :B },
             },

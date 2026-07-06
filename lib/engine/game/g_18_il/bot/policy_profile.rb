@@ -8,9 +8,7 @@ module Engine
           DEFAULTS = {
             token_score_threshold: 25,
             auction_cash_reserve: 180,
-            concession_cash_reserve: 160,
-            concession_values: { 2 => 20, 5 => 35, 10 => 45 },
-            attached_private_value: 5,
+            concession_values: { 2 => 30, 5 => 30, 10 => 30 },
             private_values: { A: 55, B: 40 },
             par_values: { 40 => 0, 60 => 0, 80 => 0, 100 => 0, 120 => 0, 150 => 0 },
             presidency_penalty: 0,
@@ -19,11 +17,15 @@ module Engine
             dividend_values: { payout: 0, half: 0, withhold: 0 },
             private_acquisition_threshold: 0,
             private_president_bonus: 0,
+            private_price_enforcement_percent: 35,
+            max_concession_plan_size: 8,
+            extra_concession_min_delta: 45,
+            extra_concession_plan_divisor: 2,
+            extra_concession_bailout_bonus: 35,
             stock_own_corporation_bonus: 0,
             stock_market_bonus: 0,
             stock_treasury_bonus: 0,
             stock_price_weight: 0,
-            train_cash_reserve: 30,
             train_capacity_weight: 25,
             train_permanent_bonus: 80,
             train_price_divisor: 11,
@@ -46,17 +48,19 @@ module Engine
           MUTATION_RANGES = {
             token_score_threshold: [0, 100, 5],
             auction_cash_reserve: [0, 400, 10],
-            concession_cash_reserve: [80, 400, 10],
-            attached_private_value: [0, 50, 5],
             presidency_penalty: [-150, 150, 5],
             train_count_penalty: [-150, 150, 5],
             private_acquisition_threshold: [-150, 150, 5],
             private_president_bonus: [-150, 150, 5],
+            private_price_enforcement_percent: [0, 100, 5],
+            max_concession_plan_size: [1, 8, 1],
+            extra_concession_min_delta: [0, 100, 5],
+            extra_concession_plan_divisor: [1, 5, 1],
+            extra_concession_bailout_bonus: [0, 100, 5],
             stock_own_corporation_bonus: [-150, 150, 5],
             stock_market_bonus: [-150, 150, 5],
             stock_treasury_bonus: [-150, 150, 5],
             stock_price_weight: [-10, 10, 1],
-            train_cash_reserve: [0, 200, 10],
             train_capacity_weight: [5, 60, 5],
             train_permanent_bonus: [0, 200, 10],
             train_price_divisor: [2, 30, 1],
@@ -77,11 +81,30 @@ module Engine
           }.freeze
 
           HASH_MUTATION_RANGES = {
-            concession_values: [0, 150, 5],
             private_values: [0, 150, 5],
             par_values: [-150, 150, 5],
             conversion_values: [-150, 150, 5],
             dividend_values: [-150, 150, 5],
+          }.freeze
+
+          PERSONALITY_ORDER = %i[
+            balanced
+            operator
+            investor
+            aggressive
+            conservative
+            opportunist
+            founder
+          ].freeze
+
+          PERSONALITY_LABELS = {
+            balanced: 'Balanced',
+            operator: 'Operator',
+            investor: 'Investor',
+            aggressive: 'Aggressive',
+            conservative: 'Conservative',
+            opportunist: 'Opportunist',
+            founder: 'Founder',
           }.freeze
 
           attr_reader :name, :settings
@@ -139,23 +162,146 @@ module Engine
           end
 
           def self.starter_set
+            PERSONALITY_ORDER.map { |key| personality(key) }
+          end
+
+          def self.personality(key)
+            personalities.fetch(normalize_personality_key(key))
+          end
+
+          def self.personality_options
+            PERSONALITY_ORDER.map { |key| { key: key.to_s, name: PERSONALITY_LABELS.fetch(key) } }
+          end
+
+          def self.default_personality_keys(count)
+            Array.new(count) { |index| PERSONALITY_ORDER[index % PERSONALITY_ORDER.size].to_s }
+          end
+
+          def self.default_roster(players)
+            default_personality_keys(players).map { |key| personality(key) }
+          end
+
+          def self.normalize_personality_key(key)
+            key = key.to_s.downcase.tr(' ', '_').to_sym
+            PERSONALITY_ORDER.include?(key) ? key : :balanced
+          end
+
+          def self.personalities
+            @personalities ||= {
+              balanced: new,
+              operator: new(
+                name: 'Operator',
+                auction_cash_reserve: 200,
+                stock_own_corporation_bonus: 45,
+                stock_market_bonus: -20,
+                stock_treasury_bonus: 20,
+                train_capacity_weight: 35,
+                train_permanent_bonus: 110,
+                track_neighbor_weight: 40,
+                track_new_exit_weight: 18,
+                track_revenue_weight: 3,
+                track_city_weight: 25,
+                track_ic_line_weight: 60,
+                token_score_threshold: 15,
+                token_revenue_weight: 3,
+                token_path_weight: 12,
+                token_chicago_bonus: 60,
+                token_st_louis_bonus: 55,
+              ),
+              investor: new(
+                name: 'Investor',
+                auction_cash_reserve: 220,
+                presidency_penalty: 35,
+                private_price_enforcement_percent: 45,
+                stock_own_corporation_bonus: -5,
+                stock_market_bonus: 55,
+                stock_treasury_bonus: 15,
+                stock_price_weight: 3,
+                train_permanent_bonus: 70,
+                token_score_threshold: 35,
+              ),
+              aggressive: new(
+                name: 'Aggressive',
+                auction_cash_reserve: 120,
+                presidency_penalty: -45,
+                train_count_penalty: -25,
+                private_acquisition_threshold: -20,
+                private_president_bonus: 25,
+                private_price_enforcement_percent: 30,
+                stock_own_corporation_bonus: 35,
+                stock_market_bonus: 25,
+                stock_price_weight: 2,
+                train_capacity_weight: 35,
+                train_price_divisor: 14,
+                track_home_bonus: 500,
+                token_score_threshold: 10,
+              ),
+              conservative: new(
+                name: 'Conservative',
+                auction_cash_reserve: 280,
+                presidency_penalty: 60,
+                train_count_penalty: 35,
+                private_acquisition_threshold: 30,
+                private_price_enforcement_percent: 55,
+                stock_own_corporation_bonus: 25,
+                stock_market_bonus: -15,
+                stock_price_weight: -1,
+                train_capacity_weight: 20,
+                train_permanent_bonus: 140,
+                train_price_divisor: 8,
+                token_score_threshold: 45,
+              ),
+              opportunist: new(
+                name: 'Opportunist',
+                auction_cash_reserve: 160,
+                presidency_penalty: -10,
+                private_acquisition_threshold: -35,
+                private_president_bonus: 35,
+                private_price_enforcement_percent: 25,
+                stock_own_corporation_bonus: 15,
+                stock_market_bonus: 35,
+                stock_treasury_bonus: -10,
+                stock_price_weight: 1,
+                train_capacity_weight: 30,
+                train_exchange_bonus: 35,
+                track_neighbor_weight: 30,
+                token_score_threshold: 20,
+                token_replacement_bonus: 25,
+              ),
+              founder: new(
+                name: 'Founder',
+                auction_cash_reserve: 120,
+                presidency_penalty: -35,
+                max_concession_plan_size: 8,
+                extra_concession_min_delta: 20,
+                extra_concession_plan_divisor: 1,
+                extra_concession_bailout_bonus: 80,
+                stock_own_corporation_bonus: 25,
+                stock_market_bonus: 10,
+                train_capacity_weight: 30,
+                train_permanent_bonus: 90,
+                track_home_bonus: 500,
+                token_score_threshold: 15,
+                token_chicago_bonus: 60,
+                token_st_louis_bonus: 55,
+              ),
+            }.freeze
+          end
+
+          def self.legacy_starter_set
             [
               new,
               new(
                 name: 'Financier',
-                concession_cash_reserve: 220,
-                concession_values: { 2 => 15, 5 => 25, 10 => 40 },
+                concession_values: { 2 => 30, 5 => 30, 10 => 30 },
                 presidency_penalty: 60,
-                train_cash_reserve: 70,
                 train_permanent_bonus: 100,
               ),
               new(
                 name: 'Expansionist',
                 auction_cash_reserve: 140,
-                concession_cash_reserve: 160,
-                concession_values: { 2 => 30, 5 => 50, 10 => 70 },
+                concession_values: { 2 => 30, 5 => 30, 10 => 30 },
                 presidency_penalty: -40,
-                train_cash_reserve: 20,
               ),
               new(
                 name: 'Engineer',

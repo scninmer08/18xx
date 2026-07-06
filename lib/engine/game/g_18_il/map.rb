@@ -51,8 +51,8 @@ module Engine
             blue: {
               ['H1'] => 'town=revenue:20,symbol:40,groups:port;path=a:1,b:_0;path=a:5,b:_0;border=edge:5;'\
                         'icon=image:18_il/port,sticky:1',
-              ['I2'] => 'offboard=revenue:0;path=a:1,b:2;border=edge:0;border=edge:2',
-              ['I4'] => 'city=revenue:0,slots:6',
+              ['I2'] => 'offboard=revenue:0;path=a:1,b:2;border=edge:0;border=edge:2;',
+              ['I4'] => 'city=revenue:0,slots:4;border=edge:3;',
             },
 
             white: {

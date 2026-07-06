@@ -3378,7 +3378,12 @@ module Engine
           return current_step.company == ability.owner
         end
 
-        times = Array(time).map { |t| t == '%current_step%' ? current_step_name : t.to_s }
+        # Avoid Kernel.Array's to_ary coercion here. Some replayed ability checks already
+        # provide an Array carrying engine state, and Ruby 3.2 can reject that redundant
+        # conversion with "Array#to_ary gives Array".
+        times = (time.is_a?(Array) ? time : [time]).map do |t|
+          t == '%current_step%' ? current_step_name : t.to_s
+        end
         if times.empty?
           times_to_check = ability.when
           default = false

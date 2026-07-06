@@ -20,16 +20,14 @@ module Engine
 
           def actions(entity)
             return [] unless entity == current_entity
-            return [] if entity.cash > @game.depot.min_depot_price
+            return [] if entity.cash >= @game.depot.min_depot_price
             return [] unless entity.shares != entity.ipo_shares
             return [] unless entity.trains.empty?
             return [] unless can_sell_any?(entity)
 
             actions = []
             actions << 'corporate_sell_shares' if entity.cash < @game.depot.min_depot_price && entity.trains.empty?
-            if !@game.emr_active? && !other_trains(entity).empty? && !@acted && !entity.cash.zero?
-              actions << 'pass'
-            end
+            actions << 'pass' if !@game.emr_active? && !other_trains(entity).empty? && !@acted && !entity.cash.zero?
             actions
           end
 

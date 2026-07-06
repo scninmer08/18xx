@@ -40,14 +40,12 @@ module Engine
           def available_hex(entity, hex)
             if entity.tokens.all?(&:used)
               nodes = []
-              @game.stl_nodes.each { |node| nodes << @game.graph.connected_nodes(entity)[node] }
               hex.tile.cities.each { |city| nodes << @game.token_graph_for_entity(entity).connected_nodes(entity)[city] }
-              return false if !@game.loading && nodes.none?
+              return false if nodes.none?
 
               entity.tokens.select { |t| t.status == :flipped }.map(&:hex).include?(hex)
             else
-              @game.graph.reachable_hexes(entity)[hex] ||
-                (can_token_stl?(entity) && stl_token_hex?(hex))
+              @game.graph.reachable_hexes(entity)[hex]
             end
           end
 
@@ -57,17 +55,11 @@ module Engine
             (current_entity == entity &&
               !@round.tokened &&
               !available_tokens(entity).empty? &&
-              (@game.graph.can_token?(entity) || can_token_stl?(entity))) ||
+              @game.graph.can_token?(entity)) ||
               entity.tokens.any? { |t| t.status == :flipped } ||
               (!@game.intro_game? &&
                !@game.private_used?(@game.company_by_id('USY')) &&
                entity == @game.company_by_id('USY').owner)
-          end
-
-          def can_token_stl?(entity) = !@game.stl_permit?(entity) && stl_reachable?(entity)
-
-          def stl_reachable?(entity)
-            @game.stl_nodes.any? { |node| @game.graph.connected_nodes(entity)[node] }
           end
 
           def available_tokens(entity)
@@ -87,6 +79,7 @@ module Engine
             entity.spend(TOKEN_REPLACEMENT_COST, payee)
             @log << "#{entity.name} pays #{@game.format_currency(TOKEN_REPLACEMENT_COST)} to " \
                     "#{payee.name} and #{verb} its token in #{hex.name} (#{hex.tile.location_name})"
+            @game.payoff_loan(payee) if payee.corporation? && payee.loans.any?
 
             flipped_token.status = nil
             flipped_token.remove!
@@ -95,15 +88,9 @@ module Engine
             @round.tokened = true
           end
 
-          def stl_token_hex?(hex) = @game.class::STL_TOKEN_HEX.include?(hex.id)
-
           def place_token(entity, city, token, connected: true, extra_action: false, special_ability: nil, check_tokenable: true)
             hex = city.hex
             flipped_token = hex.tile.cities.filter_map { |c| c.tokens.find { |t| t&.status == :flipped } }.first
-
-            if stl_token_hex?(hex)
-              return place_stl_token(entity, city, token, flipped_token, check_tokenable: check_tokenable)
-            end
 
             check_connected(entity, city, hex) if connected
             if should_replace_flipped_token?(entity, city, flipped_token)
@@ -113,49 +100,6 @@ module Engine
             raise GameError, "Must flip one of the corporation's abandoned stations" if entity.tokens.all?(&:used)
 
             super
-          end
-
-          def place_stl_token(entity, city, token, flipped_token, check_tokenable:)
-            stl_token_errors(entity)
-            free_stl_slot!(city)
-
-            if city.available_slots.to_i.positive?
-              city.place_token(entity, token, free: true, check_tokenable: check_tokenable)
-              @log << "#{entity.name} places a token in #{city.hex.name} (St. Louis)"
-              @round.tokened = true
-              return
-            end
-
-            if should_replace_flipped_token?(entity, city, flipped_token)
-              replace_flipped_token(entity, city, token, flipped_token)
-              return
-            end
-
-            if @game.phase.tiles.include?(:gray)
-              raise GameError, "#{entity.name} cannot lay token - no token slots available on #{city.hex&.id}"
-            end
-
-            raise GameError, 'No token slot available until phase color change'
-          end
-
-          # Removes the current phase's STLBC placeholder token, freeing a slot.
-          def free_stl_slot!(city)
-            city.tokens.each_with_index do |t, index|
-              next unless t&.corporation&.name == 'STLBC'
-
-              replaceable = case index
-                            when 0 then @game.phase.tiles.include?(:yellow)
-                            when 1 then @game.phase.tiles.include?(:green)
-                            when 2 then @game.phase.tiles.include?(:brown)
-                            when 3 then @game.phase.tiles.include?(:gray)
-                            else false
-                            end
-
-              next unless replaceable
-
-              city.tokens[index] = nil
-              break
-            end
           end
 
           def should_replace_flipped_token?(entity, city, flipped_token)
@@ -168,11 +112,6 @@ module Engine
             end
           end
 
-          def stl_token_errors(entity)
-            raise GameError, 'Must be connected to St. Louis to place token' if !@game.loading && !stl_reachable?(entity)
-            raise GameError, 'Token already placed this turn' if @round.tokened
-            raise GameError, 'Already placed token in STL' if @game.stl_permit?(entity)
-          end
         end
       end
     end

@@ -13,6 +13,7 @@ module Engine
 
             corporations_to_move_price.sort.each do |corp|
               next unless corp.share_price
+              next if @game.frozen_corporations.include?(corp)
 
               old_price = corp.share_price
 

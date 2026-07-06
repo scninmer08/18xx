@@ -478,6 +478,7 @@ module View
 
       children = []
       children << render_round
+      children << h(Game::BotControls)
       children << h(Game::GameLog, user: @user, scroll_pos: @scroll_pos, chat_input: @chat_input)
       children << h(Game::HistoryAndUndo, last_action_id: @last_action_id)
       children << h(Game::EntityOrder, round: @round)

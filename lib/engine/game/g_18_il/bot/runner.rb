@@ -122,6 +122,8 @@ module Engine
               }
             when Engine::Action::BorrowTrain
               { corporation: action.entity.name, train: action.train.name }
+            when Engine::Action::DiscardTrain
+              { corporation: action.entity.name, train: action.train.name }
             when Engine::Action::LayTile
               { corporation: action.entity.name, hex: action.hex.id, tile: action.tile.name }
             when Engine::Action::PlaceToken

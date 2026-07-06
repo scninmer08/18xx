@@ -21,6 +21,7 @@
 
 /log/
 /db/data/
+/lib/engine/game/g_18_il/bot/reports/
 
 docker-compose.override.yml
 

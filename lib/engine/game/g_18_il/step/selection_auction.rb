@@ -17,16 +17,13 @@ module Engine
             company_setup
 
             while !@auctioning && @companies.any? && current_entity&.player? && current_entity.cash < starting_bid(min_company)
-              @log << "#{current_entity.name} declines to start an auction (insufficient cash)"
-              current_entity.pass!
-              break if entities.all?(&:passed?)
-
-              @round.next_entity_index!
+              process_pass(Engine::Action::Pass.new(current_entity), 'insufficient cash')
+              break
             end
           end
 
           def company_setup
-            if @game.big_lots_first_turn?
+            if @game.packet_auction_first_turn?
               @companies = @game.lot_proxies.reject(&:closed?)
               @big_lot_current_entity = initial_auction_entities.first
               auction_entity(@game.lot_choice_proxy)
@@ -115,7 +112,7 @@ module Engine
           end
 
           def active_entities
-            if @game.big_lots_first_turn?
+            if @game.packet_auction_first_turn?
               return [@big_lot_winner] if @big_lot_winner
               return [] if @companies.empty?
 
@@ -141,8 +138,8 @@ module Engine
           end
 
           def description
-            return 'Choose a Lot' if @big_lot_winner
-            return 'Bid for the Right to Choose a Lot' if @game.big_lots_first_turn?
+            return 'Choose a Packet' if @big_lot_winner
+            return 'Bid for the Right to Choose a Packet' if @game.packet_auction_first_turn?
             return 'Bid on Selected Concession' if @auctioning&.meta&.[](:type) == :concession
             return 'Bid on Selected Private' if @auctioning&.meta&.[](:type) == :private
             return 'Bid on Selected Share' if @auctioning
@@ -151,7 +148,7 @@ module Engine
           end
 
           def pass_description
-            return 'Decline' if @game.big_lots_first_turn?
+            return 'Decline' if @game.packet_auction_first_turn?
             return 'Decline' unless @auctioning
 
             if @auctioning.meta[:type] == :concession
@@ -163,16 +160,18 @@ module Engine
 
           def help
             str = []
-            if @game.big_lots_first_turn?
+            if @game.packet_auction_first_turn?
               str << if @big_lot_winner
-                       if @game.available_big_lot_indices.size == 2
-                         'Choose one lot. The final player receives the remaining lot for free.'
+                       if @game.available_big_lot_indices.size == @game.big_lot_unassigned_players.size
+                         'Choose one packet. The final player receives the remaining packet for free.'
+                       elsif @game.big_lot_unassigned_players.one?
+                         'Choose one packet. The unselected packet returns to the Auction and Development Pools.'
                        else
-                         'Choose one of the available lots. The remaining players will bid again.'
+                         'Choose one of the available packets. The remaining players will bid again.'
                        end
                      else
-                       'Bid for the right to choose a lot, or decline. If everyone still eligible declines before '\
-                         'anyone bids, the available lots are assigned randomly among them.'
+                       'Bid for the right to choose a packet, or decline. If everyone still eligible declines before '\
+                         'anyone bids, the available packets are assigned randomly among them.'
                      end
               return str
             end
@@ -199,7 +198,7 @@ module Engine
           end
 
           def tiered_auction_companies
-            if @game.big_lots_first_turn?
+            if @game.packet_auction_first_turn?
               privates = @game.lots.flatten.select { |company| company.meta[:type] == :private }
               return [
                 @game.lot_proxies.reject(&:closed?),
@@ -249,7 +248,7 @@ module Engine
           def process_pass(action, reason = nil)
             entity = action.entity
 
-            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy
+            if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy
               pass_auction(entity)
               resolve_bids
             elsif auctioning
@@ -260,8 +259,8 @@ module Engine
               msg += " (#{reason})" if reason
               @log << msg
               entity.pass!
-              if entities.all?(&:passed?) && @game.big_lots_first_turn?
-                @log << 'All remaining players pass without making an opening bid; the remaining lots are assigned randomly'
+              if entities.all?(&:passed?) && @game.packet_auction_first_turn?
+                @log << 'All remaining players pass without making an opening bid; the remaining packets are assigned randomly'
                 @game.resolve_big_lots_randomly!
                 @companies.clear
                 return pass!
@@ -290,8 +289,8 @@ module Engine
           def process_bid(action)
             if @big_lot_winner
               company = action.company
-              raise GameError, 'Only the auction winner may choose a lot' unless action.entity == @big_lot_winner
-              raise GameError, 'Choose an available lot' unless available_big_lot_proxies.include?(company)
+              raise GameError, 'Only the auction winner may choose a packet' unless action.entity == @big_lot_winner
+              raise GameError, 'Choose an available packet' unless available_big_lot_proxies.include?(company)
 
               lot_index = company.meta[:lot_index]
               winner = @big_lot_winner
@@ -300,7 +299,7 @@ module Engine
               return
             end
 
-            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy
+            if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy
               if @bids[@auctioning].empty?
                 entities.each(&:unpass!)
                 @active_bidders = entities.dup
@@ -311,12 +310,12 @@ module Engine
               return
             end
 
-            entities.each(&:unpass!) if @game.big_lots_first_turn? && !auctioning
+            entities.each(&:unpass!) if @game.packet_auction_first_turn? && !auctioning
             super
           end
 
           def pass_auction(entity)
-            if @game.big_lots_first_turn?
+            if @game.packet_auction_first_turn?
               if @bids[@auctioning].empty?
                 @log << "#{entity.name} declines to make an opening bid"
               else
@@ -333,15 +332,15 @@ module Engine
           end
 
           def bid_target(bid)
-            return @game.lot_choice_proxy if @game.big_lots_first_turn?
+            return @game.lot_choice_proxy if @game.packet_auction_first_turn?
 
             super
           end
 
           def add_bid(bid)
             company = bid_target(bid)
-            if @game.big_lots_first_turn? && company.meta[:type] != :lot_choice
-              raise GameError, 'Only the right to choose a lot may be bid on during the Big Lots auction'
+            if @game.packet_auction_first_turn? && company.meta[:type] != :lot_choice
+              raise GameError, 'Only the right to choose a packet may be bid on during the Packet Auction'
             end
 
             entity = bid.entity
@@ -361,7 +360,7 @@ module Engine
             bids.reject! { |b| b.entity == entity }
             bids << bid
 
-            if @game.big_lots_first_turn? && company.meta[:type] == :lot_choice
+            if @game.packet_auction_first_turn? && company.meta[:type] == :lot_choice
               @log << "#{entity.name} bids #{@game.format_currency(price)}"
             else
               @log << "#{entity.name} bids #{@game.format_currency(price)} for #{company.name}"
@@ -382,21 +381,22 @@ module Engine
             price  = winner.price
             case company.meta[:type]
             when :lot_choice
-              @log << "#{player.name} wins the right to choose a lot with a bid of #{@game.format_currency(price)}"
+              @log << "#{player.name} wins the right to choose a packet with a bid of #{@game.format_currency(price)}"
               player.spend(price, @game.bank)
             when :share, :presidents_share
               @log << "#{player.name} wins the auction for #{company.name} with a bid of #{@game.format_currency(price)}"
               @log << "#{@game.ic.name} receives #{@game.format_currency(price)}"
               player.spend(price, @game.ic)
+              @game.payoff_loan(@game.ic) if @game.ic.loans.any?
             else
               super
             end
           end
 
           def resolve_bids
-            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy
+            if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy
               if @active_bidders.none? && @bids[@auctioning].empty?
-                @log << 'All remaining players decline to make an opening bid; the remaining lots are assigned randomly'
+                @log << 'All remaining players decline to make an opening bid; the remaining packets are assigned randomly'
                 @bids.clear
                 @active_bidders.clear
                 @auctioning = nil
@@ -491,7 +491,7 @@ module Engine
               return available_big_lot_proxies.include?(company)
             end
 
-            if @game.big_lots_first_turn?
+            if @game.packet_auction_first_turn?
               return false if company
 
               return true
@@ -545,7 +545,7 @@ module Engine
           end
 
           def auctioning
-            if @game.big_lots_first_turn? && @auctioning == @game.lot_choice_proxy && !@big_lot_winner
+            if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy && !@big_lot_winner
               return :turn
             end
 
@@ -571,7 +571,7 @@ module Engine
           end
 
           def choice_name
-            'Choose a lot'
+            'Choose a packet'
           end
 
           def choices
@@ -581,10 +581,10 @@ module Engine
           end
 
           def process_choose(action)
-            raise GameError, 'Only the auction winner may choose a lot' unless action.entity == @big_lot_winner
+            raise GameError, 'Only the auction winner may choose a packet' unless action.entity == @big_lot_winner
 
             unless choices.key?(action.choice)
-              raise GameError, "Invalid lot choice: #{action.choice}"
+              raise GameError, "Invalid packet choice: #{action.choice}"
             end
 
             lot_index = action.choice.to_i
@@ -595,7 +595,7 @@ module Engine
 
           def initial_auction_entities
             players = super
-            return players unless @game.big_lots_first_turn?
+            return players unless @game.packet_auction_first_turn?
 
             players.select { |player| @game.big_lot_unassigned_players.include?(player) }
           end

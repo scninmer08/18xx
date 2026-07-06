@@ -7,16 +7,16 @@ module Engine
     module G18IL
       module Bot
         class RouteFinder
-          MAX_PATHS = 20
-          MAX_STATES = 2_000
-          ROUTE_LIMIT = 100
-          VALIDATION_LIMIT = 8
+          MAX_PATHS = 40
+          MAX_STATES = 20_000
+          ROUTE_LIMIT = 1_000
+          VALIDATION_LIMIT = 80
           MAX_STOPS = 8
           AUTO_PATH_TIMEOUT = 2
           AUTO_ROUTE_TIMEOUT = 1
           AUTO_ROUTE_LIMIT = 500
 
-          attr_reader :rejections
+          attr_reader :path_walk_timed_out, :route_search_timed_out, :rejections
 
           def initialize(game)
             @game = game
@@ -27,16 +27,25 @@ module Engine
             routes_for(corporation, train, limit: 1).first
           end
 
-          def maximum_routes(corporation)
+          def maximum_routes(
+            corporation,
+            path_timeout: AUTO_PATH_TIMEOUT,
+            route_timeout: AUTO_ROUTE_TIMEOUT,
+            route_limit: AUTO_ROUTE_LIMIT
+          )
             router = Engine::AutoRouter.new(@game)
             trains = @game.route_trains(corporation).sort_by(&:price)
-            train_routes, = router.path(
+            train_routes, @path_walk_timed_out = router.path(
               trains,
               corporation,
-              path_timeout: AUTO_PATH_TIMEOUT,
-              route_limit: AUTO_ROUTE_LIMIT,
+              path_timeout: path_timeout,
+              route_limit: route_limit,
             )
-            maximum_route_combination(router, train_routes)
+            maximum_route_combination(router, train_routes, route_timeout: route_timeout)
+          end
+
+          def timed_out?
+            path_walk_timed_out || route_search_timed_out
           end
 
           def routes_for(corporation, train, limit: 20)
@@ -44,6 +53,7 @@ module Engine
             connections_to_evaluate = []
             all_paths = @game.hexes.flat_map { |hex| hex.tile.paths }
             adjacency = {}
+            direct_routes = direct_spoke_routes(corporation, train, all_paths, adjacency)
             queue = starting_paths(corporation).map { |path| [[path], [path.id]] }
             queue_index = 0
 
@@ -65,13 +75,15 @@ module Engine
             strongest_connections = connections_to_evaluate
               .sort_by { |connection| -estimated_revenue(connection) }
               .take(VALIDATION_LIMIT)
-            routes = strongest_connections.filter_map { |connection| build_route(train, connection) }
+            routes = direct_routes + strongest_connections.filter_map { |connection| build_route(train, connection) }
+            routes.uniq! { |route| route.paths.map(&:id).sort }
             routes.sort_by(&:revenue).reverse.take(limit)
           end
 
           private
 
-          def maximum_route_combination(router, train_routes)
+          def maximum_route_combination(router, train_routes, route_timeout:)
+            @route_search_timed_out = false
             candidates = train_routes.values.reverse
             return [] if candidates.empty?
 
@@ -80,11 +92,14 @@ module Engine
               remaining_maximum[index] = remaining_maximum[index + 1] + candidates[index].first&.revenue.to_i
             end
 
-            deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + AUTO_ROUTE_TIMEOUT
+            deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + route_timeout
             best_routes = []
             best_revenue = 0
             search = lambda do |index, selected, bitfield, estimated_revenue|
-              return if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+              if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+                @route_search_timed_out = true
+                return
+              end
               return if estimated_revenue + remaining_maximum[index] <= best_revenue
 
               if index == candidates.size
@@ -129,6 +144,17 @@ module Engine
             adjacency[path] ||= all_paths.select do |candidate|
               candidate != path && path.connects_to?(candidate, corporation)
             end
+          end
+
+          def direct_spoke_routes(corporation, train, all_paths, adjacency)
+            starting_paths(corporation).filter_map do |path|
+              neighboring_paths(path, corporation, all_paths, adjacency).filter_map do |neighbor|
+                next if neighbor.hex == path.hex
+                next if neighbor.nodes.compact.empty?
+
+                build_route(train, connection_for([path, neighbor]))
+              end
+            end.flatten
           end
 
           def add_connection(paths, connections, connections_to_evaluate)
@@ -181,7 +207,7 @@ module Engine
             max_stops = [distance.sum { |row| row['pay'].to_i }, visits.size].min
             max_stops.downto(1) do |count|
               candidates = visits.combination(count).filter_map do |stops|
-                next if train.requires_token && stops.none? { |stop| stop.tokened_by?(route.corporation) }
+                next if train.requires_token && stops.none? { |stop| @game.city_tokened_by?(stop, route.corporation) }
                 next unless stops_fit_distance?(stops, train, distance)
 
                 route.instance_variable_set(:@stops, stops)

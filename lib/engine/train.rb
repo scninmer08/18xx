@@ -120,11 +120,18 @@ module Engine
     def min_price(ability: nil)
       return 1 unless from_depot?
 
-      variants.keys.map do |v|
-        variant = clone
-        variant.variant = v
-        Array(ability).map { |a| a.discounted_price(variant, variant.price) }.min || variant.price
+      variants.values.map do |variant|
+        price = price(variant: variant)
+        Array(ability).map { |a| discounted_variant_price(a, variant, price) }.min || price
       end.min
+    end
+
+    def discounted_variant_price(ability, variant, price)
+      return ability.discounted_price(self, price) if variant[:name] == name
+      return price if !ability.trains.empty? && !ability.trains.include?(variant[:name])
+
+      discount_value = ability.discount.is_a?(Hash) ? ability.discount[variant[:name]] : ability.discount
+      price - (discount_value > 1 ? discount_value : (price * discount_value).floor)
     end
 
     def from_depot?

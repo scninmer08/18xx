@@ -1,7 +1,31 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls /mnt/nas/18xx-server/lib/engine/game/g_18_il/round/*.rb)"
+      "Bash(ls /mnt/nas/18xx-server/lib/engine/game/g_18_il/round/*.rb)",
+      "Bash(wait)",
+      "Bash(kill -0 40559)",
+      "Bash(kill -0 45129)",
+      "Bash(echo \"pid=$!\")",
+      "Bash(kill -0 47143)",
+      "Bash(sed -i 's/MAX_WALK_DEPTH, 60/MAX_WALK_DEPTH, 40/' /tmp/claude-1000/-mnt-nas-18xx-server/34a8f0cb-862f-4ebc-bbe1-6fac2c7fac5c/scratchpad/load_test15.rb)",
+      "Bash(kill -0 48303)",
+      "Bash(kill -0 49514)",
+      "Bash(kill -0 50265)",
+      "Bash(kill -0 52563)",
+      "Bash(kill -0 53741)",
+      "Bash(git stash *)",
+      "Bash(kill -0 57935)",
+      "Bash(kill -0 62482)",
+      "Bash(kill -0 63875)",
+      "Bash(kill -0 64661)",
+      "Bash(kill -0 67949)",
+      "Bash(kill -0 68603)",
+      "Bash(kill -0 77627)",
+      "Bash(kill -0 81472)",
+      "Bash(kill -0 83841)",
+      "Bash(kill -0 86911)",
+      "Bash(kill -0 87722)",
+      "Bash(kill -0 98138)"
     ]
   }
 }

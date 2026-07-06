@@ -129,6 +129,7 @@ module Engine
                 city: 2,
                 color: '#0d8743',
                 type: 'ten_share',
+                max_ownership_percent: 100,
                 always_market_price: true,
                 floatable: false,
               },

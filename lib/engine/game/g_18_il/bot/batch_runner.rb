@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'fileutils' unless RUBY_ENGINE == 'opal'
 
 module Engine
   module Game
     module G18IL
       module Bot
+        TRACK_TILE_USAGE_IDS = %w[7 8 9].freeze
+
         class BatchResult
           attr_reader :games_requested, :players, :optional_rules, :first_seed, :summaries
 
@@ -49,6 +52,23 @@ module Engine
             end
             lines.concat([
                            '',
+                           'Seat diagnostics:',
+                           '  Opening corporations by seat:',
+                         ])
+            aggregate[:opening_corporations_by_seat].each do |seat, corporations|
+              lines << "    Seat #{seat}: #{format_mix(corporations)}"
+            end
+            lines.concat([
+                           "  IC first presidency by seat: #{format_mix(aggregate[:ic_presidency_by_seat][:first])}",
+                           "  IC final presidency by seat: #{format_mix(aggregate[:ic_presidency_by_seat][:final])}",
+                           "  IC ever presidency by seat: #{format_mix(aggregate[:ic_presidency_by_seat][:ever])}",
+                           '  Winner opening combinations:',
+                         ])
+            aggregate[:winner_opening_combinations].each do |combo, data|
+              lines << "    #{combo}: #{data[:wins]} wins, average winner value #{data[:average_value]}"
+            end
+            lines.concat([
+                           '',
                            'Decision totals:',
                            "  Auction bids: #{aggregate[:metrics][:auction_bids]}",
                            "  Corporations started: #{aggregate[:metrics][:corporations_started]}",
@@ -58,6 +78,7 @@ module Engine
                            "  Private acquisitions: #{aggregate[:metrics][:private_acquisitions]}",
                            "  Train purchases: #{aggregate[:metrics][:train_purchases]}",
                            "  Trains borrowed: #{aggregate[:metrics][:trains_borrowed]}",
+                           "  Trains discarded: #{aggregate[:metrics][:trains_discarded]}",
                            "  Track lays: #{aggregate[:metrics][:track_lays]}",
                            "  Token placements: #{aggregate[:metrics][:token_placements]}",
                            "  Private ability uses: #{aggregate[:metrics][:private_ability_uses]}",
@@ -70,6 +91,7 @@ module Engine
                            'Game balance:',
                            "  Average corporations opened per game: #{aggregate[:average_corporations_opened]}",
                            "  Average corporations opened per player: #{aggregate[:average_corporations_per_player]}",
+                           "  Peak track tile usage: #{format_track_tile_usage}",
                            "  Train lifecycle: #{format_train_lifecycle}",
                            "  Train route revenue: #{format_train_performance}",
                            "  Winner dividend receipts by train: #{format_winner_train_payouts}",
@@ -88,6 +110,20 @@ module Engine
                 lines << "  Seed #{summary[:seed]}: #{summary[:status]} - #{summary[:detail]}"
                 last_action = summary.dig(:failure, :last_action)
                 lines << "    Last action: #{format_last_action(last_action)}" if last_action
+                Array(summary.dig(:failure, :crash_logs)).each do |path|
+                  lines << "    Error log: #{path}"
+                end
+              end
+            end
+            recovered = summaries.select { |summary| summary[:status] == 'finished' && summary.dig(:failure, :crash_logs)&.any? }
+            unless recovered.empty?
+              lines << ''
+              lines << 'Recovered child error logs:'
+              recovered.each do |summary|
+                lines << "  Seed #{summary[:seed]} finished after a failed child attempt"
+                Array(summary.dig(:failure, :crash_logs)).each do |path|
+                  lines << "    Error log: #{path}"
+                end
               end
             end
             lines.join("\n")
@@ -106,10 +142,14 @@ module Engine
                 summaries.flat_map { |summary| summary[:players].map { |player| openings_for(summary, player[:name]) } },
               ),
               par_by_corporation: par_by_corporation,
+              track_tile_usage: track_tile_usage,
               train_lifecycle: train_lifecycle,
               train_performance: train_performance,
               winner_train_payouts: winner_train_payouts,
               winner_presidencies: winner_presidencies,
+              opening_corporations_by_seat: opening_corporations_by_seat,
+              ic_presidency_by_seat: ic_presidency_by_seat,
+              winner_opening_combinations: winner_opening_combinations,
             }
           end
 
@@ -128,7 +168,7 @@ module Engine
           end
 
           def format_mix(mix)
-            mix.sort.map { |key, count| "#{key}=#{count}" }.join(', ')
+            mix.sort_by { |key, _count| key.to_s }.map { |key, count| "#{key}=#{count}" }.join(', ')
           end
 
           def format_train_lifecycle
@@ -153,9 +193,15 @@ module Engine
             format_mix(aggregate[:winner_presidencies])
           end
 
+          def format_track_tile_usage
+            aggregate[:track_tile_usage].map do |tile, data|
+              "##{tile} avg=#{data[:average]} max=#{data[:max]}"
+            end.join(', ')
+          end
+
           def seat_results
             (1..players).map do |seat|
-              results = summaries.filter_map { |summary| summary[:players].find { |player| player[:seat] == seat } }
+              results = completed_summaries.filter_map { |summary| summary[:players].find { |player| player[:seat] == seat } }
               {
                 seat: seat,
                 name: "Bot #{seat}",
@@ -163,6 +209,10 @@ module Engine
                 average_value: average(results.map { |result| result[:value] }),
               }
             end
+          end
+
+          def completed_summaries
+            summaries.select { |summary| summary[:status] == 'finished' }
           end
 
           def metric_totals
@@ -192,6 +242,13 @@ module Engine
               totals[event[:corporation]] ||= Hash.new(0)
               totals[event[:corporation]][event[:price]] += 1
             end.transform_values(&:to_h)
+          end
+
+          def track_tile_usage
+            TRACK_TILE_USAGE_IDS.to_h do |tile|
+              counts = summaries.map { |summary| summary.fetch(:track_tile_usage, {}).fetch(tile, 0) }
+              [tile, { average: average(counts), max: counts.max || 0 }]
+            end
           end
 
           def train_lifecycle
@@ -231,7 +288,7 @@ module Engine
           end
 
           def winner_presidencies
-            summaries.each_with_object(Hash.new(0)) do |summary, totals|
+            completed_summaries.each_with_object(Hash.new(0)) do |summary, totals|
               winner = summary[:players].find { |player| player[:rank] == 1 }
               next unless winner
 
@@ -241,6 +298,64 @@ module Engine
                 .uniq
                 .each { |corporation| totals[corporation] += 1 }
             end.to_h
+          end
+
+          def opening_corporations_by_seat
+            totals = (1..players).to_h { |seat| [seat, Hash.new(0)] }
+            completed_summaries.each do |summary|
+              seats = player_seats(summary)
+              summary[:par_events].each do |event|
+                seat = seats[event[:player]]
+                totals[seat][event[:corporation]] += 1 if seat
+              end
+            end
+            totals.transform_values(&:to_h)
+          end
+
+          def ic_presidency_by_seat
+            counts = {
+              first: Hash.new(0),
+              final: Hash.new(0),
+              ever: Hash.new(0),
+            }
+            completed_summaries.each do |summary|
+              seats = player_seats(summary)
+              ic_events = summary[:presidency_events].select { |event| event[:corporation] == 'IC' }
+
+              first_seat = seats[ic_events.first&.dig(:player)]
+              counts[:first][first_seat || 'none'] += 1
+
+              final_owner = summary[:corporations].find { |corporation| corporation[:name] == 'IC' }&.dig(:owner)
+              final_seat = seats[final_owner]
+              counts[:final][final_seat || 'none'] += 1
+
+              ic_events.map { |event| seats[event[:player]] }.compact.uniq.each do |seat|
+                counts[:ever][seat] += 1
+              end
+              counts[:ever]['none'] += 1 if ic_events.empty?
+            end
+            counts.transform_values(&:to_h)
+          end
+
+          def winner_opening_combinations
+            grouped = completed_summaries.group_by do |summary|
+              winner = summary[:players].find { |player| player[:rank] == 1 }
+              opened = summary[:par_events]
+                .select { |event| event[:player] == winner&.dig(:name) }
+                .map { |event| event[:corporation] }
+                .sort
+              opened.empty? ? 'none' : opened.join('+')
+            end
+            grouped.to_h do |combo, combo_summaries|
+              values = combo_summaries.filter_map do |summary|
+                summary[:players].find { |player| player[:rank] == 1 }&.dig(:value)
+              end
+              [combo, { wins: combo_summaries.size, average_value: average(values) }]
+            end.sort_by { |combo, data| [-data[:wins], combo] }.to_h
+          end
+
+          def player_seats(summary)
+            summary[:players].to_h { |player| [player[:name], player[:seat]] }
           end
 
           def average(values)
@@ -255,9 +370,11 @@ module Engine
         end
 
         class BatchRunner
-          attr_reader :games, :players, :optional_rules, :first_seed, :max_actions, :policy_factory, :on_game
+          attr_reader :games, :players, :optional_rules, :first_seed, :max_actions, :policy_factory, :on_game,
+                      :crash_log_dir
 
-          def initialize(games:, players:, optional_rules:, first_seed:, max_actions:, policy_factory:, on_game: nil)
+          def initialize(games:, players:, optional_rules:, first_seed:, max_actions:, policy_factory:, on_game: nil,
+                         crash_log_dir: nil)
             raise ArgumentError, 'games must be positive' unless games.positive?
 
             @games = games
@@ -267,6 +384,7 @@ module Engine
             @max_actions = max_actions
             @policy_factory = policy_factory
             @on_game = on_game
+            @crash_log_dir = crash_log_dir
           end
 
           def run
@@ -291,10 +409,13 @@ module Engine
           def run_game(seed)
             return run_game_in_process(seed) unless Process.respond_to?(:fork)
 
-            summary = run_game_in_child(seed)
-            return summary if summary&.dig(:status) == 'finished'
+            summary = run_game_in_child(seed, 1)
+            return attach_seed_crash_logs(summary, seed) if summary&.dig(:status) == 'finished'
 
-            run_game_in_child(seed) || crashed_worker_summary(seed)
+            summary = run_game_in_child(seed, 2)
+            return attach_seed_crash_logs(summary, seed) if summary
+
+            crashed_worker_summary(seed)
           end
 
           def run_game_in_process(seed)
@@ -303,10 +424,12 @@ module Engine
             worker_error_summary(seed, e)
           end
 
-          def run_game_in_child(seed)
+          def run_game_in_child(seed, attempt)
+            log_path = crash_log_path(seed, attempt)
             reader, writer = IO.pipe
             pid = Process.fork do
               reader.close
+              redirect_child_error_log(log_path)
               payload = run_game_in_process(seed)
               Marshal.dump(payload, writer)
               writer.close
@@ -316,7 +439,7 @@ module Engine
             payload = Marshal.load(reader)
             reader.close
             _waited_pid, status = Process.waitpid2(pid)
-            status.success? ? payload : nil
+            status.success? ? attach_crash_log(payload, log_path) : nil
           rescue EOFError, TypeError
             Process.waitpid(pid) if pid
             nil
@@ -327,13 +450,58 @@ module Engine
             writer&.close unless writer&.closed?
           end
 
+          def crash_log_path(seed, attempt)
+            return unless crash_log_dir
+
+            FileUtils.mkdir_p(crash_log_dir)
+            File.join(crash_log_dir, format('seed_%<seed>s_attempt_%<attempt>d.log', seed: seed, attempt: attempt))
+          end
+
+          def redirect_child_error_log(path)
+            return unless path
+
+            file = File.open(path, 'w')
+            file.sync = true
+            STDERR.reopen(file)
+            STDERR.sync = true
+          end
+
+          def attach_crash_log(summary, path)
+            return summary unless path && File.size?(path)
+
+            summary[:failure] ||= {}
+            summary[:failure][:crash_logs] = (Array(summary.dig(:failure, :crash_logs)) + [path]).uniq
+            summary
+          end
+
+          def attach_seed_crash_logs(summary, seed)
+            logs = seed_crash_logs(seed)
+            return summary if logs.empty?
+
+            summary[:failure] ||= {}
+            summary[:failure][:crash_logs] = (Array(summary.dig(:failure, :crash_logs)) + logs).uniq
+            summary
+          end
+
+          def seed_crash_logs(seed)
+            return [] unless crash_log_dir
+
+            Dir[File.join(crash_log_dir, "seed_#{seed}_attempt_*.log")]
+              .select { |path| File.size?(path) }
+              .sort
+          end
+
           def run_bot(seed)
+            policy =
+              if policy_factory
+                policy_factory.arity.zero? ? policy_factory.call : policy_factory.call(seed)
+              end
             Bot.run(
               players: players,
               optional_rules: optional_rules,
               seed: seed,
               max_actions: max_actions,
-              policy: policy_factory.call,
+              policy: policy,
             )
           end
 
@@ -354,7 +522,8 @@ module Engine
               metrics: {},
               par_mix: {},
               train_mix: {},
-              failure: { exception_class: 'WorkerCrash' },
+              track_tile_usage: {},
+              failure: { exception_class: 'WorkerCrash', crash_logs: seed_crash_logs(seed) },
             }
           end
 
@@ -392,6 +561,7 @@ module Engine
                 .select { |entry| entry[:action] == 'buy_train' }
                 .group_by { |entry| entry[:train] }
                 .transform_values(&:size),
+              track_tile_usage: summarize_track_tile_usage(result.trace),
               failure: summarize_failure(result),
             }
           end
@@ -491,6 +661,7 @@ module Engine
               private_acquisitions: trace.count { |entry| entry[:action] == 'acquire_company' },
               train_purchases: trace.count { |entry| entry[:action] == 'buy_train' },
               trains_borrowed: trace.count { |entry| entry[:action] == 'borrow_train' },
+              trains_discarded: trace.count { |entry| entry[:action] == 'discard_train' },
               track_lays: trace.count { |entry| entry[:action] == 'lay_tile' },
               token_placements: trace.count { |entry| entry[:action] == 'place_token' },
               private_ability_uses: trace.count do |entry|
@@ -499,6 +670,33 @@ module Engine
               routes_run: trace.count { |entry| entry[:action] == 'run_routes' },
               route_revenue: trace.sum { |entry| entry[:route_revenue].to_i + entry[:subsidy].to_i },
             }
+          end
+
+          def summarize_track_tile_usage(trace)
+            tiles_by_hex = {}
+            current = Hash.new(0)
+            peak = TRACK_TILE_USAGE_IDS.to_h { |tile| [tile, 0] }
+
+            trace.each do |entry|
+              next unless entry[:action] == 'lay_tile'
+
+              hex = entry[:hex]
+              old_tile = tiles_by_hex[hex]
+              current[old_tile] -= 1 if peak.key?(old_tile)
+
+              new_tile = normalized_tile_id(entry[:tile])
+              tiles_by_hex[hex] = new_tile
+              next unless peak.key?(new_tile)
+
+              current[new_tile] += 1
+              peak[new_tile] = [peak[new_tile], current[new_tile]].max
+            end
+
+            peak
+          end
+
+          def normalized_tile_id(tile)
+            tile.to_s.split('-', 2).first
           end
         end
       end

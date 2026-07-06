@@ -44,7 +44,7 @@ module Engine
             return false if bundle.owner.player? && !@game.can_gain_from_player?(entity, bundle)
             return false if corporation.shares.all? { |s| !s.buyable }
 
-            corporation.holding_ok?(entity, bundle.common_percent)
+            corporation == @game.ic || corporation.holding_ok?(entity, bundle.common_percent)
           end
 
           def log_pass(entity)
@@ -69,7 +69,9 @@ module Engine
 
           def process_buy_shares(action)
             player = action.entity
+            cash_recipient = action.bundle.owner if action.bundle.owner&.corporation?
             buy_shares(player, action.bundle)
+            @game.payoff_loan(cash_recipient) if cash_recipient&.loans&.any?
             player.pass! if !corporation.president?(player.owner) || !can_buy_any?(player)
             return if corporation.president?(player.owner)
 

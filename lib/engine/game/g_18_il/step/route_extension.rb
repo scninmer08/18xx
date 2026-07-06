@@ -14,7 +14,7 @@ module Engine
             return [] unless route_extension&.owner == entity
             return [] unless entity.corporation?
             return [] if entity.receivership?
-            return [] if entity.trains.empty?
+            return [] if extendable_trains(entity).empty?
 
             ACTIONS
           end
@@ -32,7 +32,7 @@ module Engine
           end
 
           def choices
-            current_entity.trains.to_h { |train| [train.id, extended_train_name(train)] }
+            extendable_trains(current_entity).to_h { |train| [train.id, extended_train_name(train)] }
           end
 
           def round_state
@@ -64,6 +64,10 @@ module Engine
 
           def route_extension
             @game.company_by_id('RE')
+          end
+
+          def extendable_trains(entity)
+            entity.trains.reject { |train| train.name == 'D' }
           end
 
           def extended_train_name(train)

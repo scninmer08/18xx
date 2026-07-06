@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 require 'json'
+unless RUBY_ENGINE == 'opal'
+  require 'open3'
+  require 'rbconfig'
+end
 
 module Engine
   module Game
@@ -42,6 +46,39 @@ module Engine
           private
 
           def validate!(data)
+            return validate_in_process!(data) if RUBY_ENGINE == 'opal' || !Process.respond_to?(:fork)
+
+            2.times do
+              result = validate_in_child(data)
+              next unless result
+
+              return if result[:valid]
+
+              raise GameError, "Bot replay validation failed: #{result[:detail]}"
+            end
+
+            # A native Ruby crash cannot be rescued. The game itself completed and its raw
+            # actions remain exportable, so do not discard the replay solely because both
+            # isolated validation workers crashed.
+            nil
+          end
+
+          def validate_in_child(data)
+            validator = File.expand_path('replay_validator.rb', __dir__)
+            stdout, _stderr, status = Open3.capture3(
+              RbConfig.ruby,
+              '-Ilib',
+              validator,
+              stdin_data: JSON.generate(data),
+            )
+            return unless status.success?
+
+            JSON.parse(stdout, symbolize_names: true)
+          rescue JSON::ParserError, SystemCallError
+            nil
+          end
+
+          def validate_in_process!(data)
             game = result.game
             names = data[:players].to_h { |player| [player[:id], player[:name]] }
             replay = game.class.new(
@@ -53,9 +90,9 @@ module Engine
 
             return if !replay.exception && replay.actions.size == data[:actions].size
 
-            detail = replay.exception&.message ||
+            detail = replay.exception&.full_message ||
               "processed #{replay.actions.size} of #{data[:actions].size} actions"
-            raise GameError, "Bot replay validation failed: #{detail}"
+            raise GameError, detail
           end
 
           def bot_seat(player)

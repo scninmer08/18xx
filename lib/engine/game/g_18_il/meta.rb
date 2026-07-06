@@ -8,13 +8,13 @@ module Engine
       module Meta
         include Game::Meta
 
-        DEV_STAGE = :prealpha
+        DEV_STAGE = :alpha
 
         GAME_SUBTITLE = 'The Formation of the Illinois Central Railroad'
         GAME_DESIGNER = 'Scott Ninmer'
         GAME_PUBLISHER = :self_published
         GAME_LOCATION = 'Illinois, USA'
-        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/hxx7czydkee19e2f121wl/18IL_Rulebook_v0.9.5.pdf?rlkey=ed3cfx5aub58w97q6dnlt1fal&dl=0'
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/u8ph86r0fef6a9dsbm0ao/18IL_Rulebook_v0.9.6.pdf?rlkey=8iryta6gf8t29fbdtt03igkem&dl=0'
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
         PLAYER_RANGE = [2, 6].freeze
 
@@ -35,25 +35,25 @@ module Engine
           desc: 'Private companies are not used.',
         },
         {
-          sym: :big_lots_variant,
-          short_name: 'Big Lots Variant (2p or 4p)',
-          desc: 'Players bid for the right to choose a lot. In a two-player game, each lot has four concessions and '\
-                'four privates of each class. In a four-player game, each lot has two concessions and two privates of '\
-                'each class. The final player receives the remaining lot for free.',
+          sym: :packet_auction_variant,
+          short_name: 'Packet Auction Variant',
+          desc: 'Players bid for the right to choose a packet. Packets contain randomly selected concessions and '\
+                'private companies. With three or five players, the unselected packet returns its concessions to the '\
+                'Auction Pool and its private companies to the Development Pool.',
         },
-        {
-          sym: :draft_variant,
-          short_name: 'Private Draft Variant',
-          desc: 'Players snake-draft private companies from the full pool. Undrafted privates enter the Development Pool. '\
-                'Drafted privates may be assigned when starting or converting corporations.',
-        },
-        {
-          sym: :full_draft_variant,
-          short_name: 'Full Draft Variant',
-          desc: 'Players snake-draft concessions and private companies from the full pool. Undrafted concessions enter the '\
-                'Auction Pool and undrafted privates enter the Development Pool. Drafted privates may be assigned when '\
-                'starting or converting corporations.',
-        },
+          # {
+          #   sym: :draft_variant,
+          #   short_name: 'Private Draft Variant',
+          #   desc: 'Players snake-draft private companies from the full pool. Undrafted privates enter the Development Pool. '\
+          #         'Drafted privates may be assigned when starting or converting corporations.',
+          # },
+          # {
+          #   sym: :full_draft_variant,
+          #   short_name: 'Full Draft Variant',
+          #   desc: 'Players snake-draft concessions and private companies from the full pool. Undrafted concessions enter the '\
+          #         'Auction Pool and undrafted privates enter the Development Pool. Drafted privates may be assigned when '\
+          #         'starting or converting corporations.',
+          # },
         ].freeze
       end
     end

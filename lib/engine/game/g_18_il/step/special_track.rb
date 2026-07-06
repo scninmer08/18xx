@@ -65,8 +65,7 @@ module Engine
               hex = action.hex
               @game.process_ic_line(action, beneficiary: action.entity.owner, round: @round) if @game.ic_line_hex?(hex)
 
-              # Flip GTL if Chicago upgrades to brown, including while GTL is unowned.
-              @game.flip_private!(@game.company_by_id('GTL')) if !@game.intro_game? && action.tile.name == 'CHI3'
+              @game.remove_gtl_chicago_reservation! if !@game.intro_game? && action.tile.name == 'CHI3'
 
               ability.laid_hexes << action.hex.id
               @round.laid_hexes << action.hex

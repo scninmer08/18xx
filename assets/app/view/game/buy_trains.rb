@@ -17,6 +17,8 @@ module View
 
       def render_president_contributions
         player = corp_owner(@corporation)
+        return [] unless player&.player?
+
         owner = nil
         if @game.class::EBUY_OWNER_MUST_HELP
           owner = @game.acting_for_entity(player)

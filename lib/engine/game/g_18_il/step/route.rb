@@ -12,10 +12,10 @@ module Engine
 
             actions = []
             return actions unless entity.corporation?
-            return [] if entity.receivership?
 
             actions << 'run_routes'
             return actions if entity == @game.ic && @game.ic_in_receivership?
+            return [] if entity.receivership?
 
             actions << 'scrap_train' if scrappable_trains(entity).count > 1 && !@game.last_set
             actions

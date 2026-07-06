@@ -13,9 +13,9 @@ module Engine
           DIVIDEND_TYPES = %i[payout half withhold].freeze
 
           def setup
-            if @game.insolvent_corporations.include?(current_entity)
-              @log << "#{current_entity.name} has a loan of #{@game.format_currency(current_entity.loans.first.amount)}"\
-                      ' and must withhold during the dividend step'
+            if @game.frozen_corporations.include?(current_entity)
+              @log << "#{current_entity.name} is frozen with a loan of " \
+                      "#{@game.format_currency(current_entity.loans.first.amount)}"
             end
             super
           end
@@ -28,10 +28,8 @@ module Engine
           end
 
           def dividend_types
-            return [:withhold] if (current_entity == @game.ic && @game.ic_in_receivership?) ||
-                                   !current_entity.loans.empty? || @game.train_borrowed
-
             return [:payout] if @game.last_set
+            return [:withhold] if current_entity == @game.ic && @game.ic_in_receivership?
 
             DIVIDEND_TYPES
           end
@@ -43,6 +41,9 @@ module Engine
           end
 
           def share_price_change(entity, revenue = 0)
+            return {} if @game.frozen_corporations.include?(entity)
+            return {} if entity == @game.ic && @game.ic_in_receivership?
+
             price = entity.share_price.price
             return { share_direction: :down, share_times: 1 } if revenue.zero? && price == @game.lowest_stock_price
             return { share_direction: :left, share_times: 1 } if revenue.zero?
@@ -59,29 +60,15 @@ module Engine
             end
 
             if payout[:corporation].positive?
-              @log << if @game.train_borrowed
-                        "#{entity.name} withholds #{@game.format_currency(payout[:corporation])} "\
-                          "(#{@game.format_currency(payout[:corporation])} paid to bank as a lease payment)"
-                      else
-                        "#{entity.name} withholds #{@game.format_currency(payout[:corporation])}"
-                      end
+              @log << "#{entity.name} withholds #{@game.format_currency(payout[:corporation])}"
             elsif payout[:per_share].zero?
               @log << "#{entity.name} does not run"
             end
             @log << "#{entity.name} earns a #{@game.subsidy_name} of #{@game.format_currency(subsidy)}" if subsidy.positive?
-            @game.train_borrowed = nil
-            return unless (borrowed_train = @game.borrowed_trains[current_entity])
-
-            @game.log << "#{current_entity.name} returns a #{borrowed_train.name} train"
-            @game.remove_train(borrowed_train)
-            @game.depot.trains.delete(borrowed_train)
-            @game.depot.insert_train(borrowed_train)
-            @game.borrowed_trains[current_entity] = nil
           end
 
           def dividend_options(entity)
             revenue = total_revenue
-            revenue = total_revenue / 2 if @game.train_borrowed
             dividend_types.to_h do |type|
               payout = send(type, entity, revenue)
               # Shares remaining in the Auction Pool do not pay dividends to IC.
@@ -111,6 +98,11 @@ module Engine
                           .map { |receiver, cash| "#{@game.format_currency(cash)} to #{receiver.name}" }.join(', ')
 
             log_payout_shares(entity, revenue, per_share, receivers)
+          end
+
+          def payout_entity(entity, holder, per_share, payouts)
+            super
+            @game.payoff_loan(holder) if holder.corporation? && holder.loans.any? && holder.cash.positive?
           end
 
           def skip!

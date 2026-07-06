@@ -22,7 +22,9 @@
   <circle class="st0" cx="4" cy="4" r="4"/>
   <g class="st1">
     <g class="st1">
-      <text class="st2" transform="translate(1.93 4.97)"><tspan x="0" y="0">IRR</tspan></text>
+      <g class="st1">
+        <text class="st2" transform="translate(2.84 4.93)"><tspan x="0" y="0">IR</tspan></text>
+      </g>
     </g>
   </g>
 </svg>

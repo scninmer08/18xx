@@ -19,6 +19,21 @@ module Engine
           end
 
           def process_lay_tile(action)
+            if (special_track = @round.steps.find { |step| step.is_a?(G18IL::Step::SpecialTrack) }) &&
+               (company = special_tile_lay_company(action, special_track))
+              special_action = Engine::Action::LayTile.new(
+                company,
+                tile: action.tile,
+                hex: action.hex,
+                rotation: action.rotation,
+                combo_entities: action.combo_entities
+              )
+              special_track.process_lay_tile(special_action)
+
+              pass! unless can_lay_tile?(action.entity)
+              return
+            end
+
             hex       = action.hex
             tile_name = action.tile.name
 
@@ -26,14 +41,129 @@ module Engine
 
             @game.process_ic_line(action, beneficiary: action.entity, round: @round) if @game.ic_line_hex?(hex)
 
-            # Flip GTL if Chicago upgrades to brown, including while GTL is unowned.
-            @game.flip_private!(@game.company_by_id('GTL')) if !@game.intro_game? && tile_name == 'CHI3'
+            @game.remove_gtl_chicago_reservation! if !@game.intro_game? && tile_name == 'CHI3'
 
             pass! unless can_lay_tile?(action.entity)
           end
 
           def pass_description
             'Pass (Track)'
+          end
+
+          def special_tile_lay_company(action, special_track)
+            return unless action.entity.corporation?
+
+            @game.companies.find do |company|
+              next unless company.owner == action.entity
+              next unless %w[CIB CVCC FWC].include?(company.sym)
+              next if special_track.actions(company).empty?
+              next unless special_track.available_hex(company, action.hex)
+
+              special_track.potential_tiles(company, action.hex).any? { |tile| tile.name == action.tile.name }
+            end
+          end
+
+          def hex_neighbors(entity, hex)
+            neighbors = super || long_walk_hex_neighbors(entity, hex)
+            stl_construction_neighbors(entity, hex, neighbors)
+          end
+
+          def stl_construction_neighbors(entity, hex, neighbors)
+            return neighbors unless entity.corporation?
+            return neighbors unless neighbors
+            return neighbors if stl_station_token?(entity)
+            stl_hexes = @game.class::STL_HEXES
+
+            filtered = neighbors.reject do |edge|
+              neighbor = hex.neighbors[edge]
+              stl_hexes.include?(hex.id) || (neighbor && stl_hexes.include?(neighbor.id))
+            end
+            filtered.empty? ? nil : filtered
+          end
+
+          def stl_station_token?(entity)
+            @game.class::STL_TOKEN_HEX.any? do |hex_id|
+              @game.hex_by_id(hex_id).tile.cities.any? { |city| @game.city_tokened_by?(city, entity) }
+            end
+          end
+
+          def long_walk_hex_neighbors(entity, hex)
+            return unless entity.corporation?
+
+            long_walk_connected_hexes(entity)[hex]
+          end
+
+          def long_walk_connected_hexes(entity)
+            skip_paths = @game.graph_skip_paths(entity)
+            hexes = Hash.new { |h, k| h[k] = [] }
+            visited_nodes = {}
+            visited_paths = {}
+            queue = []
+
+            @game.hexes.each do |hex|
+              hex.tile.cities.each do |city|
+                next unless @game.city_tokened_by?(city, entity) ||
+                            @game.for_graph_city_tokened_by?(city, entity, @game.graph_for_entity(entity))
+
+                hex.neighbors.each_key { |edge| hexes[hex] << edge }
+                queue << [:node, city]
+              end
+            end
+
+            until queue.empty?
+              type, part = queue.shift
+              next unless part
+
+              if type == :node
+                next if visited_nodes[part]
+
+                visited_nodes[part] = true
+                part.paths.each do |path|
+                  next if path.ignore?
+                  next if skip_paths&.key?(path)
+
+                  queue << [:path, path]
+                end
+              else
+                next if visited_paths[part]
+                next if skip_paths&.key?(part)
+
+                visited_paths[part] = true
+
+                part.exits.each do |edge|
+                  hex = part.hex
+                  hexes[hex] << edge
+                  hexes[hex.neighbors[edge]] << hex.invert(edge) if hex.neighbors[edge]
+                end
+
+                part.junction&.paths&.each { |path| queue << [:path, path] unless visited_paths[path] }
+
+                part.edges.each do |edge_part|
+                  edge = edge_part.num
+                  next unless (neighbor = part.hex.neighbors[edge])
+
+                  neighbor_edge = part.hex.invert(edge)
+                  neighbor.paths[neighbor_edge].each do |neighbor_path|
+                    next if visited_paths[neighbor_path]
+                    next unless part.lane_match?(part.exit_lanes[edge], neighbor_path.exit_lanes[neighbor_edge])
+                    next if !part.ignore_gauge_walk && !part.tracks_match?(neighbor_path, dual_ok: true)
+
+                    queue << [:path, neighbor_path]
+                  end
+                end
+
+                next if part.terminal?
+
+                part.nodes.each do |node|
+                  next if visited_nodes[node]
+                  next if node.blocks?(entity)
+
+                  queue << [:node, node]
+                end
+              end
+            end
+
+            hexes.to_h { |hex, edges| [hex, edges.uniq] }
           end
 
           # Override lay_tile to include border types in terrain even when net border cost is zero.
@@ -174,8 +304,9 @@ module Engine
           end
 
           def available_hex(entity, hex, normal: false)
-            # Highlight the STL hexes only when the corporation has a permit token.
-            return nil if @game.class::STL_HEXES.include?(hex.id) && !@game.stl_permit?(current_entity)
+            # An STL permit allows routes to visit St. Louis, but it is not a station
+            # token and cannot anchor track construction in the STL area.
+            return nil if @game.class::STL_HEXES.include?(hex.id) && !stl_station_token?(entity)
 
             # Force NC to lay in its home hex first if it is not yellow.
             if !@game.class::SPRINGFIELD_HEX.include?(hex.id) &&
@@ -203,7 +334,6 @@ module Engine
 
             @log << "#{company.owner.name} earns #{@game.format_currency(income)} for the #{noun} built by #{company.name}"
           end
-
         end
       end
     end

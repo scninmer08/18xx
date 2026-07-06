@@ -13,26 +13,39 @@ module Engine
   module Game
     module G18IL
       module Bot
-        def self.run(players: 4, optional_rules: [], seed: 1, max_actions: 1_000, policy: nil, profiles: nil,
-                     verbose: false, output: $stdout, log_path: nil, hotseat_path: nil)
+          def self.run(players: 4, optional_rules: [], seed: 1, max_actions: 1_000, policy: nil, profiles: nil,
+                     verbose: false, output: $stdout, log_path: nil, hotseat_path: nil, replay_dir: nil)
           raise ArgumentError, 'Specify policy or profiles, not both' if policy && profiles
+          raise ArgumentError, 'Specify hotseat_path or replay_dir, not both' if hotseat_path && replay_dir
 
           if profiles
             raise ArgumentError, 'Profile count must match player count' unless profiles.size == players
 
             policy = PolicyRoster.new(profiles)
           end
-          policy ||= BaselinePolicy.new
+          policy ||= PolicyRoster.new(PolicyProfile.default_roster(players))
 
           log_file = File.open(log_path, 'w') if log_path
           outputs = [output, log_file].compact
           outputs.each { |stream| stream.sync = true if stream.respond_to?(:sync=) }
+          if hotseat_path || replay_dir
+            outputs.each { |stream| stream.puts("Starting 18IL bot replay, seed #{seed}") }
+          end
           names = Array.new(players) { |index| "Bot #{index + 1}" }
           game = Game.new(names, seed: seed, optional_rules: optional_rules)
           formatter = Runner.method(:format_trace_entry)
           on_action = ->(entry) { outputs.each { |stream| stream.puts(formatter.call(entry)) } } if verbose
           result = Runner.new(game, policy: policy, max_actions: max_actions, on_action: on_action).run
-          HotseatExporter.new(result).write(hotseat_path) if hotseat_path
+          replay_requested = hotseat_path || replay_dir
+          if replay_requested && result.status == :finished
+            hotseat_path ||= ReportPaths.resolve_replay(replay_dir)
+            HotseatExporter.new(result).write(hotseat_path)
+          elsif replay_requested
+            outputs.each do |stream|
+              stream.puts("Replay not written: bot run #{result.status}: #{result.detail} " \
+                          "(#{result.actions_taken} actions)")
+            end
+          end
           if verbose
             outputs.each do |stream|
               stream.puts("Bot run #{result.status}: #{result.detail} (#{result.actions_taken} actions)")
@@ -45,7 +58,7 @@ module Engine
         end
 
         def self.run_batch(games: 10, players: 4, optional_rules: [], first_seed: 1, max_actions: 2_000,
-                           policy_factory: -> { BaselinePolicy.new }, output: $stdout, verbose: true,
+                           policy_factory: nil, output: $stdout, verbose: true,
                            text_path: nil, json_path: nil, report_dir: nil)
           text_path, json_path = ReportPaths.resolve(
             report_dir: report_dir,
@@ -53,6 +66,7 @@ module Engine
             text_path: text_path,
             json_path: json_path,
           )
+          crash_log_dir = batch_crash_log_dir(text_path, json_path)
           progress = if verbose && output
                        lambda do |number, total, summary|
                          output.puts("Game #{number}/#{total}, seed #{summary[:seed]}: " \
@@ -68,14 +82,25 @@ module Engine
             max_actions: max_actions,
             policy_factory: policy_factory,
             on_game: progress,
+            crash_log_dir: crash_log_dir,
           ).run
 
           report = result.format
           output&.puts(report)
           File.write(text_path, "#{report}\n") if text_path
           File.write(json_path, JSON.pretty_generate(result.to_h)) if json_path
-          output&.puts("Reports written to #{text_path} and #{json_path}") if text_path && json_path
+          if text_path && json_path
+            output&.puts("Reports written to #{text_path} and #{json_path}")
+            output&.puts("Child error logs written to #{crash_log_dir}") if crash_log_dir
+          end
           result
+        end
+
+        def self.batch_crash_log_dir(text_path, json_path)
+          path = text_path || json_path
+          return unless path
+
+          path.sub(/\.(?:txt|json)\z/, '_crashes')
         end
 
         def self.run_tournament(profiles: PolicyProfile.starter_set, seeds: 2, first_seed: 1, optional_rules: [],

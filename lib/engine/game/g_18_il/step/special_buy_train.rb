@@ -44,6 +44,10 @@ module Engine
               else
                 player.spend(remaining, entity)
                 @log << "#{player.name} contributes #{@game.format_currency(remaining)}"
+                if entity.loans.any?
+                  @game.payoff_loan(entity)
+                  try_take_loan(entity, price)
+                end
               end
             end
 
