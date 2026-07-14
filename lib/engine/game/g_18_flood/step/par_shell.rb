@@ -8,7 +8,7 @@ module Engine
       module Step
         class ParShell < Engine::Step::Base
           ACTIONS = %w[choose].freeze
-          PARS = [60, 80, 100, 120].freeze
+          PARS = [80, 100, 120, 140, 160].freeze
 
           def setup
             @finished = false

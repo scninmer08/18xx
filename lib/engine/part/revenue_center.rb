@@ -60,7 +60,7 @@ module Engine
       end
 
       def route_base_revenue(phase, train)
-        return (@revenue[:diesel]) if train.name.upcase == 'D' && @revenue[:diesel]
+        return (@revenue[:diesel]) if train.name == 'D' && @revenue[:diesel]
 
         phase.tiles.reverse_each { |color| return (@revenue[color]) if @revenue[color] }
         0

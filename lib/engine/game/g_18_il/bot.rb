@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require_relative 'game'
 require_relative 'bot/baseline_policy'
 require_relative 'bot/policy_roster'
 require_relative 'bot/runner'
 require_relative 'bot/batch_runner'
+require_relative 'bot/replay_reporter'
 require_relative 'bot/hotseat_exporter'
 require_relative 'bot/tournament_runner'
 require_relative 'bot/evolution_runner'
@@ -13,7 +15,7 @@ module Engine
   module Game
     module G18IL
       module Bot
-          def self.run(players: 4, optional_rules: [], seed: 1, max_actions: 1_000, policy: nil, profiles: nil,
+        def self.run(players: 4, optional_rules: [], seed: 1, max_actions: 1_000, policy: nil, profiles: nil,
                      verbose: false, output: $stdout, log_path: nil, hotseat_path: nil, replay_dir: nil)
           raise ArgumentError, 'Specify policy or profiles, not both' if policy && profiles
           raise ArgumentError, 'Specify hotseat_path or replay_dir, not both' if hotseat_path && replay_dir
@@ -28,11 +30,9 @@ module Engine
           log_file = File.open(log_path, 'w') if log_path
           outputs = [output, log_file].compact
           outputs.each { |stream| stream.sync = true if stream.respond_to?(:sync=) }
-          if hotseat_path || replay_dir
-            outputs.each { |stream| stream.puts("Starting 18IL bot replay, seed #{seed}") }
-          end
+          outputs.each { |stream| stream.puts("Starting 18IL bot replay, seed #{seed}") } if hotseat_path || replay_dir
           names = Array.new(players) { |index| "Bot #{index + 1}" }
-          game = Game.new(names, seed: seed, optional_rules: optional_rules)
+          game = ::Engine::Game::G18IL::Game.new(names, seed: seed, optional_rules: optional_rules)
           formatter = Runner.method(:format_trace_entry)
           on_action = ->(entry) { outputs.each { |stream| stream.puts(formatter.call(entry)) } } if verbose
           result = Runner.new(game, policy: policy, max_actions: max_actions, on_action: on_action).run
@@ -67,10 +67,13 @@ module Engine
             json_path: json_path,
           )
           crash_log_dir = batch_crash_log_dir(text_path, json_path)
+          game_json_dir = batch_game_json_dir(text_path, json_path)
           progress = if verbose && output
                        lambda do |number, total, summary|
-                         output.puts("Game #{number}/#{total}, seed #{summary[:seed]}: " \
-                                     "#{summary[:status]} (#{summary[:actions_taken]} actions)")
+                         elapsed = summary[:elapsed_seconds] ? ", #{format_elapsed(summary[:elapsed_seconds])}" : ''
+                         player_count = summary[:player_count] ? ", #{summary[:player_count]}p" : ''
+                         output.puts("Game #{number}/#{total}#{player_count}, seed #{summary[:seed]}: " \
+                                     "#{summary[:status]} (#{summary[:actions_taken]} actions#{elapsed})")
                          output.flush
                        end
                      end
@@ -83,6 +86,7 @@ module Engine
             policy_factory: policy_factory,
             on_game: progress,
             crash_log_dir: crash_log_dir,
+            game_json_dir: game_json_dir,
           ).run
 
           report = result.format
@@ -91,6 +95,7 @@ module Engine
           File.write(json_path, JSON.pretty_generate(result.to_h)) if json_path
           if text_path && json_path
             output&.puts("Reports written to #{text_path} and #{json_path}")
+            output&.puts("Game JSONs written to #{game_json_dir}") if game_json_dir && Dir.exist?(game_json_dir)
             output&.puts("Child error logs written to #{crash_log_dir}") if crash_log_dir
           end
           result
@@ -101,6 +106,35 @@ module Engine
           return unless path
 
           path.sub(/\.(?:txt|json)\z/, '_crashes')
+        end
+
+        def self.batch_game_json_dir(text_path, json_path)
+          path = text_path || json_path
+          return unless path
+
+          path.sub(/\.(?:txt|json)\z/, '')
+        end
+
+        def self.format_elapsed(seconds)
+          seconds = seconds.to_f
+          return "in #{format('%.1fs', seconds)}" if seconds < 60
+
+          minutes = (seconds / 60).floor
+          remaining_seconds = (seconds % 60).round
+          return "in #{minutes}m #{remaining_seconds}s" if minutes < 60
+
+          hours = minutes / 60
+          remaining_minutes = minutes % 60
+          "in #{hours}h #{remaining_minutes}m"
+        end
+
+        def self.report_replay(path = 'test18', output: $stdout, text_path: nil, json_path: nil, at_action: nil)
+          report = ReplayReporter.new(path, at_action: at_action).run
+          text = report.format
+          output&.puts(text)
+          File.write(text_path, "#{text}\n") if text_path
+          File.write(json_path, JSON.pretty_generate(report.to_h)) if json_path
+          report
         end
 
         def self.run_tournament(profiles: PolicyProfile.starter_set, seeds: 2, first_seed: 1, optional_rules: [],

@@ -16,6 +16,12 @@ Private company values are corporation-specific. The same valuation is used when
 privates, choosing post-conversion acquisitions, and bidding on privates in the Auction Pool. Auction-pool private bids
 preserve cash for the next useful share purchase or for opening an owned concession, so private purchases compete with
 stock investment instead of ignoring it.
+The private valuation table is intentionally grounded in direct ability impact: Route Extension is strong throughout,
+Train Subsidy and Rush Delivery rise when permanent-train pressure appears, GTL and ICC are useful but not automatic
+premiums, and FWC is valued as a solid Galena track/subsidy private rather than above Train Subsidy by default.
+Concession private value depends on corporation size: ten-share corporations use their attached private package, five-
+share corporations value the best available Class A private fit, and two-share corporations value the best available
+Class B plus Class A fit.
 Train Subsidy and Rush Delivery receive extra value when they bridge a corporation into an immediate permanent-train
 purchase, including cases where one legal share issue would complete the funding. IC auction certificates look beyond
 the first two operating rounds when permanent trains are near or IC has connected endpoint pairs.
@@ -57,8 +63,17 @@ the next stock round. A bot that already holds an unused concession does not bid
 Concession base values are equal across two-, five-, and ten-share corporations. When multiple concession targets have
 the same computed value, the bot chooses among them with the game's seeded RNG instead of using corporation name as a
 strategic tie-breaker.
-Concession auction bids are capped separately from strategic concession value, keeping early auctions from consuming
-too much personal cash before shares, privates, and later IC certificates become available.
+First-concession auction bids normalize against the best currently available opening score: the best target maps to a
+$60 hard cap, and other concessions bid as a percentage of that score. Later concession bids remain based on marginal
+plan value.
+At five and six players, the last player without an opening commitment may choose an investor start when the best
+remaining concession package is weaker than one already claimed. That player avoids taking a presidency through phase
+3, diversifies into healthy corporations, and will not buy a share that would move it ahead of the current president.
+From phase 4A onward, it values an available concession against cash plus legal sales from its weaker investments. It
+may sell those holdings before buying, then start a corporation at $120 or $150 only when its operating-order projection
+shows the launch can fund the expected train. That projection accounts for likely train purchases by corporations ahead
+of it and for one legal share issue before the train buy, using six president-owned share units as a ceiling rather than
+a fixed requirement. A genuinely unaffordable launch is deferred rather than being forced at a lower capitalization.
 Before bidding, the bot also projects whether the corporation can afford the next Depot train rank when it operates.
 The launch projection conservatively includes par capitalization, required startup tokens, one conversion token, one
 affordable president purchase after conversion, and one treasury/Reserve issuance. It does not assume purchases by
@@ -73,7 +88,10 @@ Route selection uses a bounded route finder and branch-and-bound combination sea
 all trains. The best validated route combination is cached by corporation and network state, so an identical later OR
 cannot replace it with a lower-revenue partial result when the search times out. The deeper Auto-button path walker is
 not used during batch bot route selection because some late-game 18IL networks can overflow Ruby 3.2's VM stack during
-that speculative search. Other optional decisions are declined until their policies are implemented.
+that speculative search. By default, isolated exact route verification is limited to 4-trains and complex trains such
+as 0+3C, 1+3C, Pullmans, route-extension trains, 8s, 9s, and Ds. Set `G18_IL_BOT_EXACT_ROUTES=all` for exhaustive checking,
+`long` for long trains only, or `off` to disable the isolated verifier. Other optional decisions are declined until
+their policies are implemented.
 
 Track choices favor new neighboring connections, revenue centers, and home development while accounting for cost.
 A corporation without a city-to-city or city-to-offboard route first selects one nearest destination (breaking equal
@@ -200,20 +218,43 @@ Use a random starting seed while retaining reproducible consecutive seeds within
 bundle exec ruby -Ilib -e "require 'engine/logger'; Engine::Logger.set_level(Logger::FATAL); require 'require_all'; require_all 'lib/engine/game/g_18_il'; Engine::Game::G18IL::Bot.run_batch(games: 5, players: 4, first_seed: Random.rand(1..1_000_000), report_dir: 'lib/engine/game/g_18_il/bot/reports')"
 ```
 
+Vary player count from game to game by passing a list or range. The runner cycles through the configured counts in
+order, so this ten-game example runs 2p, 3p, 4p, 5p, 6p, then repeats:
+
+```sh
+bundle exec ruby -Ilib -e "require 'engine/logger'; Engine::Logger.set_level(Logger::FATAL); require 'require_all'; require_all 'lib/engine/game/g_18_il'; Engine::Game::G18IL::Bot.run_batch(games: 10, players: [2, 3, 4, 5, 6], first_seed: 1, report_dir: 'lib/engine/game/g_18_il/bot/reports')"
+```
+
+Process a saved hotseat or browser-export JSON from `bot/reports/tests` with the same batch-style stats:
+
+```sh
+bundle exec ruby -Ilib lib/engine/game/g_18_il/bot/replay_reporter.rb test18
+```
+
+Pass `--at-action 498` to stop the replay at a specific action id, or `--text path` / `--json path` to save the
+readable and structured reports.
+
 The selected seeds are recorded in both reports. With `report_dir:`, batches, tournaments, and evolutions are placed in
 their corresponding subdirectories. Replays use the explicit `replay_dir:` shown above. Repeated runs create sequential
 names such as `batches/batch_001.json` and `replays/replay_001.json` without overwriting earlier output. Explicit
 `text_path:`, `json_path:`, and `hotseat_path:` remain available when a particular filename is desired.
+Batch runs also create a per-game hotseat JSON folder beside the batch reports, such as `batches/batch_001/`, with
+files named like `game_001_seed_12345.json`. These can be imported in the browser to inspect a specific simulated game.
+The per-game progress line includes elapsed wall time, for example
+`Game 1/5, seed 12345: finished (642 actions, in 4m 58s)`.
 
 The batch report includes final rankings and wealth, seat win counts, auction bids, action totals, conversions, share
 transactions, private acquisitions, route revenue, and details for incomplete games. Its seat diagnostics include
 opening corporations by seat, IC first/final/ever presidency counts by seat, and winner opening-corporation
 combinations. Its game-balance section also reports corporation-specific par prices, corporations opened per game and
-per player, purchased versus exported train cards, average and maximum peak simultaneous usage per game for #7, #8, and
-#9 track tiles, route count and average route revenue by train type, winner dividend receipts allocated across the
-trains that earned them, and corporations whose presidency was held by the winner at any point. The JSON report retains
-the underlying par, train, route, track-tile, and dividend events for
-further analysis without rerunning the batch. Set
+per player, closures, purchased versus exported train cards, average and maximum peak track-tile usage, route count and
+average route revenue by train type, city revenue hotspots, IC formation timing, completed-game IC non-formation
+reasons, winner dividend receipts allocated across the trains that earned them, and corporations whose presidency was
+held by the winner at any point. Mixed-player-count batches also add per-count train value and route-revenue trends.
+Closure diagnostics distinguish planned market-close tactics from IC merger closures
+and record the triggering action plus the corporation's cash, trains, market shares, and last route revenue. The JSON
+report retains the underlying par, train, route, track-tile, dividend, closure, IC formation, and IC Line diagnostic
+data for further analysis without rerunning the batch. Set
 `verbose: false` to suppress per-game progress while retaining the final report. Pass `output: nil` to suppress terminal
 output entirely.
 

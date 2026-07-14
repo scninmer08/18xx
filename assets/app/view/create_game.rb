@@ -88,7 +88,7 @@ module View
         )
       else
         if selected_game_or_variant
-          update_player_range(selected_game_or_variant)
+          update_player_range(selected_game_or_variant, clamp: true)
           inputs << render_create_button
           inputs << h(:h2, selected_game_or_variant.meta.full_title)
           inputs << render_inputs
@@ -163,6 +163,8 @@ module View
       game_min_players = selected_game_or_variant.min_players(@optional_rules, game_max_players)
       player_attrs = {
         value: @max_players || @max_p[title],
+        min: game_min_players,
+        max: game_max_players,
         required: true,
       }
       player_label = @mode == :hotseat ? 'Players' : "Max Players (#{game_max_players})"
@@ -175,6 +177,8 @@ module View
           type: :number,
           attrs: {
             value: @min_players || @min_p[title],
+            min: game_min_players,
+            max: game_max_players,
             required: true,
           },
           container_style: @mode == :hotseat ? { display: 'none' } : {},
@@ -278,6 +282,9 @@ module View
           uncheck_mutex(sym)
         end
         store(:optional_rules, @optional_rules)
+        update_player_range(selected_game_or_variant, clamp: true)
+        sync_player_range_inputs
+        update_inputs
       end
     end
 
@@ -618,7 +625,7 @@ module View
       min_players_elm = Native(@inputs[:min_players])&.elm
 
       if title_change
-        update_player_range(selected_game_or_variant)
+        update_player_range(selected_game_or_variant, clamp: true)
         game_max_players = @max_p[title]
         game_min_players = selected_game_or_variant.min_players(@optional_rules, @max_players || game_max_players)
         max_players_elm&.value = game_max_players
@@ -896,9 +903,32 @@ module View
       !@game_variants.empty? || !selected_game_or_variant::OPTIONAL_RULES.empty?
     end
 
-    def update_player_range(meta)
+    def update_player_range(meta, clamp: false)
       title = meta.title
-      @min_p[title], @max_p[title] = meta::PLAYER_RANGE
+      base_min, base_max = meta::PLAYER_RANGE
+      @max_p[title] = meta.max_players(@optional_rules, @max_players || base_max) || base_max
+      @min_p[title] = meta.min_players(@optional_rules, @max_p[title]) || base_min
+
+      return unless clamp
+
+      @max_players = @max_p[title] if @max_players && @max_players > @max_p[title]
+      @min_players = @min_p[title] if @min_players && @min_players < @min_p[title]
+      @min_players = @max_players if @min_players && @max_players && @min_players > @max_players
+    end
+
+    def sync_player_range_inputs
+      return unless selected_game_or_variant
+
+      title = selected_game_or_variant.title
+      max_players_elm = Native(@inputs[:max_players])&.elm
+      min_players_elm = Native(@inputs[:min_players])&.elm
+
+      max_players_elm&.max = @max_p[title]
+      min_players_elm&.max = @max_p[title]
+      max_players_elm&.min = @min_p[title]
+      min_players_elm&.min = @min_p[title]
+      max_players_elm&.value = @max_players if @max_players
+      min_players_elm&.value = @min_players if @min_players
     end
   end
 end

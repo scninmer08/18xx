@@ -111,7 +111,6 @@ module Engine
               c.tokens.any? { |t| t&.corporation == entity && t&.status != :flipped }
             end
           end
-
         end
       end
     end

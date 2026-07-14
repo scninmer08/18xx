@@ -29,7 +29,7 @@ module Engine
         BANK_CASH = 99_999
         CAPITALIZATION = :incremental
         CERT_LIMIT = { 3 => 99 }.freeze
-        STARTING_CASH = { 3 => 100 }.freeze
+        STARTING_CASH = { 3 => 1_200 }.freeze
 
         EVENTS_TEXT = Base::EVENTS_TEXT.merge.freeze
         STATUS_TEXT = Base::STATUS_TEXT.merge.freeze
@@ -91,18 +91,30 @@ module Engine
           'A' => 50, 'B' => 40, 'C' => 30, 'D' => 20, 'E' => 10, 'F' => 5
         }.freeze
 
-        CENTER_START_TILE = 'FLDS1'
-        CENTER_SEQUENCE   = ([CENTER_START_TILE] + CENTER_PLAN.map { |s| s[:to] }).freeze
-
-        FUTURE_COST = {
-          yellow: { next: :green, fraction: 2.0 / 3.0 },
-          green: { next: :brown, fraction: 1.0 / 3.0 },
-          brown: { next: :gray,  fraction: 0.0       },
-          gray: { next: nil, fraction: 0.0 },
+        GREEN_CITY_SEEDS_BY_RING = { 2 => 6, 3 => 4, 4 => 3, 5 => 3 }.freeze
+        BROWN_CITY_SEEDS_BY_RING = { 6 => 9 }.freeze
+        GENERATED_CITY_TILES = %w[FLD21 FLD22 FLD31].freeze
+        COASTAL_TRACK_EDGES = { '7' => [0, 1], '8' => [0, 2], '9' => [0, 3] }.freeze
+        CORRIDOR_SWITCHBACK_BY_RING = { 5 => 0, 4 => 1, 3 => 0, 2 => -1 }.freeze
+        GREEN_CITY_EDGES = {
+          'FLD21' => [0, 1, 2, 4],
+          'FLD22' => [0, 1, 3, 5],
+        }.freeze
+        TERRAIN_COST_FRACTIONS = {
+          yellow: 2.0 / 3.0,
+          green: 1.0 / 3.0,
+          brown: 1.0 / 6.0,
+          gray: 0.0,
+        }.freeze
+        TERRAIN_BASE_COST_BY_RING = {
+          1 => 240, 2 => 240,
+          3 => 120, 4 => 120,
+          5 => 60, 6 => 60,
         }.freeze
 
         attr_accessor :steel, :lumber, :pending_shell, :center_fund, :center_stage,
-                      :done_this_round, :center_used
+                      :center_used
+        attr_reader :city_corridor_sextants, :city_corridor_hexes
 
         def init_share_pool
           @share_pool = Engine::Game::G18FLOOD::SharePool.new(
@@ -178,10 +190,6 @@ module Engine
         def center_hex_id = self.class::CENTER_CITY.first
         def center_hex?(hex_or_id) = (hex_or_id.respond_to?(:id) ? hex_or_id.id : hex_or_id) == center_hex_id
 
-        def corp_touched_center?(corp)
-          !!(@round&.center_touchers && @round.center_touchers[corp])
-        end
-
         def center_phase_contribution
           CENTER_PHASE_CONTRIBUTION.fetch(@phase.name, 5)
         end
@@ -190,7 +198,7 @@ module Engine
           sequence = %w[FLDS1 FLDS2 FLDS3 FLDS4 FLDS5]
           current  = hex_by_id(center_hex_id)&.tile&.name
           idx      = sequence.index(current) || 0
-          @center_stage = [[idx - 1, 0].max, CENTER_PLAN.size].min
+          @center_stage = [idx, CENTER_PLAN.size].min
         end
 
         def center_next_need
@@ -252,7 +260,17 @@ module Engine
 
         def or_set_finished
           super
-          flood_event!
+          flood_event! if symmetrical_map?
+        end
+
+        def or_round_finished
+          super
+          advance_flood_clock!
+        end
+
+        def advance_flood_clock!
+          @completed_operating_rounds = (@completed_operating_rounds || 0) + 1
+          flood_event! if !symmetrical_map? && @completed_operating_rounds.even?
         end
 
         def compute_flood_rings!
@@ -263,26 +281,23 @@ module Engine
           @max_flood_ring = 0
           return unless center_hex
 
-          distance = { center_hex.id => 0 }
-          queue    = [center_hex]
-
-          until queue.empty?
-            hex   = queue.shift
-            depth = distance[hex.id]
-            hex.neighbors.values.compact.each do |nbr|
-              next if distance.key?(nbr.id)
-
-              distance[nbr.id] = depth + 1
-              queue << nbr
-            end
-          end
-
           rings = Hash.new { |hash, key| hash[key] = [] }
-          distance.each { |hid, ring_idx| rings[ring_idx] << hid }
+          @hexes.each do |hex|
+            next if outer_water_ring.include?(hex.id)
+
+            ring = geometric_ring(hex, center_hex)
+            rings[ring] << hex.id
+          end
           rings.each_value(&:sort!)
 
           @flood_rings    = rings
           @max_flood_ring = rings.keys.max || 0
+        end
+
+        def geometric_ring(hex, center = hex_by_id(center_hex_id))
+          dx = hex.x - center.x
+          dr = ((hex.y - center.y) - dx) / 2
+          [dx.abs, dr.abs, (dx + dr).abs].max
         end
 
         def ring_for_flood_index(idx)
@@ -324,10 +339,8 @@ module Engine
               hex.instance_variable_set(:@location_name, nil)
             end
 
-            # replace with flood tile
-            flood_tile = Engine::Tile.from_code('FLOOD', 'blue', '')
-            flood_tile.upgrades = []
-            hex.lay(flood_tile, 0)
+            # Use a managed pool tile so tile inventory and replay state remain consistent.
+            lay_from_pool!(hid, 'FLOOD', 0)
           end
 
           # close corps that don't have any tokens on the map
@@ -451,7 +464,7 @@ module Engine
         end
 
         def upgrades_to?(from, to, special = false, selected_company: nil)
-          return true if from.color == :gray && to.color == :purple && from.hex && center_hex?(from.hex)
+          return false if to.color == :purple
 
           super
         end
@@ -545,30 +558,6 @@ module Engine
           new_auction_round
         end
 
-        def can_par?(corporation, entity)
-          super
-        end
-
-        def initial_auction_companies
-          companies
-        end
-
-        def company_status_str(company)
-          super
-        end
-
-        def company_header(company)
-          super
-        end
-
-        def float_str(_entity)
-          super
-        end
-
-        def optional_hexes
-          super
-        end
-
         def controller(entity)
           return entity if entity&.player?
           return nil    unless entity&.corporation?
@@ -634,24 +623,19 @@ module Engine
           controller_order.to_h { |k| [k, grouped[k]] }
         end
 
-        def list_with_and(array)
-          return '' if array.empty?
-          return array.first.to_s if array.size == 1
-          return array.join(' and ') if array.size == 2
+        def train_help(entity, _runnable_trains, _routes)
+          return [] unless national_corporation?(entity)
 
-          "#{array[0..-2].join(', ')}, and #{array[-1]}"
+          ['Nationals run a hypothetical train of infinite length. '\
+           'This train is allowed to run a route of just a single city.']
         end
-
-      def train_help(entity, _runnable_trains, _routes)
-      return [] unless national_corporation?(entity)
-        ['Nationals run a hypothetical train of infinite length. This train is allowed to run a route of just a single city.']
-      end
 
         def setup
           super
           @or = 0
           @sr = 1
           @round_counter = 0
+          @completed_operating_rounds = 0
           @lumber ||= Hash.new(0)
           @steel  ||= Hash.new(0)
           @flood_ring_index ||= @max_flood_ring
@@ -673,13 +657,8 @@ module Engine
             @lumber[corp] = 5
             @steel[corp]  = 5
           end
-          @done_this_round ||= {}
           @center_fund ||= 0
           compute_center_stage!
-        end
-
-        def done_operating!(entity)
-          @done_this_round[entity] = true
         end
 
         # Hide labels for hexes that are flooded
@@ -698,8 +677,8 @@ module Engine
           'starts'
         end
 
-        def tile_valid_for_phase?(_tile, hex: nil, phase_color_cache: nil)
-          true
+        def tile_valid_for_phase?(tile, hex: nil, phase_color_cache: nil)
+          tile.color != :purple
         end
 
         def timeline
@@ -708,8 +687,16 @@ module Engine
 
         def check_distance(_route, visits)
           super
-          raise GameError, 'Train cannot run to a lumber mill' if visits.any? { |n| self.class::LUMBER_MILLS.include?(n.hex.id) }
-          raise GameError, 'Train cannot run to a steel mill' if visits.any? { |n| self.class::STEEL_MILLS.include?(n.hex.id) }
+          raise GameError, 'Train cannot run to a lumber mill' if visits.any? { |node| lumber_mills.include?(node.hex.id) }
+          raise GameError, 'Train cannot run to a steel mill' if visits.any? { |node| steel_mills.include?(node.hex.id) }
+        end
+
+        def lumber_mills
+          @lumber_mills || self.class::LUMBER_MILLS
+        end
+
+        def steel_mills
+          @steel_mills || self.class::STEEL_MILLS
         end
 
         def operating_order
@@ -875,7 +862,28 @@ module Engine
           hex.neighbors.values.all? { |nbr| blank_plain?(nbr) }
         end
 
-        def rings_from(center_hid, max_r = 9)
+        def city_seed_hex?(hex)
+          return false unless blank_plain?(hex)
+          return false if hex.neighbors.values.compact.any? { |neighbor| self.class::HOME_HEXES.include?(neighbor.id) }
+
+          mill_ids = Array(@lumber_mills) + Array(@steel_mills)
+          return false if mill_ids.include?(hex.id)
+          return false if hex.neighbors.values.compact.any? { |neighbor| mill_ids.include?(neighbor.id) }
+
+          adjacent_cities = hex.neighbors.values.compact.select do |neighbor|
+            GENERATED_CITY_TILES.include?(neighbor.tile.name)
+          end
+          return true if adjacent_cities.empty?
+          return false unless adjacent_cities.one?
+
+          neighbor = adjacent_cities.first
+          neighbor.neighbors.values.compact.none? do |other|
+            other != hex && GENERATED_CITY_TILES.include?(other.tile.name)
+          end
+        end
+
+        def rings_from(center_hid)
+          max_r = 9
           start = hex_by_id(center_hid) or raise GameError, "No hex #{center_hid}"
           rings = Hash.new { |h, k| h[k] = [] }
           dist  = { start.id => 0 }
@@ -928,49 +936,228 @@ module Engine
           tile.upgrades << Engine::Part::Upgrade.new(cost, [:mountain], nil)
         end
 
-        # --- GREEN cities: 3 per sextant (rings 4,5,6) with costs 40/20/20 ----------
+        def base_terrain_cost(hex)
+          original = hex.original_tile
+          return 0 unless original
+
+          cost = original.upgrades.sum { |upgrade| Integer(upgrade.cost || 0) }
+          return cost unless original.preprinted && original.cities.any?
+
+          case original.color
+          when :yellow then (cost * 3.0 / 2).round
+          when :green then cost * 3
+          else cost
+          end
+        end
+
+        def terrain_cost_for(hex, color)
+          (base_terrain_cost(hex) * TERRAIN_COST_FRACTIONS.fetch(color, 0.0)).round
+        end
+
+        def seed_hex_for(rings, ring, sextant)
+          rings[ring]
+            .select { |hid| sextant_index(center_hex_id, hid) == sextant }
+            .select { |hid| city_seed_hex?(hex_by_id(hid)) }
+            .min_by { r_hi }
+        end
+
+        def symmetrical_map?
+          @optional_rules&.include?(:symmetrical_map)
+        end
+
+        def rotated_hex_id(hex_id, edge_offset = 2)
+          @rotated_hex_ids ||= {}
+          return @rotated_hex_ids[[edge_offset, hex_id]] if @rotated_hex_ids.key?([edge_offset, hex_id])
+
+          center = hex_by_id(center_hex_id)
+          mapping = { center.id => center.id }
+          queue = [center]
+          until queue.empty?
+            source = queue.shift
+            rotated = hex_by_id(mapping[source.id])
+            source.neighbors.each do |edge, neighbor|
+              next unless neighbor
+
+              rotated_neighbor = rotated.neighbors[(edge + edge_offset) % 6]
+              next unless rotated_neighbor
+              next if mapping.key?(neighbor.id)
+
+              mapping[neighbor.id] = rotated_neighbor.id
+              queue << neighbor
+            end
+          end
+          mapping.each { |source_id, target_id| @rotated_hex_ids[[edge_offset, source_id]] = target_id }
+          @rotated_hex_ids[[edge_offset, hex_id]]
+        end
+
+        def threefold_orbit(hex_id)
+          second = rotated_hex_id(hex_id)
+          third = rotated_hex_id(second)
+          [hex_id, second, third].compact.uniq
+        end
+
+        def adjacent_to_city?(hex)
+          hex.neighbors.values.compact.any? { |neighbor| neighbor.tile.cities.any? }
+        end
+
+        def relocate_mills!
+          sources = (self.class::LUMBER_MILLS + self.class::STEEL_MILLS).map { |id| hex_by_id(id) }
+          candidates = @hexes.select do |hex|
+            blank_plain?(hex) && !adjacent_to_city?(hex) && !sources.include?(hex)
+          end
+          candidates.sort_by! { r_hi }
+          destinations = nonadjacent_hexes(candidates, sources.size)
+          raise GameError, 'Unable to place resource mills without clustering' unless destinations
+
+          sources.zip(destinations).each do |source, destination|
+            source_tile = source.tile
+            destination_tile = destination.tile
+            source.tile = destination_tile
+            destination.tile = source_tile
+            cost = TERRAIN_BASE_COST_BY_RING[geometric_ring(source)]
+            ensure_mountain_upgrade_cost!(source.tile, cost) if cost
+          end
+          @lumber_mills = destinations.first(self.class::LUMBER_MILLS.size).map(&:id)
+          @steel_mills = destinations.drop(self.class::LUMBER_MILLS.size).map(&:id)
+        end
+
+        def nonadjacent_hexes(candidates, count, chosen = [])
+          return chosen if chosen.size == count
+          return nil if chosen.size + candidates.size < count
+
+          candidates.each_with_index do |candidate, index|
+            adjacent_ids = candidate.neighbors.values.compact.map(&:id)
+            remaining = candidates.drop(index + 1).reject { |hex| adjacent_ids.include?(hex.id) }
+            result = nonadjacent_hexes(remaining, count, chosen + [candidate])
+            return result if result
+          end
+          nil
+        end
 
         def seed_green_cities!
-          center = self.class::CENTER_CITY.first
-          rings  = rings_from(center, 9)
+          rings = rings_from(center_hex_id)
+          placed = 0
+          offset = r_mod(2)
+          @city_corridor_sextants = [offset, offset + 2, offset + 4]
+          @city_corridor_hexes = Hash.new { |hash, key| hash[key] = [] }
 
-          [[4, 40], [5, 20], [6, 20]].each do |ring, cost|
-            6.times do |sx|
-              candidates = rings[ring]
-                            .select { |hid| sextant_index(center, hid) == sx }
-                            .select { |hid| isolated_blank_hex_id?(hid) }
-              next if candidates.empty?
+          GREEN_CITY_SEEDS_BY_RING.each do |ring, count|
+            count.times do |slot|
+              candidates = rings[ring].select { |hid| city_seed_hex?(hex_by_id(hid)) }
+              desired_sextant = (@city_corridor_sextants[slot % 3] +
+                CORRIDOR_SWITCHBACK_BY_RING.fetch(ring)) % 6
+              hid = candidates.min_by do |candidate|
+                sextant = sextant_index(center_hex_id, candidate)
+                distance = [(sextant - desired_sextant) % 6, (desired_sextant - sextant) % 6].min
+                [distance, r_hi]
+              end
+              break unless hid
 
-              hid  = candidates.min_by { r_hi }
-              name = coin_flip ? 'FLD21' : 'FLD22'
-              rot  = r_mod(6)
-
-              tile = lay_from_pool!(hid, name, rot)
-              ensure_mountain_upgrade_cost!(tile, cost)
+              corridor = slot % 3
+              lay_corridor_city!(hid, ring, corridor)
+              placed += 1
             end
+          end
+
+          (GREEN_CITY_SEEDS_BY_RING.values.sum - placed).times do
+            hid = GREEN_CITY_SEEDS_BY_RING.keys.flat_map { |ring| rings[ring] }
+                                          .select { |id| city_seed_hex?(hex_by_id(id)) }
+                                          .min_by { r_hi }
+            break unless hid
+
+            sextant = sextant_index(center_hex_id, hid)
+            corridor = @city_corridor_sextants.each_index.min_by do |index|
+              target = @city_corridor_sextants[index]
+              [(sextant - target) % 6, (target - sextant) % 6].min
+            end
+            lay_corridor_city!(hid, geometric_ring(hex_by_id(hid)), corridor)
           end
         end
 
-        # --- BROWNS: one FLD31 in ring 7 and one in ring 8 per sextant --------------
+        def corridor_route_edges(hex, ring, corridor)
+          base = @city_corridor_sextants[corridor]
+          [ring - 1, ring + 1].filter_map do |target_ring|
+            next unless target_ring.between?(1, 6)
+
+            target_sextant = (base + CORRIDOR_SWITCHBACK_BY_RING.fetch(target_ring, 0)) % 6
+            choices = hex.neighbors.select { |_edge, neighbor| neighbor && geometric_ring(neighbor) == target_ring }
+            choices.min_by do |_edge, neighbor|
+              sextant = sextant_index(center_hex_id, neighbor.id)
+              [(sextant - target_sextant) % 6, (target_sextant - sextant) % 6].min
+            end&.first
+          end.uniq
+        end
+
+        def green_city_spec(hex, ring, corridor)
+          required_edges = corridor_route_edges(hex, ring, corridor)
+          specs = GREEN_CITY_EDGES.flat_map do |name, base_edges|
+            6.times.filter_map do |rotation|
+              exits = base_edges.map { |edge| (edge + rotation) % 6 }
+              [name, rotation] if (required_edges - exits).empty?
+            end
+          end
+          specs.min_by { r_hi } || [coin_flip ? 'FLD21' : 'FLD22', r_mod(6)]
+        end
+
+        def lay_corridor_city!(hid, ring, corridor)
+          hex = hex_by_id(hid)
+          name, rotation = green_city_spec(hex, ring, corridor)
+          tile = lay_from_pool!(hid, name, rotation)
+          ensure_mountain_upgrade_cost!(tile, terrain_cost_for(hex, :green))
+          @city_corridor_hexes[corridor] << hid
+        end
 
         def seed_brown_cities!
-          center = self.class::CENTER_CITY.first
-          rings  = rings_from(center, 9)
+          rings = rings_from(center_hex_id)
 
-          [7, 8].each do |ring|
-            6.times do |sx|
-              candidates = rings[ring]
-                            .select { |hid| sextant_index(center, hid) == sx }
-                            .select { |hid| isolated_blank_hex_id?(hid) }
-              next if candidates.empty?
+          BROWN_CITY_SEEDS_BY_RING.each do |ring, count|
+            placed = 0
+            (0...6).each do |sextant|
+              hid = seed_hex_for(rings, ring, sextant)
+              next unless hid
 
-              hid = candidates.min_by { r_hi }
-              lay_from_pool!(hid, 'FLD31', r_mod(6))
+              tile = lay_from_pool!(hid, 'FLD31', r_mod(6))
+              ensure_mountain_upgrade_cost!(tile, terrain_cost_for(hex_by_id(hid), :brown))
+              placed += 1
+            end
+            (count - placed).times do
+              hid = rings[ring].select { |id| city_seed_hex?(hex_by_id(id)) }.min_by { r_hi }
+              break unless hid
+
+              tile = lay_from_pool!(hid, 'FLD31', r_mod(6))
+              ensure_mountain_upgrade_cost!(tile, terrain_cost_for(hex_by_id(hid), :brown))
             end
           end
         end
 
-        # --- WATER: fill every eligible isolated blank --------------------------------
+        def coastal_track_spec(hex)
+          coast_edges = hex.neighbors.filter_map do |edge, neighbor|
+            edge if neighbor && geometric_ring(neighbor) == 6
+          end
+          return unless coast_edges.size == 2
+
+          COASTAL_TRACK_EDGES.each do |name, base_edges|
+            6.times do |rotation|
+              rotated_edges = base_edges.map { |edge| (edge + rotation) % 6 }.sort
+              return [name, rotation] if rotated_edges == coast_edges.sort
+            end
+          end
+          nil
+        end
+
+        def seed_coastal_track!
+          candidates = ring_for_flood_index(6).filter_map do |id|
+            hex = hex_by_id(id)
+            spec = coastal_track_spec(hex)
+            [hex, spec] if blank_plain?(hex) && spec
+          end
+          candidates.sort_by! { r_hi }
+
+          candidates.each do |hex, (name, rotation)|
+            tile = lay_from_pool!(hex.id, name, rotation)
+            ensure_mountain_upgrade_cost!(tile, terrain_cost_for(hex, :yellow))
+          end
+        end
 
         def seed_blue_waters!
           @hexes.map(&:id)
@@ -982,16 +1169,20 @@ module Engine
           end
         end
 
-        # --- Place green cities, then brown cities, then fill any holes with water ---
-
         def seed_map_tiles!
-          seed_green_cities!
+          if symmetrical_map?
+            @lumber_mills = self.class::LUMBER_MILLS
+            @steel_mills = self.class::STEEL_MILLS
+          else
+            relocate_mills!
+          end
           seed_brown_cities!
-          seed_blue_waters!
+          seed_coastal_track! unless symmetrical_map?
+          seed_green_cities!
+          seed_blue_waters! if symmetrical_map?
           @graph&.clear_graph_for_all
         end
 
-        # --- randomizers --------------------------------------------------------------
         def r_hi = (rand >> 16)
         def coin_flip = (r_hi & 1).zero?
         def r_mod(n) = r_hi % n

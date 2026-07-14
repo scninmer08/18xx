@@ -18,8 +18,8 @@ module Engine
             private_acquisition_threshold: 0,
             private_president_bonus: 0,
             private_price_enforcement_percent: 35,
-            max_concession_plan_size: 8,
-            extra_concession_min_delta: 45,
+            max_concession_plan_size: 2,
+            extra_concession_min_delta: 80,
             extra_concession_plan_divisor: 2,
             extra_concession_bailout_bonus: 35,
             stock_own_corporation_bonus: 0,
@@ -43,6 +43,8 @@ module Engine
             token_st_louis_bonus: 40,
             token_ic_line_bonus: 25,
             token_replacement_bonus: 10,
+            closure_strategy_weight: 20,
+            ic_auction_cash_reserve: 160,
           }.freeze
 
           MUTATION_RANGES = {
@@ -53,7 +55,7 @@ module Engine
             private_acquisition_threshold: [-150, 150, 5],
             private_president_bonus: [-150, 150, 5],
             private_price_enforcement_percent: [0, 100, 5],
-            max_concession_plan_size: [1, 8, 1],
+            max_concession_plan_size: [1, 4, 1],
             extra_concession_min_delta: [0, 100, 5],
             extra_concession_plan_divisor: [1, 5, 1],
             extra_concession_bailout_bonus: [0, 100, 5],
@@ -78,6 +80,8 @@ module Engine
             token_st_louis_bonus: [0, 100, 5],
             token_ic_line_bonus: [0, 100, 5],
             token_replacement_bonus: [0, 50, 5],
+            closure_strategy_weight: [0, 100, 5],
+            ic_auction_cash_reserve: [0, 320, 20],
           }.freeze
 
           HASH_MUTATION_RANGES = {
@@ -95,6 +99,7 @@ module Engine
             conservative
             opportunist
             founder
+            explorer
           ].freeze
 
           PERSONALITY_LABELS = {
@@ -105,6 +110,7 @@ module Engine
             conservative: 'Conservative',
             opportunist: 'Opportunist',
             founder: 'Founder',
+            explorer: 'Explorer',
           }.freeze
 
           attr_reader :name, :settings
@@ -179,6 +185,13 @@ module Engine
 
           def self.default_roster(players)
             default_personality_keys(players).map { |key| personality(key) }
+          end
+
+          def self.random_roster(players, seed:)
+            random = Random.new(seed)
+            roster = []
+            roster.concat(starter_set.shuffle(random: random)) while roster.size < players
+            roster.first(players)
           end
 
           def self.normalize_personality_key(key)
@@ -272,8 +285,8 @@ module Engine
                 name: 'Founder',
                 auction_cash_reserve: 120,
                 presidency_penalty: -35,
-                max_concession_plan_size: 8,
-                extra_concession_min_delta: 20,
+                max_concession_plan_size: 3,
+                extra_concession_min_delta: 55,
                 extra_concession_plan_divisor: 1,
                 extra_concession_bailout_bonus: 80,
                 stock_own_corporation_bonus: 25,
@@ -284,6 +297,25 @@ module Engine
                 token_score_threshold: 15,
                 token_chicago_bonus: 60,
                 token_st_louis_bonus: 55,
+              ),
+              explorer: new(
+                name: 'Explorer',
+                auction_cash_reserve: 80,
+                presidency_penalty: -60,
+                train_count_penalty: -60,
+                max_concession_plan_size: 3,
+                extra_concession_min_delta: 40,
+                extra_concession_plan_divisor: 1,
+                extra_concession_bailout_bonus: 100,
+                stock_own_corporation_bonus: 35,
+                stock_market_bonus: -25,
+                stock_treasury_bonus: 45,
+                train_capacity_weight: 38,
+                train_permanent_bonus: 55,
+                train_price_divisor: 16,
+                train_exchange_bonus: 50,
+                closure_strategy_weight: 90,
+                ic_auction_cash_reserve: 240,
               ),
             }.freeze
           end

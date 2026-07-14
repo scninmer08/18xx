@@ -40,6 +40,7 @@ module Engine
             return {} if @game.national_corporation?(entity)
             return {} if @game.shell_corporation?(entity) && entity.trains.none?
             return { share_direction: :left, share_times: 1 } if revenue.zero?
+            return {} if revenue < entity.share_price.price
 
             { share_direction: :right, share_times: 1 }
           end

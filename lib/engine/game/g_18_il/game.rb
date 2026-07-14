@@ -545,7 +545,7 @@ module Engine
         end
 
         def packet_auction_variant?
-          optional_rules&.include?(:packet_auction_variant) && (2..6).cover?(@players.size)
+          optional_rules&.include?(:packet_auction_variant) && (2..4).cover?(@players.size)
         end
 
         def privates_in_auction_pool?
@@ -638,10 +638,10 @@ module Engine
 
                     packet_specs = if @players.size <= 4
                                      [
-                                       [[10, 5], 3, 1],
+                                       [[10, 5], 2, 2],
                                        [[10, 2], 2, 2],
                                        [[5, 5], 2, 2],
-                                       [[5, 2], 1, 3],
+                                       [[5, 2], 2, 2],
                                      ]
                                    else
                                      [
@@ -1030,12 +1030,22 @@ module Engine
           permit_tokened_by?(port_permit_city, corporation)
         end
 
+        def port_permit_available?(corp = nil)
+          city = port_permit_city
+          return true if corp && city.find_reservation(corp)
+
+          city.available_slots.to_i.positive?
+        end
+
         def assign_port_permit(corp)
           return if owns_port_permit?(corp)
+
+          raise GameError, 'No port permit slot is available' unless port_permit_available?(corp)
 
           city = port_permit_city
           token = Token.new(corp, price: 0, type: :permit)
           reserved_slot = city.find_reservation(corp)
+          corp.tokens << token
           city.place_token(corp, token, free: true, check_tokenable: false)
           city.reservations[reserved_slot] = nil if reserved_slot
         end
@@ -1155,6 +1165,8 @@ module Engine
         end
 
         def place_home_token(corporation)
+          return if home_token_placed?(corporation)
+
           # Reopened corporations reuse a flipped token when possible; otherwise they choose a new home.
           return super unless @closed_corporations.include?(corporation)
 
@@ -1169,6 +1181,12 @@ module Engine
             token: corporation.tokens.first,
           }
           @round.clear_cache!
+        end
+
+        def home_token_placed?(corporation)
+          corporation.tokens.any? do |token|
+            token.used && token.status != :flipped && token.type != :permit
+          end
         end
 
         def home_token_locations(corporation)
@@ -1368,11 +1386,18 @@ module Engine
             @log << 'IC Line is complete, but does not form in phase D'
           else
             @log << 'IC Line is complete'
-            @log << "-- The Illinois Central Railroad will form at the end of #{entity.name}'s turn --"
+            trigger_name = ic_formation_trigger_name(entity)
+            @log << "-- The Illinois Central Railroad will form at the end of #{trigger_name}'s turn --"
             @ic_formation_triggered = true
             @ic_formation_pending = true
             @ic_trigger_entity = entity
           end
+        end
+
+        def ic_formation_trigger_name(entity)
+          return entity.owner.name if entity&.company? && entity.owner
+
+          entity.name
         end
 
         def ic_formation_pending?
@@ -1488,11 +1513,10 @@ module Engine
             sep,
             'Corporations with loans are frozen: their shares remain tradable and their stock price does not move',
             'Frozen corporations may choose any dividend and immediately apply all corporation income to their loan',
-            'If trainless in its train-buying step, IC receives the cheapest bank train and takes a loan for any shortfall',
             sep,
             "The 'Rogers' train runs between Springfield and Jacksonville and rusts immediately after running",
             'An x+yC train may visit x red areas or cities, plus y additional cities that earn double revenue. ' \
-            'The doubled cities may be anywhere along the route. The train may also include any number of towns or ports',
+            'The doubled cities may be anywhere along the route. The train may also include any number of towns',
           ].freeze
         end
 
@@ -1571,8 +1595,10 @@ module Engine
           elsif (emr_active? && bundle.owner == corporation) || corporation.share_price.price == lowest_stock_price
             movement = :down_share
           end
-          # Reserve shares lose their restriction as soon as the corporation issues them to the Market.
-          bundle.shares.each { |share| share.buyable = true } if bundle.owner == corporation
+          # Shares lose their restriction as soon as they are sold into the Market.
+          if sold_shares_destination(corporation) != :corporation
+            bundle.shares.each { |share| share.buyable = true }
+          end
           @share_pool.sell_shares(bundle, allow_president_change: allow_president_change, swap: swap)
           payoff_loan(corporation) if corporation.loans.any? && corporation.cash.positive?
           return if was_frozen
@@ -1587,6 +1613,12 @@ module Engine
           else
             raise NotImplementedError
           end
+        end
+
+        def check_sale_timing(entity, bundle)
+          return true if @round&.operating?
+
+          super
         end
 
         def lowest_stock_price
@@ -1839,7 +1871,10 @@ module Engine
           return false unless ew_ns_bonus(route.stops)[:revenue].positive?
 
           routes = route.routes
-          routes.empty? || routes.find { |r| operating_corporation_for(r) == owner && ew_ns_bonus(r.stops)[:revenue].positive? } == route
+          routes.empty? ||
+            routes.find do |r|
+              operating_corporation_for(r) == owner && ew_ns_bonus(r.stops)[:revenue].positive?
+            end == route
         end
 
         def icc_bonus_route?(route, stops)
@@ -2450,12 +2485,6 @@ module Engine
                       "(#{share_count} ordinary share#{'s' unless share_count == 1} at " \
                       "#{president_shares ? 'half' : 'full'} price)"
             end
-
-            market_shares = @merge_market_share_count.to_i
-            if market_shares.positive?
-              @log << "#{market_shares} open market share#{'s' unless market_shares == 1} " \
-                      "#{market_shares == 1 ? 'is' : 'are'} redeemed without payment"
-            end
           end
           # Replace the merging corporation's IC Line token with an IC token.
           ic.tokens << Token.new(ic, price: 0)
@@ -2498,6 +2527,10 @@ module Engine
         end
 
         def check_ic_presidency_after_merge!
+          claim_ic_presidency_if_eligible!
+        end
+
+        def claim_ic_presidency_if_eligible!
           return unless ic_in_receivership?
           return unless ic.presidents_share.owner == ic
 
@@ -2560,20 +2593,7 @@ module Engine
           @post_ic_formation_stock_round = true
           add_ic_additional_tokens
 
-          train = @depot.upcoming[0]
-          if ic.trains.empty?
-            @log << "#{ic.name} is trainless"
-            ic_needs_train!
-            if ic.cash >= @depot.min_depot_price
-              train_type = train.name.length == 1 ? "#{train.name}-train" : "#{train.name} train"
-              @log << "#{ic.name} buys a #{train_type} for #{format_currency(train.price)} from the Depot"
-              ic_owns_train!
-              buy_train(ic, train, train.price)
-              @phase.buying_train!(ic, train, train.owner)
-            else
-              @log << "#{ic.name} does not have enough cash to purchase a train"
-            end
-          end
+          buy_formation_train_for_ic! if ic.trains.empty?
 
           if @merge_share_prices.size > 1
             avg_price = @merge_share_prices.sum / @merge_share_prices.count
@@ -2619,6 +2639,25 @@ module Engine
             @round.entity_index = @round.entities.index(next_entity) - 1 if next_entity
           end
           round.entity_index = @round.entities.index(next_entity) - 1 if next_entity
+        end
+
+        def buy_formation_train_for_ic!
+          train = @depot.min_depot_train
+          return unless train
+
+          @log << "#{ic.name} is trainless"
+          ic_needs_train!
+
+          price = train.price
+          shortfall = price - ic.cash
+          shortfall = 0 if shortfall.negative?
+          take_loan(ic, shortfall) if shortfall.positive?
+
+          @log << "#{ic.name} buys a #{train.name} train for #{format_currency(price)} from #{train.owner.name}"
+
+          buy_train(ic, train, price)
+          @phase.buying_train!(ic, train, train.owner)
+          ic_owns_train!
         end
 
         def sync_ic_operating_state!

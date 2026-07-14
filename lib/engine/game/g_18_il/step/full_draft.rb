@@ -55,9 +55,7 @@ module Engine
 
             category = draft_category(company)
             already = draft_counts(player)[category]
-            if already >= category_cap
-              raise GameError, "#{player.name} already has #{category_phrase(category, category_cap)}"
-            end
+            raise GameError, "#{player.name} already has #{category_phrase(category, category_cap)}" if already >= category_cap
 
             company.owner = player
             player.companies << company
@@ -152,9 +150,9 @@ module Engine
             unless concessions.empty?
               @log << "Undrafted concessions added to Auction Pool: #{@game.list_with_and(concessions.map(&:name))}"
             end
-            unless privates.empty?
-              @log << "Undrafted privates placed in Development Pool: #{@game.list_with_and(privates.map(&:name))}"
-            end
+            return if privates.empty?
+
+            @log << "Undrafted privates placed in Development Pool: #{@game.list_with_and(privates.map(&:name))}"
           end
 
           def draft_counts(player)

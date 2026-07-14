@@ -17,9 +17,9 @@ module Engine
             @result = result
           end
 
-          def write(path)
+          def write(path, validate: true)
             data = to_h
-            validate!(data)
+            validate!(data) if validate
             File.write(path, JSON.pretty_generate(data))
           end
 

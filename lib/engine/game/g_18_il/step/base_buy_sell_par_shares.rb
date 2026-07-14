@@ -59,16 +59,7 @@ module Engine
             track_action(action, corporation)
             @game.payoff_loan(cash_recipient) if cash_recipient&.loans&.any?
 
-            if corporation == ic && entity == @game.ic_operator && @game.ic_in_receivership?
-              ic_shares = entity.shares_of(ic)[0, 2]
-              ic_shares.each { |share| share.buyable = false }
-
-              @game.share_pool.transfer_shares(ShareBundle.new(ic_shares), ic)
-              ic.presidents_share.buyable = true
-              @game.share_pool.transfer_shares(ShareBundle.new(ic.presidents_share), entity)
-
-              @game.sync_ic_operating_state!
-            end
+            @game.claim_ic_presidency_if_eligible! if corporation == ic && @game.ic_in_receivership?
 
             @game.sync_ic_operating_state! if corporation == ic
           end
@@ -132,8 +123,9 @@ module Engine
           def can_dump?(entity, bundle)
             return true unless bundle.presidents_share
 
-            sh = bundle.corporation.player_share_holders(corporate: false).dup
-            (sh.reject { |k, _| k == entity }.values.max || 0) >= bundle.presidents_share.percent
+            holders = bundle.corporation.player_share_holders(corporate: false)
+            largest_other_holding = holders.filter_map { |holder, percent| percent unless holder == entity }.max || 0
+            largest_other_holding >= bundle.presidents_share.percent
           end
 
           def can_buy?(entity, bundle)

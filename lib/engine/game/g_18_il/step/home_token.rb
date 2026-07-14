@@ -30,7 +30,7 @@ module Engine
               token = action.entity.tokens.reject(&:used).first
               place_token(action.entity, action.city, token, connected: false, extra_action: true)
             end
-            action.entity.coordinates ||= action.entity.tokens.first&.hex&.id
+            action.entity.coordinates ||= hex.id
             @round.pending_tokens.shift
           end
 

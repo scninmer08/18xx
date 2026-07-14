@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Style/GlobalVars
+
 if RUBY_ENGINE != 'opal' && File.expand_path($PROGRAM_NAME) == File.expand_path(__FILE__) &&
    !$g18_il_replay_validator_loading
   $g18_il_replay_validator_loading = true
@@ -28,3 +30,5 @@ if RUBY_ENGINE != 'opal' && File.expand_path($PROGRAM_NAME) == File.expand_path(
     puts JSON.generate(valid: false, detail: detail)
   end
 end
+
+# rubocop:enable Style/GlobalVars

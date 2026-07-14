@@ -91,9 +91,16 @@ module Engine
             corporation = action.corporation
             entity      = action.entity
 
-            # Use the default par if none was sent (or just ignore the UI’s choice)
-            share_price = action.share_price || @game.par_prices(corporation).find do |p|
+            raise GameError, 'Corporation is not available to start' unless @companies.include?(corporation)
+            raise GameError, 'Only the auction winner may start a corporation' unless entity == current_entity
+            raise GameError, 'Bidding has not finished' if @auction_open
+
+            share_price = @game.par_prices(corporation).find do |p|
               p.price == @game.class::NATIONAL_STARTING_PRICE
+            end
+            raise GameError, 'Required national par price is unavailable' unless share_price
+            if action.share_price && action.share_price != share_price
+              raise GameError, "#{corporation.name} must start at #{@game.format_currency(share_price.price)}"
             end
             raise GameError, "#{corporation} cannot be parred" unless @game.can_par?(corporation, entity)
 

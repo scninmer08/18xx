@@ -166,6 +166,7 @@ module Engine
           def train_variant_helper(train, entity)
             variants = train.variants.values
             return variants if train.owned_by_corporation?
+            return variants if train.variants.key?('0+3C')
 
             cash = entity.cash
             priced = variants.map { |v| [v, (v[:price] || train.price)] }
@@ -212,9 +213,7 @@ module Engine
               raise GameError, "#{entity.name} may only buy trains from the Depot while in receivership"
             end
 
-            if entity == @game.ic && train.owned_by_corporation? && price != train.price
-              raise GameError, 'Must pay face value'
-            end
+            raise GameError, 'Must pay face value' if entity == @game.ic && train.owned_by_corporation? && price != train.price
 
             if !buyable_exchangeable_train_variants(train, entity, exchange).include?(train.variant) ||
                 !(@game.depot.available(entity).include?(train) || buyable_trains(entity).include?(train))
@@ -230,9 +229,6 @@ module Engine
               return
             end
 
-            raise GameError, 'Must issue shares before the president may contribute' if entity.cash < price &&
-             !entity.num_ipo_shares.zero? && must_buy_train?(entity)
-
             remaining = price - buying_power(entity)
             player = entity.owner
             if remaining.positive? && must_buy_train?(entity)
@@ -241,6 +237,8 @@ module Engine
               if price > entity.cash && train != @depot.min_depot_train
                 raise GameError, "#{entity.name} cannot spend #{@game.format_currency(price)}"
               end
+              raise GameError, 'Must issue shares before the president may contribute' if entity.cash < price &&
+                !entity.num_ipo_shares.zero?
 
               if player&.player?
                 if player.cash >= remaining
@@ -340,8 +338,8 @@ module Engine
             shortfall = price - entity.cash
             @game.take_loan(entity, shortfall) if shortfall.positive?
 
-            @log << "#{entity.name} receives a #{train.name} train from the bank, paying "\
-                    "#{@game.format_currency(price - shortfall)} from its treasury"
+            @log << "#{entity.name} buys a #{train.name} train for "\
+                    "#{@game.format_currency(price)} from #{train.owner.name}"
 
             @game.buy_train(entity, train, price)
             @game.phase.buying_train!(entity, train, train.owner)

@@ -8,9 +8,9 @@ require 'view/game/part/debug_region_weights'
 require 'view/game/part/label'
 require 'view/game/part/location_name'
 require 'view/game/part/revenue'
+require 'view/game/part/split_fill'
 require 'view/game/part/towns'
 require 'view/game/part/track'
-require 'view/game/part/split_fill'
 require 'view/game/part/upgrades'
 
 module View
@@ -76,7 +76,7 @@ module View
         #   the DOM; parts at the end of the array render on top of ealier parts
         children = []
 
-        if @tile.frame&.color && @tile.partitions.any? { |p| p.type == 'split' }
+        if @tile.frame&.color && @tile.partitions.any? { |partition| partition.type == 'split' }
           children << render_tile_part(Part::SplitFill)
         end
 

@@ -70,8 +70,8 @@ module Engine
             lumber_routes = 0
             steel_routes  = 0
 
-            lumber_hex_ids = @game.class::LUMBER_MILLS
-            steel_hex_ids  = @game.class::STEEL_MILLS
+            lumber_hex_ids = @game.lumber_mills
+            steel_hex_ids  = @game.steel_mills
 
             edges_by_hex.each do |hid, touched|
               next if touched.empty?
@@ -116,10 +116,10 @@ module Engine
 
           def split_halves(tile)
             part = tile.partitions&.first
-            return nil unless part && part.type == :split
+            return nil unless part && part.type == 'split'
 
-            a = to_f(part.a)
-            b = to_f(part.b)
+            a = part.a.to_f
+            b = part.b.to_f
 
             half_a = edges_on_arc(a, b)
             half_b = ([0, 1, 2, 3, 4, 5] - half_a)
@@ -151,10 +151,6 @@ module Engine
               i = (i + 1) % 6
             end
             res
-          end
-
-          def to_f(v)
-            v.is_a?(String) ? v.to_f : v.to_f
           end
         end
       end

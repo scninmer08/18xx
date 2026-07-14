@@ -71,7 +71,7 @@ module Engine
           private
 
           def queue_private_choice(corporation)
-            return unless corporation&.corporation? && corporation.ipoed && !corporation.closed? && corporation.total_shares > 2
+            return if !corporation&.corporation? || !corporation&.ipoed || corporation.closed? || corporation.total_shares <= 2
             return if @round.converted
             return if @round.converts.include?(corporation)
             return if @round.private_choice_corporation

@@ -13,15 +13,24 @@ module Engine
           def actions(entity)
             return [] if @game.last_set
             return [] if @game.will_buy_other_train
-            return [] unless entity == current_entity
-            return [] unless rush_delivery&.owner == entity
-            return [] if @round.premature_trains_bought.include?(entity)
-            return [] if entity.cash < @depot.min_depot_price && entity.trains.any?
+
+            corporation = current_entity
+            return [] if entity != corporation && entity != corporation&.owner
+            return [] unless rush_delivery&.owner == corporation
+            return [] if @round.premature_trains_bought.include?(corporation)
+            return [] if corporation.cash < @depot.min_depot_price && corporation.trains.any?
+
+            if entity.player?
+              return [] unless president_may_contribute?(corporation)
+              return %w[sell_shares] if sellable_shares?(entity)
+
+              return []
+            end
 
             actions = []
-            actions << %w[buy_train sell_shares] if must_sell_shares?(entity)
-            actions << %w[buy_train] if can_buy_train?(entity)
-            actions << %w[pass] unless @acted
+            actions << %w[buy_train sell_shares] if must_sell_shares?(corporation)
+            actions << %w[buy_train] if can_buy_train?(corporation) || president_may_contribute?(corporation)
+            actions << %w[pass] if !@acted && !@game.emr_active?
 
             actions.flatten
           end

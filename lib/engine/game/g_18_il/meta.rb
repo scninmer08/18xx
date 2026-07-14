@@ -14,7 +14,7 @@ module Engine
         GAME_DESIGNER = 'Scott Ninmer'
         GAME_PUBLISHER = :self_published
         GAME_LOCATION = 'Illinois, USA'
-        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/u8ph86r0fef6a9dsbm0ao/18IL_Rulebook_v0.9.6.pdf?rlkey=8iryta6gf8t29fbdtt03igkem&dl=0'
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/wion4zpk8cnal42zug7s1/18IL_Rulebook_v0.9.7.pdf?rlkey=difgkx3nh4mwk5z2ciy52tat7&dl=0'
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18IL'
         PLAYER_RANGE = [2, 6].freeze
 
@@ -36,10 +36,11 @@ module Engine
         },
         {
           sym: :packet_auction_variant,
-          short_name: 'Packet Auction Variant',
+          short_name: 'Packet Auction Variant (2-4p only)',
           desc: 'Players bid for the right to choose a packet. Packets contain randomly selected concessions and '\
-                'private companies. With three or five players, the unselected packet returns its concessions to the '\
+                'private companies. With three players, the unselected packet returns its concessions to the '\
                 'Auction Pool and its private companies to the Development Pool.',
+          players: [2, 3, 4],
         },
           # {
           #   sym: :draft_variant,
@@ -55,6 +56,17 @@ module Engine
           #         'starting or converting corporations.',
           # },
         ].freeze
+
+        def self.check_options(options, _min_players, max_players)
+          optional_rules = (options || []).map(&:to_sym)
+          return unless optional_rules.include?(:packet_auction_variant) && max_players.to_i > 4
+
+          { error: 'Packet Auction Variant is only available for 2-4 players' }
+        end
+
+        def self.max_players(optional_rules, _num_players)
+          optional_rules&.map(&:to_sym)&.include?(:packet_auction_variant) ? 4 : PLAYER_RANGE[1]
+        end
       end
     end
   end

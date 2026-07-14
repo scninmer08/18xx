@@ -7,7 +7,7 @@ require_relative 'hex'
 
 module Lib
   module Settings
-    DARK = `window.matchMedia('(prefers-color-scheme: dark)').matches`.freeze
+    DARK = RUBY_ENGINE == 'opal' ? `window.matchMedia('(prefers-color-scheme: dark)').matches` : false
     # http://mkweb.bcgsc.ca/colorblind/ 15 color palette, with some substitutions + 1 additional
     ROUTE_COLORS = %i[ #A40122 #099FFA #00DCB5 #FF5AAF #9400E6 #FF6E3A #009581 #FFDC3D
                        #EF0096 #7CFFFA #005FCC #F60239 #00E307 #FFCFE2 #AFFF2A #E8D2AB ].freeze

@@ -72,6 +72,7 @@ module Engine
             return neighbors unless entity.corporation?
             return neighbors unless neighbors
             return neighbors if stl_station_token?(entity)
+
             stl_hexes = @game.class::STL_HEXES
 
             filtered = neighbors.reject do |edge|
@@ -102,8 +103,8 @@ module Engine
 
             @game.hexes.each do |hex|
               hex.tile.cities.each do |city|
-                next unless @game.city_tokened_by?(city, entity) ||
-                            @game.for_graph_city_tokened_by?(city, entity, @game.graph_for_entity(entity))
+                next if !@game.city_tokened_by?(city, entity) &&
+                        !@game.for_graph_city_tokened_by?(city, entity, @game.graph_for_entity(entity))
 
                 hex.neighbors.each_key { |edge| hexes[hex] << edge }
                 queue << [:node, city]
@@ -163,7 +164,7 @@ module Engine
               end
             end
 
-            hexes.to_h { |hex, edges| [hex, edges.uniq] }
+            hexes.transform_values(&:uniq)
           end
 
           # Override lay_tile to include border types in terrain even when net border cost is zero.
@@ -309,8 +310,9 @@ module Engine
             return nil if @game.class::STL_HEXES.include?(hex.id) && !stl_station_token?(entity)
 
             # Force NC to lay in its home hex first if it is not yellow.
+            home_hex = @game.hex_by_id(entity.coordinates)
             if !@game.class::SPRINGFIELD_HEX.include?(hex.id) &&
-               @game.hex_by_id(entity.coordinates).tile.color == :white &&
+               home_hex&.tile&.color == :white &&
                entity == @game.corporation_by_id('NC')
               return nil
             end

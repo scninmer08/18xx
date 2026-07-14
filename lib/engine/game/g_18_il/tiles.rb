@@ -108,7 +108,7 @@ module Engine
           {
             'count' => 1,
             'color' => 'green',
-            'code' => 'label=Chi;city=revenue:40,loc:1.5;city=revenue:40,loc:3.5;city=revenue:40,'\
+            'code' => 'label=Chi;city=revenue:40,loc:1;city=revenue:40,loc:4;city=revenue:40,'\
                       'loc:5.5;path=a:1,b:_0;path=a:4,b:_1;path=a:0,b:_2',
           },
 

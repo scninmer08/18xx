@@ -19,7 +19,13 @@ module Engine
         GAME_INFO_URL = 'https://github.com/tobymao/18xx/wiki/18FLOOD'
         PLAYER_RANGE = [3, 3].freeze
 
-        OPTIONAL_RULES = [].freeze
+        OPTIONAL_RULES = [
+          {
+            sym: :symmetrical_map,
+            short_name: 'Symmetrical Map',
+            desc: 'Use the original geometrical terrain, fixed mills, separated cities, and seeded water.',
+          },
+        ].freeze
       end
     end
   end

@@ -34,7 +34,6 @@ module Engine
             when :green  then { lumber: 1, steel: 1 }
             when :brown  then { lumber: 1, steel: 2 }
             when :gray   then { lumber: 1, steel: 3 }
-            when :purple then { lumber: 1, steel: 4 }
             else              { lumber: 0, steel: 0 }
             end
           end
@@ -51,25 +50,6 @@ module Engine
 
           # ---------------- Split terrain logic ----------------
 
-          def base_terrain_cost_for(hex)
-            orig = hex.original_tile
-            return 0 unless orig
-
-            raw = orig.upgrades.sum { |u| Integer(u.cost || 0) }
-            return 0 if raw.zero?
-
-            # Preprinted city adjustments (your “hidden” base costs)
-            if orig.preprinted && orig.cities.any?
-              case orig.color
-              when :yellow then ((raw * 3.0) / 2).round
-              when :green  then raw * 3
-              else raw
-              end
-            else
-              raw
-            end
-          end
-
           def upgrade_possible_from_tile_to_color?(from_tile, to_color, chooser)
             sel = chooser || current_entity
             sel = sel.owner if sel&.company?
@@ -77,28 +57,20 @@ module Engine
             candidates.any? { |t| @game.upgrades_to?(from_tile, t, false, selected_company: sel) }
           end
 
-          # ----- Generalized future-cost policy (simple + strict) -----
-          FUTURE_COST = {
-            yellow: { next: :green, fraction: 2.0 / 3.0 },
-            green: { next: :brown,  fraction: 1.0 / 3.0  },
-            brown: { next: :gray,   fraction: 1.0 / 6.0  },
-            gray: { next: :purple, fraction: 1.0 / 12.0 },
-            purple: { next: nil,     fraction: 0.0 },
+          NEXT_TILE_COLOR = {
+            yellow: :green,
+            green: :brown,
+            brown: :gray,
           }.freeze
 
           def compute_future_cost(placed_tile, hex, chooser)
-            base = base_terrain_cost_for(hex)
-            return 0 if base.zero?
-
-            rule = FUTURE_COST[placed_tile.color] || {}
-            nxt  = rule[:next]
-            frac = rule[:fraction] || 0.0
-            return 0 if nxt.nil? || frac.zero?
+            next_color = NEXT_TILE_COLOR[placed_tile.color]
+            return 0 unless next_color
 
             # Only stamp if the next color is actually reachable from this tile.
-            return 0 unless upgrade_possible_from_tile_to_color?(placed_tile, nxt, chooser)
+            return 0 unless upgrade_possible_from_tile_to_color?(placed_tile, next_color, chooser)
 
-            (base * frac).round
+            @game.terrain_cost_for(hex, placed_tile.color)
           end
 
           def set_future_cost_on!(tile, amount)

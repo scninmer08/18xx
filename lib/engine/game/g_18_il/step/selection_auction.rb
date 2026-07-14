@@ -16,10 +16,11 @@ module Engine
             setup_auction
             company_setup
 
-            while !@auctioning && @companies.any? && current_entity&.player? && current_entity.cash < starting_bid(min_company)
-              process_pass(Engine::Action::Pass.new(current_entity), 'insufficient cash')
-              break
-            end
+            insufficient_cash = !@auctioning && @companies.any? && current_entity&.player? &&
+              current_entity.cash < starting_bid(min_company)
+            return if insufficient_cash == false
+
+            process_pass(Engine::Action::Pass.new(current_entity), 'insufficient cash')
           end
 
           def company_setup
@@ -48,7 +49,8 @@ module Engine
             corp = @game.corporations.find { |c| c.name == company.sym }
             share_count = company&.meta&.[](:share_count)
 
-            base = "Can start #{bold(company.sym)}#{corp&.coordinates ? " (#{corp.coordinates})" : ''} as a #{share_count}-share corporation."
+            coordinates = corp&.coordinates ? " (#{corp.coordinates})" : ''
+            base = "Can start #{bold(company.sym)}#{coordinates} as a #{share_count}-share corporation."
 
             if corp && (corp.cash.positive? || corp.trains.any?)
               cash_part = corp.cash.positive? ? @game.format_currency(corp.cash) : nil
@@ -227,17 +229,57 @@ module Engine
           end
 
           BOLD_MAP = {
-            'A' => '𝐀', 'B' => '𝐁', 'C' => '𝐂', 'D' => '𝐃', 'E' => '𝐄',
-            'F' => '𝐅', 'G' => '𝐆', 'H' => '𝐇', 'I' => '𝐈', 'J' => '𝐉',
-            'K' => '𝐊', 'L' => '𝐋', 'M' => '𝐌', 'N' => '𝐍', 'O' => '𝐎',
-            'P' => '𝐏', 'Q' => '𝐐', 'R' => '𝐑', 'S' => '𝐒', 'T' => '𝐓',
-            'U' => '𝐔', 'V' => '𝐕', 'W' => '𝐖', 'X' => '𝐗', 'Y' => '𝐘',
+            'A' => '𝐀',
+            'B' => '𝐁',
+            'C' => '𝐂',
+            'D' => '𝐃',
+            'E' => '𝐄',
+            'F' => '𝐅',
+            'G' => '𝐆',
+            'H' => '𝐇',
+            'I' => '𝐈',
+            'J' => '𝐉',
+            'K' => '𝐊',
+            'L' => '𝐋',
+            'M' => '𝐌',
+            'N' => '𝐍',
+            'O' => '𝐎',
+            'P' => '𝐏',
+            'Q' => '𝐐',
+            'R' => '𝐑',
+            'S' => '𝐒',
+            'T' => '𝐓',
+            'U' => '𝐔',
+            'V' => '𝐕',
+            'W' => '𝐖',
+            'X' => '𝐗',
+            'Y' => '𝐘',
             'Z' => '𝐙',
-            'a' => '𝐚', 'b' => '𝐛', 'c' => '𝐜', 'd' => '𝐝', 'e' => '𝐞',
-            'f' => '𝐟', 'g' => '𝐠', 'h' => '𝐡', 'i' => '𝐢', 'j' => '𝐣',
-            'k' => '𝐤', 'l' => '𝐥', 'm' => '𝐦', 'n' => '𝐧', 'o' => '𝐨',
-            'p' => '𝐩', 'q' => '𝐪', 'r' => '𝐫', 's' => '𝐬', 't' => '𝐭',
-            'u' => '𝐮', 'v' => '𝐯', 'w' => '𝐰', 'x' => '𝐱', 'y' => '𝐲',
+            'a' => '𝐚',
+            'b' => '𝐛',
+            'c' => '𝐜',
+            'd' => '𝐝',
+            'e' => '𝐞',
+            'f' => '𝐟',
+            'g' => '𝐠',
+            'h' => '𝐡',
+            'i' => '𝐢',
+            'j' => '𝐣',
+            'k' => '𝐤',
+            'l' => '𝐥',
+            'm' => '𝐦',
+            'n' => '𝐧',
+            'o' => '𝐨',
+            'p' => '𝐩',
+            'q' => '𝐪',
+            'r' => '𝐫',
+            's' => '𝐬',
+            't' => '𝐭',
+            'u' => '𝐮',
+            'v' => '𝐯',
+            'w' => '𝐰',
+            'x' => '𝐱',
+            'y' => '𝐲',
             'z' => '𝐳',
           }.freeze
 
@@ -248,10 +290,7 @@ module Engine
           def process_pass(action, reason = nil)
             entity = action.entity
 
-            if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy
-              pass_auction(entity)
-              resolve_bids
-            elsif auctioning
+            if auctioning
               pass_auction(entity)
               resolve_bids
             else
@@ -274,16 +313,30 @@ module Engine
           end
 
           def next_entity!
-            @round.next_entity_index!
-            entity = entities[entity_index]
-            entity.pass! if @auctioning && entity && max_bid(entity, @auctioning) < min_bid(@auctioning)
-
-            if !@auctioning && @companies.any? && entity&.player? && !entity.passed? &&
-                  entity.cash < starting_bid(min_company)
-              return process_pass(Engine::Action::Pass.new(entity), 'insufficient cash')
+            # Auction turns are selected from @active_bidders. Affordability is
+            # already handled when the auction starts and after every bid.
+            if @auctioning
+              @round.next_entity_index!
+              return
             end
 
-            next_entity! if entity&.passed?
+            skipped = 0
+            loop do
+              @round.next_entity_index!
+              entity = entities[entity_index]
+              return unless entity
+
+              if @companies.any? && entity.player? && !entity.passed? &&
+                 entity.cash < starting_bid(min_company)
+                return process_pass(Engine::Action::Pass.new(entity), 'insufficient cash')
+              end
+
+              return unless entity.passed?
+
+              skipped += 1
+              return pass! if skipped >= entities.size && !@auctioning
+              return resolve_bids if skipped >= entities.size
+            end
           end
 
           def process_bid(action)
@@ -316,11 +369,12 @@ module Engine
 
           def pass_auction(entity)
             if @game.packet_auction_first_turn?
-              if @bids[@auctioning].empty?
-                @log << "#{entity.name} declines to make an opening bid"
-              else
-                @log << "#{entity.name} declines to bid"
-              end
+              message = if @bids[@auctioning].empty?
+                          "#{entity.name} declines to make an opening bid"
+                        else
+                          "#{entity.name} declines to bid"
+                        end
+              @log << message
               @bids[@auctioning]&.reject! { |bid| bid.entity == entity }
               @active_bidders.delete(entity)
               entity.pass!
@@ -328,7 +382,42 @@ module Engine
               return
             end
 
+            if already_out_of_auction?(entity)
+              entity.pass!
+              return
+            end
+
             super
+          end
+
+          def auto_pass_auction(entity)
+            if already_out_of_auction?(entity)
+              entity.pass!
+              return
+            end
+
+            message = if @game.packet_auction_first_turn?
+                        if @bids[@auctioning].empty?
+                          "#{entity.name} declines to make an opening bid"
+                        else
+                          "#{entity.name} declines to bid"
+                        end
+                      else
+                        "#{entity.name} cannot bid #{@game.format_currency(min_bid(@auctioning))} " \
+                          "and is out of the auction for #{@auctioning.name}"
+                      end
+            @log << message
+            @bids[@auctioning]&.reject! { |bid| bid.entity == entity }
+            @active_bidders.delete(entity)
+            entity.pass!
+            @big_lot_current_entity = @active_bidders.first if @game.packet_auction_first_turn?
+          end
+
+          def already_out_of_auction?(entity)
+            return false unless @auctioning
+            return false if @active_bidders.include?(entity)
+
+            !@bids[@auctioning]&.any? { |bid| bid.entity == entity }
           end
 
           def bid_target(bid)
@@ -360,11 +449,12 @@ module Engine
             bids.reject! { |b| b.entity == entity }
             bids << bid
 
-            if @game.packet_auction_first_turn? && company.meta[:type] == :lot_choice
-              @log << "#{entity.name} bids #{@game.format_currency(price)}"
-            else
-              @log << "#{entity.name} bids #{@game.format_currency(price)} for #{company.name}"
-            end
+            message = if @game.packet_auction_first_turn? && company.meta[:type] == :lot_choice
+                        "#{entity.name} bids #{@game.format_currency(price)}"
+                      else
+                        "#{entity.name} bids #{@game.format_currency(price)} for #{company.name}"
+                      end
+            @log << message
 
             return unless @auctioning
 
@@ -405,7 +495,7 @@ module Engine
                 return pass!
               end
 
-              return unless @active_bidders.one? && @bids[@auctioning].any?
+              return if !@active_bidders.one? || @bids[@auctioning].empty?
 
               winner = highest_bid(@auctioning)
               company = @auctioning
@@ -419,6 +509,7 @@ module Engine
             end
 
             super
+            return if @auctioning
             return if @big_lot_winner
             return pass! if @companies.none?
 
@@ -435,14 +526,17 @@ module Engine
             when :lot_choice
               @big_lot_winner = player
               @round.goto_entity!(player)
-              return
             when :share
-              @game.share_pool.transfer_shares(ShareBundle.new(ic.shares.last), player)
+              share = ic.shares_of(ic).reject(&:president).last
+              raise GameError, "No 10% shares of #{ic.name} are available" unless share
+
+              @game.share_pool.transfer_shares(ShareBundle.new(share), player)
 
               @game.companies.delete(company)
               @companies.delete(company)
               company.close!
 
+              @game.claim_ic_presidency_if_eligible!
               @game.sync_ic_operating_state!
 
               if (pres = @game.company_by_id('ICP')) && !@game.ic_in_receivership?
@@ -454,7 +548,7 @@ module Engine
               refresh_ic_share_proxies!
 
             when :presidents_share
-              @game.share_pool.transfer_shares(ShareBundle.new(ic.shares.first), player)
+              @game.share_pool.transfer_shares(ShareBundle.new(ic.presidents_share), player)
 
               @game.companies.delete(company)
               @companies.delete(company)
@@ -499,9 +593,7 @@ module Engine
 
             return true if company.meta&.[](:type) == :lot
 
-            if company.meta&.[](:type) == :private
-              return @game.privates_in_auction_pool? && company.owner.nil?
-            end
+            return @game.privates_in_auction_pool? && company.owner.nil? if company.meta&.[](:type) == :private
 
             true
           end
@@ -515,13 +607,9 @@ module Engine
           end
 
           def min_bid(company)
-            if @big_lot_winner && @game.lot_proxies.include?(company)
-              return 0
-            end
+            return 0 if @big_lot_winner && @game.lot_proxies.include?(company)
 
-            if !@auctioning && @game.privates_in_auction_pool? && company&.meta&.[](:type) == :private
-              return 10
-            end
+            return 10 if !@auctioning && @game.privates_in_auction_pool? && company&.meta&.[](:type) == :private
 
             super
           end
@@ -545,9 +633,7 @@ module Engine
           end
 
           def auctioning
-            if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy && !@big_lot_winner
-              return :turn
-            end
+            return :turn if @game.packet_auction_first_turn? && @auctioning == @game.lot_choice_proxy && !@big_lot_winner
 
             super
           end
@@ -583,9 +669,7 @@ module Engine
           def process_choose(action)
             raise GameError, 'Only the auction winner may choose a packet' unless action.entity == @big_lot_winner
 
-            unless choices.key?(action.choice)
-              raise GameError, "Invalid packet choice: #{action.choice}"
-            end
+            raise GameError, "Invalid packet choice: #{action.choice}" unless choices.key?(action.choice)
 
             lot_index = action.choice.to_i
             winner = @big_lot_winner

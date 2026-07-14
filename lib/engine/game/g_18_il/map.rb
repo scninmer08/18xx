@@ -37,6 +37,7 @@ module Engine
           'G10' => 'Champaign',
           'G16' => 'Effingham',
           'G22' => 'Harrisburg',
+          'H3' => 'Chicago',
           'H7' => 'Kankakee',
           'H11' => 'Danville',
           'H21' => 'Evansville',
@@ -99,7 +100,7 @@ module Engine
             yellow: {
               ['B9'] => 'border=edge:1,type:water,cost:20;path=a:0,b:4',
               ['D13'] => 'label=J;town=revenue:10;path=a:4,b:_0',
-              ['H3'] => 'label=Chi;city=revenue:10,loc:1.5;city=revenue:10,loc:3.5;city=revenue:10,loc:5.5;'\
+              ['H3'] => 'label=Chi;city=revenue:10,loc:1;city=revenue:10,loc:4;city=revenue:10,loc:5.5;'\
                         'path=a:4,b:_1;path=a:0,b:_2',
               ['H5'] => 'path=a:3,b:0',
               ['E8'] => 'label=P;city=revenue:20;path=a:3,b:_0;upgrade=cost:20,terrain:water',

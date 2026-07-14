@@ -35,11 +35,9 @@ module Engine
 
             super
 
-            if gtl?(company)
-              @game.flip_private!(company)
-            else
-              @game.flip_private!(company) if token_ability&.count&.zero?
-            end
+            return if !gtl?(company) && !token_ability&.count&.zero?
+
+            @game.flip_private!(company)
           end
 
           def process_pass(action)

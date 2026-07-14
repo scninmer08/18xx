@@ -20,6 +20,20 @@ module Engine
       step
     end
 
+    def buy_train_before_run_route_step(game, corporation)
+      round = double(
+        'round',
+        entities: [corporation],
+        entity_index: 0,
+        current_operator: corporation,
+        premature_trains_bought: [],
+        bought_trains: [],
+      )
+      step = Game::G18IL::Step::BuyTrainBeforeRunRoute.new(game, round)
+      step.setup
+      step
+    end
+
     def special_buy_step(game, corporation)
       round = double('round', entities: [corporation], entity_index: 0, active_step: nil)
       step = Game::G18IL::Step::SpecialBuy.new(game, round)
@@ -31,6 +45,25 @@ module Engine
       round = double('round', entities: [corporation], entity_index: 0)
       step = Game::G18IL::Step::Route.new(game, round)
       step.setup
+      step
+    end
+
+    def dividend_step(game, corporation)
+      round = Struct.new(:entities, :entity_index, :round_num, :laid_hexes, :routes, :extra_revenue)
+        .new([corporation], 0, 1, [], [], 0)
+      step = Game::G18IL::Step::Dividend.new(game, round)
+      step.setup
+      step
+    end
+
+    def home_token_step(game, corporation)
+      round_class = Struct.new(:pending_tokens) do
+        def clear_cache!; end
+      end
+      round = round_class.new([])
+      step = Game::G18IL::Step::HomeToken.new(game, round)
+      game.instance_variable_set(:@round, round)
+      game.place_home_token(corporation)
       step
     end
 
@@ -49,6 +82,20 @@ module Engine
       step
     end
 
+    def selection_auction_step(game)
+      round_class = Struct.new(:entities, :entity_index) do
+        def next_entity_index!
+          self.entity_index = (entity_index + 1) % entities.size
+        end
+
+        def goto_entity!(entity)
+          self.entity_index = entities.index(entity)
+        end
+      end
+      round = round_class.new(game.players, 0)
+      Game::G18IL::Step::SelectionAuction.new(game, round)
+    end
+
     def graph_with_connected_nodes(nodes)
       double('graph').tap do |graph|
         allow(graph).to receive(:connected_nodes).and_return(nodes)
@@ -58,6 +105,10 @@ module Engine
     def advance_depot_to_8_phase(game)
       %w[2 3 4 5 4+2C 5+1C].each { |name| game.depot.export_all!(name, silent: true) }
       game.depot.export!
+    end
+
+    def advance_depot_to_4_trains(game)
+      %w[2 3].each { |name| game.depot.export_all!(name, silent: true) }
     end
 
     def make_ic_presidented!(game, player = game.players.first)
@@ -77,36 +128,121 @@ module Engine
     end
 
     include_examples 'packet auction setup', 3, [
-      [[10, 5], 3, 1],
+      [[10, 5], 2, 2],
       [[10, 2], 2, 2],
       [[5, 5], 2, 2],
-      [[5, 2], 1, 3],
+      [[5, 2], 2, 2],
     ]
 
     include_examples 'packet auction setup', 4, [
-      [[10, 5], 3, 1],
+      [[10, 5], 2, 2],
       [[10, 2], 2, 2],
       [[5, 5], 2, 2],
-      [[5, 2], 1, 3],
+      [[5, 2], 2, 2],
     ]
 
-    include_examples 'packet auction setup', 5, [
-      [[10, 5], 2, 0],
-      [[10, 2], 1, 1],
-      [[5, 5], 1, 1],
-      [[5, 2], 0, 2],
-      [[], 2, 2],
-      [[], 2, 2],
-    ]
+    [5, 6].each do |player_count|
+      it "does not enable packet auction for #{player_count} players" do
+        game = described_class.new(Array.new(player_count) { |index| "Player #{index + 1}" },
+                                   optional_rules: [:packet_auction_variant])
 
-    include_examples 'packet auction setup', 6, [
-      [[10, 5], 2, 0],
-      [[10, 2], 1, 1],
-      [[5, 5], 1, 1],
-      [[5, 2], 0, 2],
-      [[], 2, 2],
-      [[], 2, 2],
-    ]
+        expect(game.packet_auction_variant?).to be false
+      end
+    end
+
+    it 'limits packet auction game creation to 4 players' do
+      expect(Game::G18IL::Meta.max_players([:packet_auction_variant], 6)).to eq(4)
+      expect(Game::G18IL::Meta.max_players([], 6)).to eq(6)
+      expect(Game::G18IL::Meta.check_options([:packet_auction_variant], 2, 5)[:error])
+        .to eq('Packet Auction Variant is only available for 2-4 players')
+    end
+
+    it 'does not duplicate cannot-bid logs for a player already out of an IC share auction' do
+      game = described_class.new(%w[A B C D])
+      step = selection_auction_step(game)
+      share = game.company_by_id('IC1')
+      bidder = game.players[1]
+      outbid_player = game.players[0]
+      outbid_player.set_cash(90, game.bank)
+
+      bids = Hash.new { |h, k| h[k] = [] }
+      bids[share] = [Action::Bid.new(bidder, company: share, price: 90)]
+      step.instance_variable_set(:@bids, bids)
+      step.instance_variable_set(:@auctioning, share)
+      step.instance_variable_set(:@active_bidders, [bidder])
+
+      message = "#{outbid_player.name} cannot bid $95 and is out of the auction for #{share.name}"
+      game.log << message
+
+      step.auto_pass_auction(outbid_player)
+
+      expect(game.log.map(&:message).count(message)).to eq(1)
+      expect(outbid_player.passed?).to be true
+    end
+
+    it 'does not eliminate a private-auction high bidder who cannot afford the next increment' do
+      game = described_class.new(['Scott', 'Eligible', 'Low Cash 1', 'Low Cash 2'])
+      step = selection_auction_step(game)
+      company = game.company_by_id('RD')
+      scott, eligible, *low_cash_players = game.players
+
+      allow(game).to receive(:privates_in_auction_pool?).and_return(true)
+      company.owner = nil
+      scott.set_cash(10, game.bank)
+      eligible.set_cash(20, game.bank)
+      low_cash_players.each { |player| player.set_cash(10, game.bank) }
+      eligible.pass!
+
+      step.send(:setup_auction)
+      step.instance_variable_set(:@companies, [company])
+      step.process_bid(Action::Bid.new(scott, company: company, price: 10))
+
+      expect(step.send(:auctioning)).to eq(company)
+      expect(step.bids.fetch(company).map(&:entity)).to eq([scott])
+      expect(step.current_entity).to eq(eligible)
+      expect(game.log.map(&:message)).not_to include(
+        'Scott cannot bid $15 and is out of the auction for Rush Delivery',
+      )
+
+      step.process_pass(Action::Pass.new(eligible))
+
+      expect(company.owner).to eq(scott)
+      expect(scott.cash).to eq(0)
+      expect(game.log.map(&:message)).to include('Scott wins the auction for Rush Delivery with a bid of $10')
+    end
+
+    it 'allows a president to sell shares for a Rush Delivery emergency train buy' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('WAB')
+      president = game.players.first
+      rush_delivery = game.company_by_id('RD')
+      corporation.owner = president
+      rush_delivery.owner = corporation
+      corporation.companies << rush_delivery unless corporation.companies.include?(rush_delivery)
+      step = buy_train_before_run_route_step(game, corporation)
+
+      allow(step).to receive(:president_may_contribute?).with(corporation).and_return(true)
+      allow(step).to receive(:sellable_shares?).with(president).and_return(true)
+      allow(step).to receive(:can_buy_train?).with(corporation).and_return(false)
+
+      expect(step.actions(president)).to eq(%w[sell_shares])
+      expect(step.actions(corporation)).to include('buy_train')
+    end
+
+    it 'logs a company owner when a private finishes the IC Line' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('IR')
+      advanced_track = game.company_by_id('AT')
+      advanced_track.owner = corporation
+      corporation.companies << advanced_track
+
+      game.send(:trigger_ic_formation!, advanced_track)
+
+      expect(game.log.map(&:message))
+        .to include("-- The Illinois Central Railroad will form at the end of #{corporation.name}'s turn --")
+      expect(game.log.map(&:message))
+        .not_to include("-- The Illinois Central Railroad will form at the end of #{advanced_track.name}'s turn --")
+    end
 
     context 'with one more packet than players' do
       let(:game) do
@@ -219,6 +355,54 @@ module Engine
       expect(step.buyable_items(corporation).map(&:description)).to include('Port Permit')
     end
 
+    it 'does not expose the port permit buy when the port permit slots are full' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('NC')
+      corporation.set_cash(100, game.bank)
+      gtl_owner = game.corporation_by_id('IR')
+      gtl = game.company_by_id('GTL')
+      gtl.owner = gtl_owner
+      gtl_owner.companies << gtl
+
+      [gtl_owner, game.ic, game.corporation_by_id('G&CU'), game.corporation_by_id('RI')].each do |corp|
+        game.assign_port_permit(corp)
+      end
+
+      step = special_buy_step(game, corporation)
+      chicago_city = game.hex_by_id(described_class::CHICAGO_HEX.first).tile.cities.first
+
+      allow(game).to receive(:graph_for_entity)
+        .with(corporation)
+        .and_return(graph_with_connected_nodes({ chicago_city => true }))
+
+      expect(game.port_permit_available?(corporation)).to be false
+      expect(step.buyable_items(corporation).map(&:description)).not_to include('Port Permit')
+      expect { game.assign_port_permit(corporation) }.to raise_error(GameError, /No port permit slot is available/)
+    end
+
+    it 'does not ask a reopened corporation for a second home after flipping an abandoned token' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('NC')
+      city = game.hex_by_id('E12').tile.cities.first
+      token = Token.new(corporation)
+      corporation.tokens << token
+      city.place_token(corporation, token, free: true, check_tokenable: false)
+      token.status = :flipped
+      game.closed_corporations << corporation
+
+      step = home_token_step(game, corporation)
+
+      expect(game.round.pending_tokens.size).to eq(1)
+
+      step.process_place_token(Action::PlaceToken.new(corporation, city: city))
+      game.closed_corporations.delete(corporation)
+      game.place_home_token(corporation)
+
+      expect(token.status).to be_nil
+      expect(corporation.coordinates).to eq('E12')
+      expect(game.round.pending_tokens).to be_empty
+    end
+
     it 'rejects buying a port permit without a route to Chicago' do
       game = described_class.new(%w[A B C D])
       corporation = game.corporation_by_id('IR')
@@ -268,6 +452,62 @@ module Engine
       expect(ic.cash).to eq(0)
       expect(ic.loans.first.amount).to eq(40)
       expect(game.frozen_corporations).to include(ic)
+      expect(game.log.map(&:message))
+        .to include("#{ic.name} buys a #{train.name} train for #{game.format_currency(train.price)} from The Depot")
+    end
+
+    it 'loans trainless IC the shortfall for the cheapest formation train' do
+      game = described_class.new(%w[A B C D])
+      ic = game.ic
+      game.send(:ic_setup)
+      ic.set_cash(40, game.bank)
+
+      train = game.depot.min_depot_train
+      expected_shortfall = train.price - ic.cash
+
+      game.send(:buy_formation_train_for_ic!)
+
+      expect(ic.trains).to include(train)
+      expect(ic.cash).to eq(0)
+      expect(ic.loans.first.amount).to eq(expected_shortfall)
+      expect(game.frozen_corporations).to include(ic)
+      expect(game.log.map(&:message))
+        .to include("#{ic.name} buys a #{train.name} train for #{game.format_currency(train.price)} from The Depot")
+    end
+
+    it 'shows the 0+3C when 4 trains are available even if the corporation cannot afford it' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('IR')
+      game.buy_train(corporation, game.depot.min_depot_train, :free)
+      advance_depot_to_4_trains(game)
+      corporation.set_cash(300, game.bank)
+      step = buy_train_step(game, corporation)
+
+      train = game.depot.min_depot_train
+
+      expect(train.name).to eq('4')
+      expect(step.buyable_train_variants(train, corporation).map { |variant| variant[:name] }).to include('0+3C')
+
+      expect do
+        step.process_buy_train(Action::BuyTrain.new(corporation, train: train, price: 320, variant: '0+3C'))
+      end.to raise_error(GameError, /cannot spend|has 300/)
+    end
+
+    it 'warns a trainless corporation to buy the cheapest train when it selects an unaffordable 0+3C' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('IR')
+      advance_depot_to_4_trains(game)
+      corporation.set_cash(300, game.bank)
+      step = buy_train_step(game, corporation)
+
+      train = game.depot.min_depot_train
+
+      expect(train.name).to eq('4')
+      expect(step.buyable_train_variants(train, corporation).map { |variant| variant[:name] }).to include('0+3C')
+
+      expect do
+        step.process_buy_train(Action::BuyTrain.new(corporation, train: train, price: 320, variant: '0+3C'))
+      end.to raise_error(GameError, /cheaper train available \(4\)/)
     end
 
     it 'lets trainless non-receivership IC buy a train from another corporation at face value' do
@@ -369,7 +609,9 @@ module Engine
       game = described_class.new(%w[A B C D])
       player = game.players.first
       ic = game.ic
-      game.stock_market.set_par(ic, game.stock_market.par_prices.find { |price| price.price == described_class::IC_STARTING_PRICE })
+      game.stock_market.set_par(ic, game.stock_market.par_prices.find do |price|
+                                      price.price == described_class::IC_STARTING_PRICE
+                                    end)
       ic.ipoed = true
 
       share = ic.shares_of(ic).reject(&:president).first
@@ -382,6 +624,25 @@ module Engine
       expect(game.ic_in_receivership?).to be true
     end
 
+    it 'does not move share price on the run that pays off a loan' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('CBQ')
+      game.stock_market.set_par(corporation, game.par_prices.find { |price| price.price == 80 })
+      corporation.loans << Loan.new(corporation, 100)
+      game.frozen_corporations << corporation
+      step = dividend_step(game, corporation)
+
+      allow(step).to receive(:total_revenue).and_return(100)
+      allow(step).to receive(:total_subsidy).and_return(0)
+
+      price = corporation.share_price
+      step.process_dividend(Action::Dividend.new(corporation, kind: 'withhold'))
+
+      expect(corporation.loans).to be_empty
+      expect(game.frozen_corporations).not_to include(corporation)
+      expect(corporation.share_price).to eq(price)
+    end
+
     context 'when buying IC shares' do
       let(:game) { described_class.new(%w[A B C D]) }
       let(:president) { game.players[0] }
@@ -392,7 +653,9 @@ module Engine
 
       before do
         game.stock_market.set_par(seller, game.par_prices.first)
-        game.stock_market.set_par(ic, game.stock_market.par_prices.find { |price| price.price == described_class::IC_STARTING_PRICE })
+        game.stock_market.set_par(ic, game.stock_market.par_prices.find do |price|
+                                        price.price == described_class::IC_STARTING_PRICE
+                                      end)
         seller.owner = president
         seller.ipoed = true
         ic.ipoed = true
@@ -413,6 +676,18 @@ module Engine
         game.share_pool.transfer_shares(ShareBundle.new(share), game.share_pool)
 
         expect(stock_step.can_gain?(other_player, share.to_bundle)).to be true
+      end
+
+      it 'makes IC shares buyable when they are sold into the market' do
+        share = ic.shares_of(ic).reject(&:president).first
+        share.buyable = false
+        game.share_pool.transfer_shares(ShareBundle.new(share), president)
+
+        game.sell_shares_and_change_price(share.to_bundle)
+
+        expect(share.owner).to eq(game.share_pool)
+        expect(share.buyable).to be true
+        expect(stock_step.can_buy_shares?(other_player, [share])).to be true
       end
     end
   end

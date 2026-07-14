@@ -43,7 +43,7 @@ module Engine
                 name: '0+3C',
                 distance: [{ 'nodes' => %w[town], 'pay' => 99, 'visit' => 99 },
                            { 'nodes' => ['city'], 'pay' => 3, 'visit' => 3 }],
-                price: 320,
+                price: 300,
                 rusts_on: '8',
               }],
             },

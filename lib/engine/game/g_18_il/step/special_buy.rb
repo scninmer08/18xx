@@ -17,7 +17,7 @@ module Engine
 
             items = []
             items << @port_permit if @game.loading || (!@game.owns_port_permit?(entity) &&
-              @game.route_to_chicago?(entity))
+              @game.port_permit_available?(entity) && @game.route_to_chicago?(entity))
             items << @stl_permit if @game.loading || (!@game.stl_permit?(entity) &&
               @game.stl_permit_available? && @game.route_to_stl?(entity))
             items.select { |item| entity.cash >= item.cost }
@@ -31,7 +31,7 @@ module Engine
             corp = action.entity
             case action.item
             when @port_permit
-              unless @game.loading || @game.route_to_chicago?(corp)
+              if !@game.loading && !@game.route_to_chicago?(corp)
                 raise GameError, "#{corp.name} must have a route to Chicago to buy a port permit"
               end
 
@@ -40,7 +40,7 @@ module Engine
               corp.spend(cost, @game.bank)
               @game.assign_port_permit(corp)
             when @stl_permit
-              unless @game.loading || @game.route_to_stl?(corp)
+              if !@game.loading && !@game.route_to_stl?(corp)
                 raise GameError, "#{corp.name} must have a route to St. Louis to buy an STL permit"
               end
 

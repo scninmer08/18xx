@@ -20,6 +20,11 @@ module Engine
             (policies[player&.id] || @fallback).choose(game)
           end
 
+          def closure_intent_for(game, corporation)
+            player = controlling_player(corporation)
+            (policies[player&.id] || @fallback).closure_intent_for(game, corporation)
+          end
+
           private
 
           def controlling_player(entity)

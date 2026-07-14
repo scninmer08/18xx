@@ -4,12 +4,24 @@ module Engine
   module Game
     module G18FLOOD
       class SharePool < Engine::SharePool
+        def log_sell_shares(entity, verb, bundle, price, swap_text)
+          return super unless @game.national_corporation?(bundle.corporation)
+
+          count = bundle.num_shares
+          certificate = count == 1 ? 'equity certificate' : 'equity certificates'
+          @log << "#{entity.name} sells #{count} #{certificate} of #{bundle.corporation.name}; " \
+                  "the #{certificate} #{count == 1 ? 'is' : 'are'} removed from the game and " \
+                  "#{entity.name} receives #{@game.format_currency(price)}#{swap_text}"
+        end
+
         private
 
         # Use the game's label hook if present (defaults to 'president')
         def label_for(corporation)
           @game.respond_to?(:president_label_for) ? @game.president_label_for(corporation) : 'president'
         end
+
+        public
 
         # Copied from Engine::SharePool#transfer_shares with only the presidency log lines changed
         def transfer_shares(bundle, to_entity,
