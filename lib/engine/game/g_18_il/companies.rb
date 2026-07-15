@@ -242,8 +242,8 @@ module Engine
               name: 'Train Subsidy',
               value: 0,
               revenue: 0,
-              desc: '(10 SHARE) When the corporation buys trains from the bank, it may flip this company to receive a 25% '\
-                    'discount on all purchases this turn.',
+              desc: '(10 SHARE) When the corporation buys a train from the bank, it may flip this company to receive a 25% '\
+                    'discount on that train.',
               sym: 'TS',
               meta: { type: :private, class: :A },
               abilities: [

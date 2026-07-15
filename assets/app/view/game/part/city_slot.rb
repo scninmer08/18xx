@@ -127,7 +127,7 @@ module View
           text = @reservation.id
 
           non_home = @reservation.corporation? && !Array(@reservation.coordinates).include?(@city.hex.coordinates)
-          color = non_home ? '#808080' : 'black'
+          color = @game&.reservation_text_color(@reservation, @city) || (non_home ? '#808080' : 'black')
 
           attrs = {
             fill: 'black',

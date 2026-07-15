@@ -34,6 +34,19 @@ module Engine
       step
     end
 
+    def special_buy_train_step(game, corporation)
+      round = double(
+        'round',
+        entities: [corporation],
+        entity_index: 0,
+        current_operator: corporation,
+        bought_trains: [],
+      )
+      step = Game::G18IL::Step::SpecialBuyTrain.new(game, round)
+      step.setup
+      step
+    end
+
     def special_buy_step(game, corporation)
       round = double('round', entities: [corporation], entity_index: 0, active_step: nil)
       step = Game::G18IL::Step::SpecialBuy.new(game, round)
@@ -265,11 +278,12 @@ module Engine
 
     it 'has four port permit spots with GTL and IC reserved' do
       game = described_class.new(%w[A B C D])
-      city = game.hex_by_id(described_class::PORT_PERMIT_HEX).tile.cities.first
+      cities = game.hex_by_id(described_class::PORT_PERMIT_HEX).tile.cities
 
-      expect(city.normal_slots).to eq(4)
-      expect(city.reservations[0]).to eq(game.company_by_id('GTL'))
-      expect(city.reservations[1]).to eq(game.ic)
+      expect(cities.size).to eq(4)
+      expect(cities.map(&:normal_slots)).to eq([1, 1, 1, 1])
+      expect(cities[2].reservations[0]).to eq(game.ic)
+      expect(cities[3].reservations[0]).to eq(game.company_by_id('GTL'))
     end
 
     it 'assigns a receivership operator for IC without marking that player as IC owner' do
@@ -456,6 +470,23 @@ module Engine
         .to include("#{ic.name} buys a #{train.name} train for #{game.format_currency(train.price)} from The Depot")
     end
 
+    it 'uses Train Subsidy for only one train' do
+      game = described_class.new(%w[A B C D])
+      corporation = game.corporation_by_id('IR')
+      corporation.owner = game.players.first
+      corporation.set_cash(1_000, game.bank)
+      company = game.company_by_id('TS')
+      company.owner = corporation
+      train = game.depot.min_depot_train
+      discounted_price = train.price * 0.75
+
+      step = special_buy_train_step(game, corporation)
+      step.process_buy_train(Action::BuyTrain.new(company, train: train, price: discounted_price))
+
+      expect(game.private_used?(company)).to be true
+      expect(company.all_abilities).to be_empty
+    end
+
     it 'loans trainless IC the shortfall for the cheapest formation train' do
       game = described_class.new(%w[A B C D])
       ic = game.ic
@@ -556,10 +587,10 @@ module Engine
       train = game.depot.min_depot_train
 
       expect(game.ic_in_receivership?).to be true
-      expect(step.actions(ic)).to eq(%w[buy_train])
+      expect(step.actions(ic)).to be_empty
       expect(step.buyable_trains(ic)).to eq([train])
 
-      step.process_buy_train(Action::BuyTrain.new(ic, train: train, price: train.price))
+      step.skip!
 
       expect(ic.trains).to include(owned_train, train)
       expect(ic.cash).to eq(0)
@@ -595,14 +626,31 @@ module Engine
 
       expect(game.depot.min_depot_train.name).to eq('8')
       expect(game.ic_in_receivership?).to be true
-      expect(step.actions(ic)).to eq(%w[buy_train])
+      expect(step.actions(ic)).to be_empty
       expect(step.buyable_trains(ic)).to eq([])
 
-      step.process_buy_train(Action::BuyTrain.new(ic, train: d_train, price: 700, exchange: owned_train))
+      step.skip!
 
       expect(ic.trains).to include(d_train)
       expect(ic.trains).not_to include(owned_train)
       expect(ic.cash).to eq(0)
+    end
+
+    it 'automatically withholds IC revenue during receivership' do
+      game = described_class.new(%w[A B C D])
+      ic = game.ic
+      step = dividend_step(game, ic)
+      starting_cash = ic.cash
+
+      allow(step).to receive(:total_revenue).and_return(100)
+      allow(step).to receive(:total_subsidy).and_return(0)
+
+      expect(game.ic_in_receivership?).to be true
+      expect(step.actions(ic)).to be_empty
+
+      step.skip!
+
+      expect(ic.cash).to eq(starting_cash + 100)
     end
 
     it 'does not move IC share price when IC shares are sold during receivership' do

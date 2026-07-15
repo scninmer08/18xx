@@ -12,7 +12,6 @@ module Engine
           def setup
             super
             @game.players.each(&:unpass!)
-            @acted_players = []
             @conversion_order = nil
           end
 
@@ -63,6 +62,10 @@ module Engine
             [corporation]
           end
 
+          def selected_corporation
+            corporation
+          end
+
           def show_other_players
             true
           end
@@ -72,10 +75,7 @@ module Engine
             cash_recipient = action.bundle.owner if action.bundle.owner&.corporation?
             buy_shares(player, action.bundle)
             @game.payoff_loan(cash_recipient) if cash_recipient&.loans&.any?
-            player.pass! if !corporation.president?(player.owner) || !can_buy_any?(player)
-            return if corporation.president?(player.owner)
-
-            @acted_players << player.owner
+            player.pass!
           end
 
           def process_sell_shares(action)
@@ -92,8 +92,17 @@ module Engine
             can_buy?(entity, corporation.shares[0])
           end
 
+          def post_conversion_buy_bundles(entity)
+            shares = corporation.ipo_shares.select(&:buyable)
+            max_count = corporation.president?(entity) ? shares.size : [shares.size, 1].min
+            (1..max_count).filter_map do |count|
+              bundle = ShareBundle.new(shares.first(count))
+              bundle if can_buy?(entity, bundle)
+            end
+          end
+
           def help
-            ['Select the corporation to see buy/sell options, or pass:']
+            ['Choose a share bundle, sell shares if eligible, or pass:']
           end
 
           def can_buy?(entity, bundle)

@@ -34,7 +34,6 @@ module View
           entity = @step.current_entity
           @current_actions = round.actions_for(entity)
 
-          @selected_corporation ||= @step.selected_corporation if @step.respond_to?(:selected_corporation)
           @auctioning_corporation = @step.auctioning_corporation if @step.respond_to?(:auctioning_corporation)
           @selected_corporation ||= @auctioning_corporation
           @auctioning_company = @step.auctioning_company if @step.respond_to?(:auctioning_company)
@@ -54,6 +53,7 @@ module View
             store(:corporation_to_par, nil, skip: true)
             store(:show_sr_hand, false, skip: true)
           end
+          @selected_corporation ||= @step.selected_corporation if @step.respond_to?(:selected_corporation)
 
           if @current_actions.include?('par') && @step.respond_to?(:companies_pending_par) && !@step.companies_pending_par.empty?
             return h(:div, render_company_pending_par)

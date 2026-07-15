@@ -2419,6 +2419,10 @@ module Engine
         true
       end
 
+      def reservation_text_color(_reservation, _city)
+        nil
+      end
+
       def after_phase_change(_name); end
 
       # players and dummy players to show up as shareholders on entity cards

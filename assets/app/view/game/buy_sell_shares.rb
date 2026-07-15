@@ -98,6 +98,17 @@ module View
       end
 
       def render_ipo_shares
+        if @step.respond_to?(:post_conversion_buy_bundles) &&
+           (bundles = @step.post_conversion_buy_bundles(@current_entity)).any?
+          return bundles.map do |bundle|
+            h(Button::BuyShare,
+              share: bundle,
+              entity: @current_entity,
+              label: "#{bundle.num_shares} (#{@game.format_currency(bundle.price)})",
+              source: @game.ipo_name(bundle.corporation))
+          end
+        end
+
         @ipo_shares.map do |share|
           next unless @step.can_buy?(@current_entity, share.to_bundle)
 

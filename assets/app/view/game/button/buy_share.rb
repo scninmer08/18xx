@@ -19,6 +19,7 @@ module View
         needs :purchase_for, default: nil
         needs :borrow_from, default: nil
         needs :discounter, default: nil
+        needs :label, default: nil
 
         def render
           step = @game.round.active_step
@@ -43,6 +44,7 @@ module View
           text += " (#{reduced_price} + #{@swap_share.percent}% Share)" if @swap_share
           text += " (#{@game.format_currency(modified_bundle_price)})" if modified_bundle_price
           text += " for #{@purchase_for.name}" if @purchase_for
+          text = @label if @label
 
           process_buy = lambda do
             do_buy = lambda do

@@ -88,7 +88,7 @@ module Engine
         PORT_PERMIT_HEX = 'I4'
         TOWN_HEXES = %w[C2 D9 D13 D17 E6 E14 E16 F5 F13 F21 G22 H11].freeze
         CITY_HEXES = %w[B11 C6 C18 D5 D15 E2 E8 E12 E22 F3 F9 F11 F17 G4 G6 G10 G16 H3 H7 H21 I6].freeze
-        STL_HEXES = %w[B15 B17 C16 C18].freeze
+        STL_HEXES = %w[B17 C16 C18].freeze
         STL_TOKEN_HEX = ['C18'].freeze
         CHICAGO_HEX = ['H3'].freeze
         SPRINGFIELD_HEX = ['E12'].freeze
@@ -526,11 +526,9 @@ module Engine
           )
           @stl_blocking_corp.owner = @bank
 
-          # Find the city where the blocking tokens will be placed.
-          city = @hexes.find { |hex| hex.id == STL_TOKEN_HEX.first }.tile.cities.first
-
-          # Place blocking tokens in the city for each color.
-          BLOCKING_LOGOS.each do |logo|
+          # Place one phase-gated blocking token in each St. Louis permit city.
+          cities = @hexes.find { |hex| hex.id == STL_TOKEN_HEX.first }.tile.cities
+          BLOCKING_LOGOS.zip(cities).each do |logo, city|
             token = Token.new(@stl_blocking_corp, price: 0, logo: logo, simple_logo: logo, type: :blocking)
             city.place_token(@stl_blocking_corp, token, check_tokenable: false)
           end
@@ -937,8 +935,8 @@ module Engine
           @operated_mergees = []
           ic.define_singleton_method(:receivership?) { presidents_share.owner == self }
 
-          port_permit_city.add_reservation!(company_by_id('GTL'), 0) unless intro_game?
-          port_permit_city.add_reservation!(ic, 1)
+          port_permit_cities[3].add_reservation!(company_by_id('GTL'), 0) unless intro_game?
+          port_permit_cities[2].add_reservation!(ic, 0)
 
           @corporations.select { |corp| corp.type == :two_share }.each { |c| c.max_ownership_percent = 100 }
 
@@ -978,63 +976,22 @@ module Engine
         def ipo_verb(_entity = nil) = 'starts'
         def ipo_reserved_name(_entity = nil) = 'Reserve'
 
-        def setup_optional_rules
-          return unless @optional_rules
-
-          add_optional_train('3',  (@optional_rules.include?(:one_extra_three_train) ? 1 : 0) +
-                                  (@optional_rules.include?(:two_extra_three_trains) ? 2 : 0))
-          add_optional_train('4',  (@optional_rules.include?(:one_extra_four_train) ? 1 : 0) +
-                                  (@optional_rules.include?(:two_extra_four_trains) ? 2 : 0))
-          add_optional_train('5', (@optional_rules.include?(:one_five_train) ? 1 : 0) +
-                                (@optional_rules.include?(:two_five_trains) ? 2 : 0))
-          add_optional_train('4+2C', (@optional_rules.include?(:one_extra_four_plus_two_p_train) ? 1 : 0) +
-                                  (@optional_rules.include?(:two_extra_four_plus_two_p_trains) ? 2 : 0))
-          add_optional_train('5+1C', (@optional_rules.include?(:one_extra_five_plus_one_p_train) ? 1 : 0) +
-                                  (@optional_rules.include?(:two_extra_five_plus_one_p_trains) ? 2 : 0))
-          add_optional_train('8', (@optional_rules.include?(:one_extra_eight_train) ? 1 : 0) +
-                                  (@optional_rules.include?(:two_extra_eight_trains) ? 2 : 0))
-        end
-
-        def add_optional_train(type, count)
-          return if count <= 0
-
-          proto = self.class::TRAINS.find { |e| e[:name] == type }
-          raise GameError, "Unknown train type: #{type}" unless proto
-
-          base_stack_index = @depot.trains.count { |t| t.name == type }
-
-          last_same_idx = @depot.upcoming.rindex { |t| t.name == type }
-          if last_same_idx
-            insert_base = last_same_idx + 1
-          else
-            roster_order = self.class::TRAINS.map { |t| t[:name] }
-            target_pos   = roster_order.index(type) || roster_order.length
-            insert_base = @depot.upcoming.index do |t|
-              (roster_order.index(t.name) || roster_order.length) > target_pos
-            end || @depot.upcoming.length
-          end
-
-          count.times do |i|
-            new_train = Train.new(**proto, index: base_stack_index + i)
-            @depot.insert_train(new_train, insert_base + i)
-          end
-
-          update_cache(:trains)
-        end
-
         def emr_active?
           @emr_active
         end
 
         def owns_port_permit?(corporation)
-          permit_tokened_by?(port_permit_city, corporation)
+          port_permit_cities.any? { |city| permit_tokened_by?(city, corporation) }
+        end
+
+        def reservation_text_color(reservation, _city)
+          'black' if reservation == ic
         end
 
         def port_permit_available?(corp = nil)
-          city = port_permit_city
-          return true if corp && city.find_reservation(corp)
+          return true if corp && port_permit_cities.any? { |city| city.find_reservation(corp) }
 
-          city.available_slots.to_i.positive?
+          port_permit_cities.any? { |city| city.available_slots.to_i.positive? }
         end
 
         def assign_port_permit(corp)
@@ -1042,7 +999,8 @@ module Engine
 
           raise GameError, 'No port permit slot is available' unless port_permit_available?(corp)
 
-          city = port_permit_city
+          city = port_permit_cities.find { |permit_city| permit_city.find_reservation(corp) } ||
+                 port_permit_cities.find { |permit_city| permit_city.available_slots.to_i.positive? }
           token = Token.new(corp, price: 0, type: :permit)
           reserved_slot = city.find_reservation(corp)
           corp.tokens << token
@@ -1050,8 +1008,8 @@ module Engine
           city.reservations[reserved_slot] = nil if reserved_slot
         end
 
-        def port_permit_city
-          hex_by_id(PORT_PERMIT_HEX).tile.cities.first
+        def port_permit_cities
+          hex_by_id(PORT_PERMIT_HEX).tile.cities
         end
 
         def use_gtl!(corp, flip: true)
@@ -1068,11 +1026,10 @@ module Engine
         end
 
         def stl_permit_available?
-          city = stl_permit_city
-          return true if city.available_slots.to_i.positive?
+          stl_permit_cities.each_with_index.any? do |city, index|
+            next false unless stl_permit_slot_unlocked?(index)
 
-          city.tokens.each_with_index.any? do |token, index|
-            token&.corporation == @stl_blocking_corp && stl_permit_slot_unlocked?(index)
+            city.available_slots.to_i.positive? || city.tokens.any? { |token| token&.corporation == @stl_blocking_corp }
           end
         end
 
@@ -1089,14 +1046,13 @@ module Engine
         def assign_stl_permit(corp)
           raise GameError, 'No St. Louis permit slot is available in the current phase' unless stl_permit_available?
 
-          city = stl_permit_city
-          city.tokens.each_with_index do |token, index|
-            next unless token&.corporation == @stl_blocking_corp
-            next unless stl_permit_slot_unlocked?(index)
-
-            city.tokens[index] = nil
-            break
-          end
+          city = stl_permit_cities.each_with_index.find do |permit_city, index|
+            stl_permit_slot_unlocked?(index) &&
+              (permit_city.available_slots.to_i.positive? ||
+               permit_city.tokens.any? { |token| token&.corporation == @stl_blocking_corp })
+          end&.first
+          blocking_token = city.tokens.find { |token| token&.corporation == @stl_blocking_corp }
+          blocking_token&.remove!
 
           token = Token.new(corp, price: 0)
           token.type = :permit
@@ -1104,8 +1060,8 @@ module Engine
           city.place_token(corp, token, free: true, check_tokenable: false)
         end
 
-        def stl_permit_city
-          hex_by_id(STL_TOKEN_HEX.first).tile.cities.first
+        def stl_permit_cities
+          hex_by_id(STL_TOKEN_HEX.first).tile.cities
         end
 
         def stl_permit_slot_unlocked?(index)
@@ -1315,8 +1271,8 @@ module Engine
         end
 
         def remove_corporation_permits!(corporation)
-          remove_corporation_permit!(corporation, port_permit_city, 'port permit')
-          remove_corporation_permit!(corporation, stl_permit_city, 'STL permit')
+          port_permit_cities.each { |city| remove_corporation_permit!(corporation, city, 'port permit') }
+          stl_permit_cities.each { |city| remove_corporation_permit!(corporation, city, 'STL permit') }
         end
 
         def remove_corporation_permit!(corporation, city, name)

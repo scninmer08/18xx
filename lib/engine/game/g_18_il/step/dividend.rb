@@ -23,6 +23,7 @@ module Engine
           def actions(entity)
             return [] if @game.last_set
             return [] unless entity == current_entity
+            return [] if entity == @game.ic && @game.ic_in_receivership?
 
             super
           end

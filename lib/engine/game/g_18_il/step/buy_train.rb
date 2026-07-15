@@ -14,11 +14,7 @@ module Engine
           def actions(entity)
             return [] if @game.last_set
             return [] if entity != current_entity && entity != current_entity.owner
-
-            if entity == @game.ic && @game.ic_in_receivership? &&
-              @round.respond_to?(:bought_trains) && @round.bought_trains.include?(entity)
-              return []
-            end
+            return [] if receivership_ic?(entity)
 
             if entity.player?
               return [] if @game.will_buy_other_train
@@ -33,6 +29,21 @@ module Engine
             return %w[buy_train pass] if can_buy_train?(entity)
 
             []
+          end
+
+          def skip!
+            entity = current_entity
+            return super unless receivership_ic?(entity)
+
+            if receivership_forced_depot_buy?(entity)
+              train = cheapest_depot_train
+              process_buy_train(Action::BuyTrain.new(entity, train: train, price: train.price))
+            elsif receivership_forced_d_upgrade?(entity)
+              exchange, train, _variant, price = forced_d_upgrade_options(entity).first
+              process_buy_train(Action::BuyTrain.new(entity, train: train, price: price, exchange: exchange))
+            else
+              super
+            end
           end
 
           def must_sell_shares?(corporation)
@@ -86,17 +97,6 @@ module Engine
 
           def pass_description
             @acted ? 'Done (Trains)' : 'Skip (Trains)'
-          end
-
-          def pass!
-            super
-            return if @game.intro_game?
-
-            company = @game.company_by_id('TS')
-            ability = company.all_abilities.find { |item| item.type == :train_discount }
-            return unless ability&.used?
-
-            @game.flip_private!(company)
           end
 
           def check_spend(action)

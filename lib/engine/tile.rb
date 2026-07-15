@@ -453,7 +453,7 @@ module Engine
       if @paths.empty? && @cities.size >= 2
         # If a tile has no paths but multiple cities, avoid them rendering on top of each other
         div = 6 / @cities.size
-        @cities.each_with_index { |x, index| edge_count[x] = (index * div) }
+        @cities.each_with_index { |city, index| edge_count[city] = compute_loc(city.loc) || (index * div) }
         return edge_count
       end
 

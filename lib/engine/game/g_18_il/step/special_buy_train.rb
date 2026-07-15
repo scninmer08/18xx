@@ -10,7 +10,7 @@ module Engine
           def process_buy_train(action)
             discount = ability(action.entity, train: action.train)
             super
-            discount.add_count!(1) if discount&.used? && discount.count.zero?
+            @game.flip_private!(action.entity) if discount&.used?
           end
 
           def buy_train_action(action, entity = nil, borrow_from: nil)

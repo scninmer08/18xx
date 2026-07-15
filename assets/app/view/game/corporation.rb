@@ -290,7 +290,7 @@ module View
 
       def render_to_float
         props = { style: { textAlign: 'center' } }
-        props[:style][:maxWidth] = '3.5rem' if @corporation.cash.positive? && @corporation.tokens.size > 3
+        props[:style][:maxWidth] = '3.5rem' if @corporation.cash.positive? && charter_tokens.size > 3
         h(:div, props, @game.float_str(@corporation))
       end
 
@@ -328,7 +328,7 @@ module View
           },
         }
 
-        tokens_body = @corporation.tokens.map.with_index do |token, i|
+        tokens_body = charter_tokens.map.with_index do |token, i|
           token_text =
             if i.zero? && @corporation.coordinates
               @corporation.coordinates.is_a?(Array) ? @corporation.coordinates.join('/') : @corporation.coordinates
@@ -361,6 +361,10 @@ module View
             h(:div, text),
           ])
         end)
+      end
+
+      def charter_tokens
+        @corporation.tokens.reject { |token| token.type == :permit }
       end
 
       def share_price_str(share_price)
