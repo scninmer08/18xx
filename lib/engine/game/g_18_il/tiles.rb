@@ -223,7 +223,7 @@ module Engine
             'code' => 'town=revenue:20;path=a:0,b:_0;path=a:1,b:_0;path=a:3,b:_0;path=a:4,b:_0',
           },
 
-          'X17a' =>
+          '169a' =>
           {
             'count' => 2,
             'color' => 'gray',

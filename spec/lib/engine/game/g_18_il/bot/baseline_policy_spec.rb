@@ -295,6 +295,37 @@ module Engine
       expect(policy.send(:city_upgrade_stranded_approach_penalty, game.hex_by_id('D9'), good_tile)).to eq(0)
     end
 
+    it 'recognizes that unused edges of tile 58 can never receive track' do
+      canton = game.hex_by_id('D9')
+      canton.lay(game.tile_by_id('58-0').dup.rotate!(2))
+      closed_edge = (0..5).find { |edge| canton.paths[edge].empty? }
+
+      expect(policy.send(:revenue_edge_eventually_available?, game, canton, closed_edge)).to be false
+    end
+
+    it 'rejects the tight E14 curve that points at a closed Springfield edge' do
+      e14 = game.hex_by_id('E14')
+      tight_curve = game.tile_by_id('7-0').dup.rotate!(3)
+
+      expect(policy.send(:permanently_stranded_revenue_approach?, game, e14, tight_curve)).to be true
+    end
+
+    it 'keeps the C8 and D7 approaches to Peoria available' do
+      c8_approach = game.tile_by_id('9-0').dup.rotate!(1)
+      d7_approach = game.tile_by_id('7-0').dup.rotate!(0)
+
+      expect(policy.send(:permanently_stranded_revenue_approach?, game, game.hex_by_id('C8'), c8_approach)).to be false
+      expect(policy.send(:permanently_stranded_revenue_approach?, game, game.hex_by_id('D7'), d7_approach)).to be false
+    end
+
+    it 'prioritizes Peoria and Springfield as CBQ route destinations' do
+      cbq = game.corporation_by_id('CBQ')
+      values = policy.send(:revenue_destination_values, cbq, {})
+
+      expect(values.values_at('E8', 'E12')).to all(be > values.fetch('H3'))
+      expect(values.values_at('E8', 'E12')).to all(be > values.fetch('B17'))
+    end
+
     it 'uses sampled routes as a fallback when isolated exact routing finds nothing' do
       corporation = game.corporation_by_id('WAB')
       train = Struct.new(:id, :name, :rusts_on, :obsolete_on)

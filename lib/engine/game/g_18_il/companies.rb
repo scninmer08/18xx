@@ -255,7 +255,7 @@ module Engine
                   remove_when_used_up: false,
                   trains: self.class::TRAINS.reject { |t| t[:reserved] }
                              .flat_map { |t| [t[:name]] + (t[:variants]&.map { |v| v[:name] } || []) },
-                  when: 'buy_train',
+                  when: 'buying_train',
                 },
               ],
             },

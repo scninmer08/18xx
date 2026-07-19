@@ -39,14 +39,23 @@ module View
         companies = ipo_row.dup
         return h(:div) if companies.empty?
 
-        divs = [render_title(ipo_row_number)]
+        divs = []
+        title = render_title(ipo_row_number)
+        divs << title if title
         divs << render_first_ipo(companies, ipo_row_number) if @show_first
-        divs << h(CompaniesTable, game: @game, companies: companies)
+        divs << h(CompaniesTable, game: @game, companies: companies, title: companies_title)
 
         h('div.player.card', { style: card_style }, divs)
       end
 
+      def companies_title
+        @game.respond_to?(:ipo_row_companies_title) ? @game.ipo_row_companies_title : 'Certs'
+      end
+
       def render_title(ipo_row_number)
+        title = @game.respond_to?(:ipo_row_title) ? @game.ipo_row_title(ipo_row_number) : "IPO Row #{ipo_row_number}"
+        return unless title
+
         bg_color = color_for(:bg2)
         props = {
           style: {
@@ -56,7 +65,7 @@ module View
           },
         }
 
-        h('div.player.title.nowrap', props, ["IPO Row #{ipo_row_number}"])
+        h('div.player.title.nowrap', props, [title])
       end
 
       def render_first_ipo(ipo_row, ipo_row_number)

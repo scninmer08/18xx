@@ -92,15 +92,6 @@ module Engine
             can_buy?(entity, corporation.shares[0])
           end
 
-          def post_conversion_buy_bundles(entity)
-            shares = corporation.ipo_shares.select(&:buyable)
-            max_count = corporation.president?(entity) ? shares.size : [shares.size, 1].min
-            (1..max_count).filter_map do |count|
-              bundle = ShareBundle.new(shares.first(count))
-              bundle if can_buy?(entity, bundle)
-            end
-          end
-
           def help
             ['Choose a share bundle, sell shares if eligible, or pass:']
           end

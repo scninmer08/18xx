@@ -60,6 +60,9 @@ module Engine
             'B17' => 100,
             'F25' => 60,
           }.freeze
+          CORPORATION_REVENUE_DESTINATION_VALUES = {
+            'CBQ' => { 'E8' => 160, 'E12' => 160 },
+          }.freeze
           STRATEGIC_TARGET_COUNT = 2
           DESTINATION_PROGRESS_BASE = 400
           DESTINATION_PROGRESS_SCALE = 20
@@ -402,6 +405,7 @@ module Engine
 
                   next unless ic_line_tile_valid?(game, hex, rotated_tile)
                   next if city_upgrade_stranded_approach?(hex, rotated_tile)
+                  next if permanently_stranded_revenue_approach?(game, hex, rotated_tile)
                   next unless advanced_track_candidate_allowed?(game, company, hex)
 
                   if ability.reachable
@@ -5780,6 +5784,7 @@ module Engine
 
                   next unless ic_line_tile_valid?(game, hex, rotated_tile)
                   next if city_upgrade_stranded_approach?(hex, rotated_tile)
+                  next if permanently_stranded_revenue_approach?(game, hex, rotated_tile)
 
                   cost = track_cost(hex, rotated_tile, tile_lay)
                   next if cost > entity.cash
@@ -5932,6 +5937,31 @@ module Engine
             city_upgrade_stranded_approach_penalty(hex, tile).positive?
           end
 
+          def permanently_stranded_revenue_approach?(game, hex, tile)
+            (tile.exits - hex.tile.exits).any? do |edge|
+              neighbor = hex.neighbors[edge]
+              next false unless neighbor
+              next false unless neighbor.tile.nodes.any? { |node| node.city? || node.town? || node.offboard? }
+
+              incoming_edge = hex.invert(edge)
+              !revenue_edge_eventually_available?(game, neighbor, incoming_edge)
+            end
+          end
+
+          def revenue_edge_eventually_available?(game, hex, edge)
+            return true if hex.paths[edge].any?
+
+            game.all_tiles.uniq.any? do |candidate|
+              candidate.legal_rotations.any? do |rotation|
+                tile = safely_rotated_tile(candidate, rotation)
+                next false unless tile
+
+                tile.hex = hex
+                game.upgrades_to?(hex.tile, tile) && tile.exits.include?(edge)
+              end
+            end
+          end
+
           def permanent_route_repair_score(game, entity, *scores)
             return 0 unless entity.corporation?
             return 0 unless owns_permanent_train?(entity)
@@ -6079,6 +6109,7 @@ module Engine
 
                   next unless ic_line_tile_valid?(game, hex, rotated_tile)
                   next if city_upgrade_stranded_approach?(hex, rotated_tile)
+                  next if permanently_stranded_revenue_approach?(game, hex, rotated_tile)
 
                   cost = track_cost(hex, rotated_tile, tile_lay)
                   next if cost > available_cash
@@ -6176,6 +6207,7 @@ module Engine
 
           def revenue_destination_values(entity, connected)
             values = REVENUE_DESTINATION_VALUES.dup
+            values.merge!(CORPORATION_REVENUE_DESTINATION_VALUES.fetch(entity.id, {}))
             return values unless entity.companies.any? { |company| company.id == 'ICC' }
 
             groups = connected.keys.flat_map(&:groups).uniq

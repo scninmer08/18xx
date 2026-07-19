@@ -47,6 +47,47 @@ module Engine
           'I18' => 'Louisville',
         }.freeze
 
+        PORT_HEXES = %w[H1].freeze
+        PORT_PERMIT_HEX = 'I4'
+        TOWN_HEXES = %w[C2 D9 D13 D17 E6 E14 E16 F5 F13 F21 G22 H11].freeze
+        CITY_HEXES = %w[B11 C6 C18 D5 D15 E2 E8 E12 E22 F3 F9 F11 F17 G4 G6 G10 G16 H3 H7 H21 I6].freeze
+        STL_HEXES = %w[B17 C16 C18].freeze
+        STL_TOKEN_HEX = ['C18'].freeze
+        CHICAGO_HEX = ['H3'].freeze
+        SPRINGFIELD_HEX = ['E12'].freeze
+        IC_LINE_CITY_HEXES = %w[H7 G10 F17 E22].freeze
+        BOOM_HEXES = %w[E8 E12].freeze
+        BOOM_TILES = %w[P4 S4].freeze
+        GALENA_HEX = %w[C2].freeze
+        JACKSONVILLE_HEX = %w[D13].freeze
+        CVCC_TOWN_HEXES = (TOWN_HEXES - GALENA_HEX - JACKSONVILLE_HEX).freeze
+        USY_CITY_HEXES = (CITY_HEXES - CHICAGO_HEX - STL_TOKEN_HEX - IC_LINE_CITY_HEXES).freeze
+        PORT_ICON = 'port'.freeze
+
+        BOOM_HEX_TILE = { 'E8' => 'P4', 'E12' => 'S4' }.freeze
+
+        ASSIGNMENT_TOKENS = {
+          'port' => '/icons/18_il/port.svg',
+        }.freeze
+
+        IC_LINE_ORIENTATION = {
+          'H7' => [1, 3],
+          'G8' => [4, 0],
+          'G10' => [3, 0],
+          'G12' => [3, 0],
+          'G14' => [1, 3],
+          'F15' => [4, 0],
+          'F17' => [3, 0],
+          'F19' => [1, 3],
+          'E20' => [4, 0],
+          'E22' => [3, 0],
+        }.freeze
+
+        BLOCKING_LOGOS = [
+          '/logos/18_il/yellow_blocking.svg', '/logos/18_il/green_blocking.svg',
+          '/logos/18_il/brown_blocking.svg', '/logos/18_il/gray_blocking.svg'
+        ].freeze
+
         def game_hexes
           {
             blue: {

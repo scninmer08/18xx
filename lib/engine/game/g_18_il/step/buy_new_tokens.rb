@@ -13,6 +13,13 @@ module Engine
             %w[choose]
           end
 
+          def auto_actions(entity)
+            return [] unless entity == pending_entity
+            return [] unless choices.one?
+
+            [Engine::Action::Choose.new(entity, choice: choices.keys.first)]
+          end
+
           def active?
             pending_entity
           end
