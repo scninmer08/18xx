@@ -23,6 +23,11 @@ module Engine
             short_name: 'Hostile Takeover Variant',
             desc: 'Adds the inter-corporation acquisition corporate action.',
           },
+          {
+            sym: :genealogy_company_purchases,
+            short_name: 'Genealogy Company Purchases',
+            desc: 'Allows corporations to buy private companies from other corporations in their genealogy.',
+          },
         ].freeze
       end
     end

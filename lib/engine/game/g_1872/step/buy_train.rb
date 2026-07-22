@@ -8,6 +8,8 @@ module Engine
       module Step
         class BuyTrain < Engine::Step::BuyTrain
           def actions(entity)
+            return [] if isolated_shell?(entity)
+
             if entity == @game.acting_for_entity(current_entity) && president_may_contribute?(current_entity) &&
                president_needs_to_sell_shares?(current_entity, entity) && sellable_bundles(entity, nil).any?
               return ['sell_shares']
@@ -32,6 +34,10 @@ module Engine
 
           alias real_owner corp_owner
 
+          def can_entity_buy_train?(entity)
+            !isolated_shell?(entity) && super
+          end
+
           def president_may_contribute?(corporation, _shell = nil)
             return false unless must_buy_train?(corporation)
             return false unless @game.emergency_issuable_bundles(corporation).empty?
@@ -52,6 +58,10 @@ module Engine
             return trains unless @emr_triggered
 
             trains.select(&:from_depot?)
+          end
+
+          def other_trains(entity)
+            super.select { |train| connected_train_owner?(entity, train.owner) }
           end
 
           def train_variant_helper(train, entity)
@@ -114,7 +124,7 @@ module Engine
             return [] unless president_may_contribute?(current_entity)
             return [] unless president_needs_to_sell_shares?(current_entity, entity)
 
-            @game.emergency_player_sellable_bundles(entity, current_entity, corporation)
+            @game.emergency_player_sellable_bundles(entity, current_entity, corporation, allow_unoperated: true)
           end
 
           def process_sell_shares(action)
@@ -136,6 +146,9 @@ module Engine
             if @emr_triggered && !action.train.from_depot?
               raise GameError, 'After beginning emergency money raising, the train must be bought from the depot'
             end
+            unless action.train.from_depot? || connected_train_owner?(entity, action.train.owner)
+              raise GameError, "#{entity.name} is not connected to #{action.train.owner.name}"
+            end
 
             if entity.cash < action.price && !must_buy_train?(entity)
               raise GameError, "#{entity.name} does not have #{@game.format_currency(action.price)}"
@@ -152,12 +165,33 @@ module Engine
 
           private
 
+          def isolated_shell?(entity)
+            entity&.corporation? && @game.isolated_shell?(entity)
+          end
+
           def emr_chain_cash(corporation)
             @game.emergency_cash_before_issuing(corporation)
           end
 
           def president_needs_to_sell_shares?(corporation, president)
             president.cash < [@depot.min_depot_price - emr_chain_cash(corporation), 0].max
+          end
+
+          def connected_train_owner?(buyer, seller)
+            return true unless seller&.corporation?
+
+            buyer_token_corporation = @game.token_corporation(buyer)
+            seller_token_corporation = @game.token_corporation(seller)
+            return true if buyer_token_corporation == seller_token_corporation
+
+            connected_nodes = @game
+              .token_graph_for_entity(buyer_token_corporation)
+              .connected_nodes(buyer_token_corporation)
+              .keys
+
+            seller_token_corporation.tokens.any? do |token|
+              token.used && token.city && connected_nodes.include?(token.city)
+            end
           end
 
           def sweep_cash(entity, stop_at, cost)

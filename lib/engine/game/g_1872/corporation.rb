@@ -6,6 +6,14 @@ module Engine
   module Game
     module G1872
       class Corporation < Engine::Corporation
+        def mark_operated!
+          @g1872_operated = true
+        end
+
+        def operated?
+          !!@g1872_operated
+        end
+
         def assign_shell_identity!(root, path)
           label = path.join('.')
           @name = "#{root.name}-#{label}"

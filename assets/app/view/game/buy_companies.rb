@@ -24,6 +24,7 @@ module View
       def owned_by_other_player?(player, company)
         return false unless company&.owner # Bank owned, not a player
 
+        player = @game.acting_for_entity(player) if !player&.player? && @game.respond_to?(:acting_for_entity)
         player != company&.owner
       end
 

@@ -8,13 +8,16 @@ module Engine
       module Step
         class TrackAndToken < Engine::Step::TrackAndToken
           OO_HOME_CORPORATIONS = {
-            'B38' => 'C&NW',
-            'H42' => 'KATY',
+            'B38' => 'CNW',
+            'H42' => 'KP',
           }.freeze
 
           def potential_tiles(entity_or_entities, hex)
             tiles = super
             corporation = track_corporation(entity_or_entities)
+
+            tiles = tiles.reject { |tile| tile.name == 'X00' && hex.id != 'B4' }
+
             tiles = tiles.reject do |tile|
               if single_slot_city_upgrade?(hex.tile, tile)
                 !single_slot_city_upgrade_available?(corporation, hex)
@@ -32,6 +35,9 @@ module Engine
           def lay_tile_action(action, entity: nil, spender: nil)
             palmer_greenwood = nil
             corporation = track_corporation(entity || action.entity)
+            raise GameError, 'Tile #X00 may only be laid in Cheyenne or by using Big Creek Land Company' if
+              action.tile.name == 'X00' && action.hex.id != 'B4'
+
             needs_upgrade_token =
               if single_slot_city_upgrade?(action.hex.tile, action.tile)
                 validate_single_slot_city_upgrade!(corporation, action.hex)
@@ -54,6 +60,8 @@ module Engine
             end
 
             super
+            @game.mines_connection_changed!
+            @game.remove_connected_unauctioned_land_grants!
 
             place_upgrade_token!(corporation, action.hex) if needs_upgrade_token
             @game.assimilate_connected_shells!
@@ -65,29 +73,34 @@ module Engine
           end
 
           def process_place_token(action)
+            reserved_company = private_reservation_company(action.entity, action.city)
             super
+            close_private_reservation_company!(reserved_company) if reserved_company
             @game.assimilate_connected_shells!
-          end
-
-          def extra_cost(tile, tile_lay, hex)
-            return 20 if town_upgrade?(hex.tile, tile)
-
-            super
           end
 
           def legal_tile_rotation?(entity_or_entities, hex, tile)
             return super unless town_upgrade?(hex.tile, tile)
 
+            entity = track_corporation(entity_or_entities)
             old_exits = hex.tile.exits
             new_exits = tile.exits
             (old_exits - new_exits).empty? &&
               new_exits.size == old_exits.size + 1 &&
               tile.towns.one? &&
-              new_exits.all? { |edge| hex.neighbors[edge] }
+              new_exits.all? { |edge| hex.neighbors[edge] } &&
+              !(new_exits & Array(hex_neighbors(entity, hex))).empty?
           end
 
           def check_track_restrictions!(entity, old_tile, new_tile)
+            return if old_tile.name == '9' && %w[141 142].include?(new_tile.name)
             return if green_city_slot_upgrade?(old_tile, new_tile)
+
+            super
+          end
+
+          def can_lay_tile?(entity)
+            return false if shell?(entity) && !isolated_shell?(entity)
 
             super
           end
@@ -95,10 +108,19 @@ module Engine
           def available_hex(entity, hex)
             return false unless entity == current_entity
             return true if can_lay_tile?(entity) && tracker_available_hex(entity, hex)
+            return false if isolated_shell?(entity)
             return false unless oo_home_token_placed?(hex)
             return true if can_place_token?(entity) && tokener_available_hex(entity, hex)
 
             false
+          end
+
+          def actions(entity)
+            return super unless isolated_shell?(entity)
+            return [] unless entity == current_entity
+            return [] unless can_lay_tile?(entity)
+
+            %w[lay_tile pass]
           end
 
           private
@@ -106,6 +128,32 @@ module Engine
           def palmer_greenwood_available?(corporation)
             palmer_greenwood = @game.company_by_id('PGS')
             palmer_greenwood && !palmer_greenwood.closed? && palmer_greenwood.owner == corporation
+          end
+
+          def isolated_shell?(corporation)
+            corporation&.corporation? && @game.isolated_shell?(corporation)
+          end
+
+          def shell?(corporation)
+            corporation&.corporation? && corporation.type == :shell
+          end
+
+          def private_reservation_company(entity, city)
+            @game.companies.find do |company|
+              company.owner == entity &&
+                !company.closed? &&
+                Array(@game.abilities(company, :reservation)).any? do |ability|
+                  ability.hex == city.hex.id && ability.city == city.index && city.reserved_by?(entity)
+                end
+            end
+          end
+
+          def close_private_reservation_company!(company)
+            ability = Array(@game.abilities(company, :reservation)).first
+            city = @game.hex_by_id(ability.hex).tile.cities[ability.city]
+            city.remove_reservation!(company)
+            @game.company_closing_after_using_ability(company)
+            company.close!
           end
 
           def track_corporation(entity_or_entities)
@@ -158,6 +206,7 @@ module Engine
 
           def upgrade_token_available?(corporation, hex)
             return false unless corporation
+            return false if shell?(corporation)
             return true if corporation_tokened_in_hex?(corporation, hex)
             return false if @tokened
             return false if (tokens = available_tokens(corporation)).empty?
@@ -182,7 +231,7 @@ module Engine
             raise GameError, "#{hex.name} must contain another corporation's token to upgrade directly to this tile"
           end
 
-          def validate_upgrade_token!(corporation, hex)
+          def validate_upgrade_token!(corporation, _hex)
             raise GameError, "#{corporation.name} already placed a token this turn" if @tokened
 
             tokens = available_tokens(corporation)

@@ -23,6 +23,8 @@ module View
       needs :routes, default: [], store: true
       needs :historical_laid_hexes, default: nil, store: true
       needs :historical_routes, default: [], store: true
+      needs :highlighted_hexes, default: []
+      needs :spotlight_hexes, default: []
       needs :map_zoom, default: nil, store: true
 
       EDGE_LENGTH = 50
@@ -67,7 +69,12 @@ module View
 
         @hexes.map! do |hex|
           clickable = @show_starting_map ? false : step&.available_hex(entity_or_entities, hex)
-          opacity = clickable ? 1.0 : 0.5
+          spotlighted = @spotlight_hexes.include?(hex)
+          opacity = if @spotlight_hexes.any?
+                      spotlighted ? 1.0 : 0.5
+                    else
+                      clickable ? 1.0 : 0.5
+                    end
           h(
             Hex,
             hex: hex,
@@ -77,7 +84,7 @@ module View
             actions: actions,
             routes: routes,
             start_pos: @start_pos,
-            highlight: laid_hexes.include?(hex),
+            highlight: laid_hexes.include?(hex) || @highlighted_hexes.include?(hex),
           )
         end
         @hexes.compact!

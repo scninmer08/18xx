@@ -7,6 +7,12 @@ module Engine
     module G1872
       module Step
         class Bankrupt < Engine::Step::Bankrupt
+          def actions(entity)
+            return [] if entity&.corporation? && @game.isolated_shell?(entity)
+
+            super
+          end
+
           def process_bankrupt(action)
             corporation = action.entity
             player = @game.acting_for_entity(corporation)
@@ -63,7 +69,9 @@ module Engine
               .filter_map do |corporation|
                 next unless corporation.share_price
 
-                @game.emergency_player_sellable_bundles(player, active_corporation, corporation).max_by(&:price)
+                @game
+                  .emergency_player_sellable_bundles(player, active_corporation, corporation, allow_unoperated: true)
+                  .max_by(&:price)
               end
               .max_by(&:price)
           end

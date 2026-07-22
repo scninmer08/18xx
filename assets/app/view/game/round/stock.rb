@@ -5,6 +5,7 @@ require 'view/game/bank'
 require 'view/game/buy_sell_shares'
 require 'view/game/company'
 require 'view/game/corporation'
+require 'view/game/map'
 require 'view/game/par'
 require 'view/game/par_chart'
 require 'view/game/players'
@@ -93,6 +94,7 @@ module View
           children.concat(render_mergeable_entities) if @current_actions.include?('merge')
           children.concat(render_player_companies) if @current_actions.include?('sell_company')
           children.concat(render_ipo_rows) if @game.show_ipo_rows?
+          children << render_map if @step.respond_to?(:show_map) && @step.show_map
           children.concat(render_bank_companies) unless @bank_first
           children << render_show_hand_button unless @game.hand_companies_for_stock_round.empty?
           children.concat(render_hand_companies) if show_sr_hand?
@@ -541,6 +543,15 @@ module View
           }
           ipo_cards = h(IpoRows, game: @game, show_first: true)
           [h(:div, div_props, ipo_cards)]
+        end
+
+        def render_map
+          spotlight_hexes = []
+          if @selected_company&.type == :land_grant && @selected_company.sym.start_with?('LG-')
+            spotlight_hexes << @game.hex_by_id(@selected_company.sym.delete_prefix('LG-'))
+          end
+
+          h(Map, game: @game, selected_company: @selected_company, spotlight_hexes: spotlight_hexes)
         end
 
         def render_bank

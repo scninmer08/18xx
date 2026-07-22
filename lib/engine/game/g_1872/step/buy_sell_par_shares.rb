@@ -7,6 +7,7 @@ module Engine
     module G1872
       module Step
         class BuySellParShares < Engine::Step::BuySellParShares
+
           def visible_corporations
             @game.sorted_corporations.reject do |corporation|
               corporation.type == :shell && !corporation.ipoed
@@ -18,9 +19,18 @@ module Engine
           end
 
           def can_buy?(entity, bundle)
+            if entity&.corporation?
+              return false unless bundle&.owner == @game.share_pool
+              return false unless bundle.corporation.floated?
+            end
+
             return false if bundle&.owner&.corporation? && bundle.owner != bundle.corporation
 
             super
+          end
+
+          def get_par_prices(entity, corporation)
+            super.reject { |price| @game.par_price_gated_until_phase_3?(price) }
           end
 
           def sell_shares(entity, bundle, swap: nil)

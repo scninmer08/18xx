@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'view/game/bank'
+require 'view/game/ipo_rows'
 require 'view/game/player'
 
 module View
@@ -39,7 +40,14 @@ module View
           ])
         end
 
-        children.concat(h(IpoRows, game: @game, show_first: false)) if @game.show_ipo_rows?
+        show_ipo_rows = if @game.respond_to?(:show_entities_ipo_rows?)
+                          @game.show_entities_ipo_rows?
+                        else
+                          @game.show_ipo_rows?
+        end
+        if show_ipo_rows
+          children << h(:div, { style: { gridColumn: '1 / -1' } }, h(IpoRows, game: @game, show_first: false))
+        end
 
         extra_bank = []
         if @game.respond_to?(:unstarted_corporation_summary)
