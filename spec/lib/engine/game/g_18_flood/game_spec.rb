@@ -451,11 +451,11 @@ module Engine
     end
 
     describe 'split resource hexes' do
-      it 'recognizes the engine string form of the split partition type' do
+      it 'recognizes the engine split partition type' do
         step = Game::G18FLOOD::Step::ResourceDelivery.new(game, game.round)
         tile = game.hex_by_id('K15').tile
 
-        expect(tile.partitions.first.type).to eq('split')
+        expect(tile.partitions.first.type).to eq(:split)
         expect(step.send(:split_halves, tile)).not_to be_nil
       end
     end

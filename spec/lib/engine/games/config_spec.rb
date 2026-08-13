@@ -38,13 +38,12 @@ module Engine
 
             expect(other_hex).to be_truthy,
                                  "Other hex missing from:#{hex.name}:#{border.edge}"
-            other_border = other_hex.tile.borders.find { |b| b.edge == Hex.invert(border.edge) }
+            other_border = other_hex.tile.borders.find do |b|
+              b.edge == Hex.invert(border.edge) && b.type == border.type
+            end
             expect(other_border).to be_truthy,
-                                    "Other Hex missing border from:#{hex.name}:#{border.edge}"\
+                                    "Other Hex missing #{border.type} border from:#{hex.name}:#{border.edge}"\
                                     " to other:#{other_hex.name}:#{Hex.invert(border.edge)}"
-            expect(border.type).to eq(other_border.type),
-                                   "Border types mismatch from:#{hex.name}:#{border.edge}"\
-                                   " other:#{other_hex.name}:#{Hex.invert(border.edge)}"
             expect(border.color).to eq(other_border.color),
                                     "Border colors mismatch from:#{hex.name}:#{border.edge}"\
                                     " other:#{other_hex.name}:#{Hex.invert(border.edge)}"

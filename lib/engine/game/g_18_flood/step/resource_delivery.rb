@@ -116,7 +116,7 @@ module Engine
 
           def split_halves(tile)
             part = tile.partitions&.first
-            return nil unless part && part.type == 'split'
+            return nil unless part&.type.to_s == 'split'
 
             a = part.a.to_f
             b = part.b.to_f
