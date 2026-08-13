@@ -15,14 +15,6 @@ module Engine
         include Map
         include CompanyPrice50To150Percent
 
-        register_colors(green: '#237333',
-                        red: '#d81e3e',
-                        blue: '#0189d1',
-                        lightBlue: '#a2dced',
-                        yellow: '#FFF500',
-                        orange: '#f48221',
-                        brown: '#7b352a')
-
         CURRENCY_FORMAT_STR = '¥%s'
 
         PROTOTYPE_BANK_CASH = 10_000
@@ -132,7 +124,7 @@ module Engine
             name: 'D',
             distance: 999,
             price: 900,
-            num: 17,
+            num: 'unlimited',
             discount: { '4' => 200, '5' => 200, '6' => 200 },
           },
         ].freeze

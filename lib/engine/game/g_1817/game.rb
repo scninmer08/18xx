@@ -15,30 +15,9 @@ module Engine
         include G1817::Entities
         include G1817::Map
 
-        register_colors(black: '#16190e',
-                        blue: '#165633',
-                        brightGreen: '#0a884b',
-                        brown: '#984573',
-                        gold: '#904098',
-                        gray: '#984d2d',
-                        green: '#bedb86',
-                        lavender: '#e96f2c',
-                        lightBlue: '#bedef3',
-                        lightBrown: '#bec8cc',
-                        lime: '#00afad',
-                        navy: '#003d84',
-                        natural: '#e31f21',
-                        orange: '#f2a847',
-                        pink: '#ee3e80',
-                        red: '#ef4223',
-                        turquoise: '#0095da',
-                        violet: '#e48329',
-                        white: '#fff36b',
-                        yellow: '#ffdea8')
-
         CURRENCY_FORMAT_STR = '$%s'
 
-        BANK_CASH = 99_999
+        BANK_CASH = :unlimited
 
         CERT_LIMIT = { 3 => 21, 4 => 16, 5 => 13, 6 => 11, 7 => 9, 8 => 8, 9 => 7, 10 => 6, 11 => 6, 12 => 5 }.freeze
 
@@ -174,7 +153,7 @@ module Engine
                     name: '8',
                     distance: 8,
                     price: 1100,
-                    num: 40,
+                    num: 'unlimited',
                     events: [{ 'type' => 'signal_end_game' }],
                   }].freeze
 
@@ -767,7 +746,7 @@ module Engine
 
             routes.each do |route|
               route.stops.each do |stop|
-                if (company = all_hexes[stop.hex.id])
+                if (company = all_hexes[stop.hex.id]) && !stop.hex.assigned?('bridge')
                   warnings << "Using #{company.name} on #{stop.hex.id} will improve revenue"
                 end
               end

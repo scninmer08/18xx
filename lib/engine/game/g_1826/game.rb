@@ -15,17 +15,6 @@ module Engine
         include Entities
         include Map
 
-        register_colors(red: '#d1232a',
-                        orange: '#f58121',
-                        black: '#110a0c',
-                        blue: '#025aaa',
-                        lightBlue: '#8dd7f6',
-                        lightishBlue: '#0097df',
-                        yellow: '#ffe600',
-                        green: '#32763f',
-                        brightGreen: '#6ec037',
-                        violet: '#601d39',
-                        sand: '#c89432')
         TRACK_RESTRICTION = :semi_restrictive
         SELL_BUY_ORDER = :sell_buy
         SELL_AFTER = :operate
@@ -123,7 +112,7 @@ module Engine
                       distance: [{ 'nodes' => %w[city offboard], 'pay' => 3, 'visit' => 99, 'multiplier' => 2 },
                                  { 'nodes' => ['town'], 'pay' => 0, 'visit' => 99 }],
                       price: 1000,
-                      num: 20,
+                      num: 'unlimited',
                       discount: { '4' => 300, '5' => 300, '6' => 300 },
                     },
                   ].freeze

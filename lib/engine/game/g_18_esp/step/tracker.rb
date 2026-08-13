@@ -36,8 +36,6 @@ module Engine
           end
           # clear graphs
           @game.graph.clear
-
-          action.entity.goal_reached!(:destination) if @game.check_for_destination_connection(action.entity)
         end
 
         def extra_cost(tile, tile_lay, hex)

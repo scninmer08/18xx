@@ -23,13 +23,15 @@ module Engine
 
         CURRENCY_FORMAT_STR = '₧%d'
 
-        BANK_CASH = 99_999
+        BANK_CASH = :unlimited
 
         IMPASSABLE_HEX_COLORS = %i[gray red blue orange].freeze
 
         CERT_LIMIT = { 3 => 27, 4 => 20, 5 => 16, 6 => 13 }.freeze
 
         STARTING_CASH = { 3 => 860, 4 => 650, 5 => 520, 6 => 440 }.freeze
+
+        ALWAYS_SHOW_PAR_PRICE = true
 
         NORTH_CORPS = %w[FdSB FdLR CFEA CFLG SFVA FdC].freeze
 
@@ -256,7 +258,7 @@ module Engine
             name: '8',
             distance: 8,
             price: 800,
-            num: 30,
+            num: 'unlimited',
             variants: [
                       {
                         name: '6+8',
@@ -321,8 +323,9 @@ module Engine
         end
 
         def operating_round(round_num)
-          G18ESP::Round::Operating.new(self, [
+          Engine::Round::Operating.new(self, [
             Engine::Step::Bankrupt,
+            G18ESP::Step::CheckDestinationConnection,
             Engine::Step::Assign,
             Engine::Step::Exchange,
             Engine::Step::SpecialToken,
@@ -720,9 +723,19 @@ module Engine
           return false unless entity&.corporation?
           return true if entity.destination_connected?
 
-          graph = Graph.new(self, no_blocking: true)
-          graph.compute(entity)
-          graph.reachable_hexes(entity).include?(hex_by_id(entity.destination))
+          @no_blocking_graph ||= Graph.new(self, no_blocking: true)
+          @no_blocking_graph.reachable_hexes(entity).include?(hex_by_id(entity.destination))
+        end
+
+        def new_destination_connection?(entity)
+          entity&.corporation? &&
+            !entity.destination_connected? &&
+            check_for_destination_connection(entity)
+        end
+
+        def clear_graph_for_entity(entity)
+          super
+          @no_blocking_graph&.clear
         end
 
         def check_offboard_goal(entity, routes)
@@ -895,7 +908,6 @@ module Engine
             super
           end
           clear_graph_for_entity(corporation)
-          corporation.goal_reached!(:destination) if check_for_destination_connection(corporation)
         end
 
         def rust_trains!(train, _entity)
@@ -977,7 +989,7 @@ module Engine
               @operating_rounds = @phase.operating_rounds
               reorder_players
               new_operating_round
-            when Round::Operating
+            when Engine::Round::Operating
               or_round_finished
               skip_pre_final_or = game_end_check_second_eight? && !final_ors?
               if @round.round_num < @operating_rounds && !skip_pre_final_or
@@ -1000,7 +1012,7 @@ module Engine
         end
 
         def final_ors?
-          @turn == @final_turn && @round.is_a?(Round::Operating)
+          @turn == @final_turn && @round.is_a?(Engine::Round::Operating)
         end
 
         def holder_for_corporation(_entity)
@@ -1064,6 +1076,7 @@ module Engine
 
           @opened_mountain_passes << pass_hax.id
           pass_tile.cities.first.remove_tokens!
+          @graph.clear
 
           entity_name = p4_ability ? "#{entity.name} (#{p4.name})" : entity.name
 
@@ -1073,7 +1086,6 @@ module Engine
         def opening_new_mountain_pass(entity, p4_ability = false)
           return {} unless entity
 
-          @graph.clear
           openable_passes = @graph.connected_hexes(entity).keys.select do |hex|
             mountain_pass_token_hex?(hex)
           end

@@ -45,12 +45,42 @@ module Engine
           '207' => 2,
           '208' => 2,
           '209' => 1,
-          '210' => 1,
-          '211' => 1,
-          '212' => 1,
-          '213' => 1,
-          '214' => 1,
-          '215' => 1,
+          '210' => {
+            'count' => 1,
+            'color' => 'green',
+            'code' => 'city=revenue:30;city=revenue:30;path=a:0,b:_0;path=a:3,b:_0;path=a:5,b:_1;path=a:4,b:_1;label=XX;'\
+                      'future_label=label:X,color:brown',
+          },
+          '211' => {
+            'count' => 1,
+            'color' => 'green',
+            'code' => 'city=revenue:30;city=revenue:30;path=a:2,b:_0;path=a:3,b:_0;path=a:0,b:_1;path=a:1,b:_1;label=XX;'\
+                      'future_label=label:X,color:brown',
+          },
+          '212' => {
+            'count' => 1,
+            'color' => 'green',
+            'code' => 'city=revenue:30;city=revenue:30;path=a:2,b:_0;path=a:3,b:_0;path=a:0,b:_1;path=a:5,b:_1;label=XX;'\
+                      'future_label=label:X,color:brown',
+          },
+          '213' => {
+            'count' => 1,
+            'color' => 'green',
+            'code' => 'city=revenue:30;city=revenue:30;path=a:2,b:_0;path=a:3,b:_0;path=a:0,b:_1;path=a:4,b:_1;label=XX;'\
+                      'future_label=label:X,color:brown',
+          },
+          '214' => {
+            'count' => 1,
+            'color' => 'green',
+            'code' => 'city=revenue:30;city=revenue:30;path=a:4,b:_0;path=a:3,b:_0;path=a:0,b:_1;path=a:2,b:_1;label=XX;'\
+                      'future_label=label:X,color:brown',
+          },
+          '215' => {
+            'count' => 1,
+            'color' => 'green',
+            'code' => 'city=revenue:30;city=revenue:30;path=a:1,b:_0;path=a:3,b:_0;path=a:0,b:_1;path=a:4,b:_1;label=XX;'\
+                      'future_label=label:X,color:brown',
+          },
           '39' => 1,
           '40' => 1,
           '41' => 2,
@@ -93,8 +123,8 @@ module Engine
           'O5' => 'Freiburg',
           'O15' => 'München',
           'I3' => 'Köln',
-          'M13' => 'Ostbayern',
           'M15' => 'Ostbayern',
+          'M17' => 'Ostbayern',
         }.freeze
 
         HEXES = {
@@ -194,7 +224,8 @@ module Engine
           },
           yellow: {
             ['E19'] =>
-                     'city=revenue:30,loc:1;city=revenue:30,loc:3;path=a:1,b:_0;path=a:2,b:_1',
+            'city=revenue:30,loc:1,groups:Berlin;city=revenue:30,loc:3,groups:Berlin;path=a:1,b:_0;path=a:2,b:_1;'\
+            'label=B',
             ['G3'] =>
             'city=revenue:0,loc:0;city=revenue:0,loc:4.5;label=XX;upgrade=cost:50',
             ['J6'] => 'city=revenue:0;city=revenue:0;label=XX;upgrade=cost:50',
@@ -203,7 +234,7 @@ module Engine
           green: {
             ['C11'] =>
             'city=revenue:40;path=a:0,b:_0;city=revenue:40;path=a:2,b:_1;'\
-            'city=revenue=40;path=a:4,b:_2;path=a:3,b:_2;label=HH',
+            'city=revenue:40;path=a:4,b:_2;path=a:3,b:_2;label=HH',
             ['J8'] =>
             'city=revenue:40,slots:2;path=a:0,b:_0;path=a:1,b:_0;path=a:3,b:_0;path=a:4,b:_0;upgrade=cost:50;label=Y',
             ['L14'] =>

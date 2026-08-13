@@ -7,6 +7,7 @@ module Engine
   module Game
     module G18ESP
       module Step
+        # No destination check needed: all TileLay abilities are bound to MINE_HEXES which cannot complete a destination route.
         class SpecialTrack < Engine::Step::SpecialTrack
           include LayTileCheck
         end

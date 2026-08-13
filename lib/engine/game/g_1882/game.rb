@@ -13,13 +13,6 @@ module Engine
         include Entities
         include Map
 
-        register_colors(green: '#237333',
-                        gray: '#9a9a9d',
-                        red: '#d81e3e',
-                        blue: '#0189d1',
-                        yellow: '#FFF500',
-                        brown: '#7b352a')
-
         CORPORATIONS_WITHOUT_NEUTRAL = %w[CPR CN].freeze
 
         CURRENCY_FORMAT_STR = '$%s'
@@ -153,7 +146,7 @@ module Engine
                     name: 'D',
                     distance: 999,
                     price: 1100,
-                    num: 20,
+                    num: 'unlimited',
                     available_on: '6',
                     discount: { '4' => 300, '5' => 300, '6' => 300 },
                   }].freeze

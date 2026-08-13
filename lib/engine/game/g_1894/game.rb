@@ -17,7 +17,7 @@ module Engine
 
         CURRENCY_FORMAT_STR = '%s F'
 
-        BANK_CASH = 99_999
+        BANK_CASH = :unlimited
 
         CERT_LIMIT = { 3 => 18, 4 => 14 }.freeze
 
@@ -146,7 +146,7 @@ module Engine
                     name: 'D',
                     distance: 999,
                     price: 800,
-                    num: 22,
+                    num: 'unlimited',
                     events: [{ 'type' => 'last_or_set_triggered' }],
                     discount: { '5+1' => 200, '6' => 300, '7' => 350 },
                   }].freeze
@@ -377,7 +377,7 @@ module Engine
               hex = hex_by_id(coordinate)
               tile = hex&.tile
               if tile.color != :brown
-                # Don't take the token that's alerady pending
+                # Don't take the token that's already pending
                 token = corporation.tokens.find { |t| !t.used && !@round.pending_tokens.find { |p_t| p_t[:token] == t } }
                 tile.cities.first.place_token(corporation, token, free: true)
               else
@@ -411,6 +411,11 @@ module Engine
               hexes: [hex],
               token: corporation.next_token,
             }
+            # The pending token is appended after the first call to
+            # Round::Operating::active_step so the home token step was not
+            # active and Step::Track is set as the active step. Clear this
+            # step so that the home token can be placed.
+            @round.clear_cache!
           end
         end
 

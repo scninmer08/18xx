@@ -14,13 +14,25 @@ module UserManager
 
   def create_user(params)
     @connection.safe_post('/user', params) do |data|
-      login_user(data)
+      if data['user']
+        login_user(data)
+      else
+        store(:flash_opts, data['flash_opts'], skip: true) if data['flash_opts']
+        store(:app_route, '/login')
+      end
+    end
+  end
+
+  def resend_verification(params)
+    @connection.safe_post('/user/resend_verification', params) do
+      store(:flash_opts, { message: 'Verification email sent — check your inbox.', color: 'lightgreen' }, skip: true)
     end
   end
 
   def edit_user(params)
     @connection.safe_post('/user/edit', params) do |data|
-      store(:user, data, skip: false)
+      store(:user, data['user'], skip: false) if data['user']
+      store(:flash_opts, data['flash_opts'], skip: false) if data['flash_opts']
     end
   end
 
@@ -36,10 +48,11 @@ module UserManager
     store(:app_route, '/')
   end
 
-  def delete_user
-    @connection.safe_post('/user/delete')
-    invalidate_user
-    store(:app_route, '/')
+  def delete_user(password = nil)
+    @connection.safe_post('/user/delete', password: password) do
+      invalidate_user
+      store(:app_route, '/')
+    end
   end
 
   def forgot(params)

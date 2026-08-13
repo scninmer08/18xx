@@ -15,14 +15,6 @@ module Engine
         include Entities
         include Map
 
-        register_colors(green: '#237333',
-                        red: '#d81e3e',
-                        blue: '#0189d1',
-                        lightBlue: '#a2dced',
-                        yellow: '#FFF500',
-                        orange: '#f48221',
-                        brown: '#7b352a')
-
         CURRENCY_FORMAT_STR = '$%s'
 
         BANK_CASH = 8000
@@ -126,7 +118,7 @@ module Engine
             name: 'D',
             distance: 999,
             price: 900,
-            num: 20,
+            num: 'unlimited',
             available_on: '6',
             discount: { '4' => 200, '5' => 200, '6' => 200 },
           },

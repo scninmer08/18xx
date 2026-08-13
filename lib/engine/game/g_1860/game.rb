@@ -18,14 +18,6 @@ module Engine
 
         attr_reader :nationalization, :sr_after_southern, :distance_graph
 
-        register_colors(black: '#000000',
-                        orange: '#f48221',
-                        brightGreen: '#76a042',
-                        red: '#ff0000',
-                        turquoise: '#00a993',
-                        blue: '#0189d1',
-                        brown: '#7b352a')
-
         CURRENCY_FORMAT_STR = '£%s'
 
         BANK_CASH = 10_000
@@ -209,7 +201,7 @@ module Engine
             distance: [{ 'nodes' => %w[city offboard], 'pay' => 9, 'visit' => 9 },
                        { 'nodes' => %w[town halt], 'pay' => 5, 'visit' => 99 }],
             price: 800,
-            num: 16,
+            num: 'unlimited',
             events: [{ 'type' => 'southern_forms' }],
           },
         ].freeze
@@ -1025,7 +1017,7 @@ module Engine
         end
 
         def loaner_new_rules?(route)
-          loaner?(route) && !option_original_insolvency? && !option_simplified_insolvency?
+          loaner?(route) && !option_original_insolvency?
         end
 
         def loaner_orig_rules?(route)

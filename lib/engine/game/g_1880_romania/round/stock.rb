@@ -6,9 +6,10 @@ module Engine
   module Game
     module G1880Romania
       module Round
-        class Stock < Engine::Round::Stock
-          def show_auto?
-            true
+        class Stock < G1880::Round::Stock
+          def finish_round
+            @game.add_interest_player_loans!
+            super
           end
         end
       end

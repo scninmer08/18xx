@@ -20,7 +20,6 @@ module Engine
 
         GAME_END_CHECK = {
           bankrupt: :immediate,
-          stock_market: :current_round,
           bank: :full_or,
           final_phase: :one_more_full_or_set,
         }.freeze
@@ -81,7 +80,7 @@ module Engine
             name: 'D',
             distance: 999,
             price: 900,
-            num: 20,
+            num: 'unlimited',
             available_on: '6',
             discount: { '4' => 200, '5' => 200, '6' => 200 },
             events: [{ 'type' => 'd_trigger' }],

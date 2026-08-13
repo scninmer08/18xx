@@ -61,7 +61,7 @@ module Engine
                     :busters
 
         # overrides
-        BANK_CASH = 99_999
+        BANK_CASH = :unlimited
         STARTING_CASH = { 2 => 1100, 3 => 734, 4 => 550, 5 => 440 }.freeze
         CERT_LIMIT = { 2 => 30, 3 => 20, 4 => 15, 5 => 12 }.freeze
         CAPITALIZATION = :incremental
@@ -1522,8 +1522,9 @@ module Engine
           hex.tile.location_name = GHOST_TOWN_NAME
 
           if hex.tile.preprinted
-            hex.tile.cities.reject! { true }
-            hex.tile.towns.reject! { true }
+            hex.tile.cities.clear
+            hex.tile.towns.clear
+            hex.tile.city_towns.clear
             hex.remove_assignment!(pure_oil.id) if hex.assigned?(pure_oil.id)
             return
           end

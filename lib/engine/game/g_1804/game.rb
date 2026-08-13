@@ -13,14 +13,6 @@ module Engine
         include Entities
         include Map
 
-        register_colors(red: '#d1232a',
-                        orange: '#f58121',
-                        black: '#110a0c',
-                        blue: '#025aaa',
-                        lightBlue: '#8dd7f6',
-                        yellow: '#ffe600',
-                        green: '#32763f',
-                        brightGreen: '#6ec037')
         TRACK_RESTRICTION = :permissive
         SELL_BUY_ORDER = :sell_buy_sell
         TILE_RESERVATION_BLOCKS_OTHERS = :always
@@ -112,7 +104,7 @@ module Engine
                     name: 'D',
                     distance: 999,
                     price: 1100,
-                    num: 20,
+                    num: 'unlimited',
                     available_on: '6',
                     discount: { '4' => 300, '5' => 300, '6' => 300 },
                   }].freeze

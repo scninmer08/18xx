@@ -16,17 +16,11 @@ module Engine
 
         attr_accessor :sell_queue, :connection_run, :reissued
 
-        register_colors(black: '#37383a',
-                        orange: '#f48221',
-                        brightGreen: '#76a042',
-                        red: '#d81e3e',
-                        turquoise: '#00a993',
-                        blue: '#0189d1',
-                        brown: '#7b352a')
-
         CURRENCY_FORMAT_STR = '$%s'
 
         BANK_CASH = 12_000
+
+        ALWAYS_SHOW_PAR_PRICE = true
 
         CERT_LIMIT = {
           2 => { 10 => 28, 9 => 24 },
@@ -227,7 +221,7 @@ module Engine
           },
           { name: '8', distance: 8, price: 800, num: 3 },
           { name: '10', distance: 10, price: 950, num: 2 },
-          { name: '12', distance: 12, price: 1100, num: 12 },
+          { name: '12', distance: 12, price: 1100, num: 'unlimited' },
         ].freeze
 
         DIESEL_VARIANT_TRAINS = [
@@ -259,7 +253,7 @@ module Engine
             name: 'D',
             distance: 999,
             price: 1100,
-            num: 20,
+            num: 'unlimited',
             available_on: '5',
             discount: { '4' => 300, '5' => 300, '6' => 300 },
           },

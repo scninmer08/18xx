@@ -69,6 +69,7 @@ module Engine
       pin = kwargs[:pin] || settings['pin']
       seed = kwargs[:seed] || settings['seed']
       optional_rules = kwargs[:optional_rules] || settings['optional_rules'] || []
+      use_engine_v2 = kwargs[:use_engine_v2] || settings['use_engine_v2']
 
       init_kwargs = %i[description min_players max_players settings created_at updated_at finished_at].to_h do |key|
         [key, data[key] || data[key.to_s]]
@@ -82,6 +83,7 @@ module Engine
         pin: pin,
         seed: seed,
         optional_rules: optional_rules,
+        use_engine_v2: use_engine_v2,
         **init_kwargs
       )
     end
@@ -95,7 +97,7 @@ module Engine
                   :tiles, :turn, :total_loans, :undo_possible, :redo_possible, :round_history, :all_tiles,
                   :optional_rules, :exception, :last_processed_action, :broken_action,
                   :turn_start_action_id, :last_turn_start_action_id, :programmed_actions, :round_counter,
-                  :manually_ended, :seed, :game_end_reason, :game_end_trigger
+                  :manually_ended, :seed, :game_end_reason, :game_end_trigger, :use_engine_v2
 
       # Game end check is described as a dictionary
       # with reason => after
@@ -185,6 +187,11 @@ module Engine
       ONLY_HIGHEST_BID_COMMITTED = false
 
       CAPITALIZATION = :full
+
+      # In some games, it's relevant to know the par price of a corporation even after the IPO sells out.
+      # Setting this to true will make the IPO row always appear on the corporation charter.
+      # If false then this row will be omitted when there are no IPO shares remaining.
+      ALWAYS_SHOW_PAR_PRICE = false
 
       # Must sell all shares of a company in one action per turn
       MUST_SELL_IN_BLOCKS = false
@@ -442,6 +449,19 @@ module Engine
         %i[loans loan],
       ].freeze
 
+      # Defined once, on the class. cache_objects used to (re)define these per
+      # game via self.class.define_method, and YJIT pins the method entries it
+      # compiles in its root set -- so each block, and the game it closed over,
+      # was held for the life of the worker. Here the block closes over ivar and
+      # self is the class, so nothing per-game is captured.
+      CACHABLE.each do |type, name|
+        ivar = "@_#{type}"
+
+        define_method("#{name}_by_id") do |id|
+          instance_variable_get(ivar)[id]
+        end
+      end
+
       # https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
       RAND_A = 1_103_515_245
       RAND_C = 12_345
@@ -531,14 +551,6 @@ module Engine
       # use to modify tiles based on optional rules
       def optional_tiles; end
 
-      def self.register_colors(colors)
-        colors.default_proc = proc do |_, key|
-          key
-        end
-
-        const_set(:COLORS, colors)
-      end
-
       def self.include_meta(meta_module)
         include meta_module
 
@@ -571,8 +583,13 @@ module Engine
         optional_rules: [],
         user: nil,
         seed: nil,
+        use_engine_v2: false,
         **init_kwargs
       )
+        # experimental flag; see
+        # https://github.com/tobymao/18xx/issues/12193
+        @use_engine_v2 = use_engine_v2
+
         @id = id
         @init_kwargs = init_kwargs
         @turn = 1
@@ -1561,7 +1578,7 @@ module Engine
         # Stops use the first available slot, so for each stop in this case
         # we'll try to put it in a town slot if possible and then
         # in a city/town/offboard slot.
-        distance = distance.sort_by { |types, _| types.size }
+        distance = distance.sort_by { |h| h['nodes'].size }
 
         max_num_stops = [distance.sum { |h| h['pay'].to_i }, visits.size].min
 
@@ -1743,29 +1760,31 @@ module Engine
 
       def upgrade_cost(tile, hex, entity, spender)
         entity = entity.owner if !entity.corporation? && entity.owner&.corporation?
-        ability = entity.all_abilities.find do |a|
+        abilities = entity.all_abilities.select do |a|
           a.type == :tile_discount &&
             (!a.hexes || a.hexes.include?(hex.name))
         end
 
-        discount = ability&.discounts_tile?(tile) ? ability.discount : 0
-        log_cost_discount(spender, ability, discount)
+        discount = abilities.sum { |a| a.discounts_tile?(tile) ? a.discount : 0 }
+        sum_cost = tile.upgrades.sum(&:cost)
+        discount = [sum_cost, discount].min # In case discount exceeds total cost
+        log_cost_discount(spender, abilities, discount)
 
-        tile.upgrades.sum(&:cost) - discount
+        sum_cost - discount
       end
 
       def tile_cost_with_discount(_tile, hex, entity, spender, cost)
         entity = entity.owner if !entity.corporation? && entity.owner&.corporation?
-        ability = entity.all_abilities.find do |a|
+        abilities = entity.all_abilities.select do |a|
           a.type == :tile_discount &&
             !a.terrain &&
             (!a.hexes || a.hexes.include?(hex.name))
         end
 
-        return cost unless ability
+        return cost if abilities.empty?
 
-        discount = [cost, ability.discount].min
-        log_cost_discount(spender, ability, discount)
+        discount = [cost, abilities.sum(&:discount)].min
+        log_cost_discount(spender, abilities, discount)
 
         cost - discount
       end
@@ -2548,12 +2567,18 @@ module Engine
       end
 
       def bank_starting_cash
+        return 0 if unlimited_bank?
+
         cash = self.class::BANK_CASH
         cash.is_a?(Hash) ? cash[players.size] : cash
       end
 
       def init_bank_kwargs
         { check: game_end_check_values.include?(:bank) }
+      end
+
+      def unlimited_bank?
+        self.class::BANK_CASH == :unlimited
       end
 
       def spenders
@@ -3221,13 +3246,8 @@ module Engine
       end
 
       def cache_objects
-        CACHABLE.each do |type, name|
-          ivar = "@_#{type}"
-          instance_variable_set(ivar, send(type).to_h { |x| [x.id, x] })
-
-          self.class.define_method("#{name}_by_id") do |id|
-            instance_variable_get(ivar)[id]
-          end
+        CACHABLE.each do |type, _name|
+          instance_variable_set("@_#{type}", send(type).to_h { |x| [x.id, x] })
         end
       end
 
@@ -3300,6 +3320,10 @@ module Engine
       end
 
       def highlight_token?(_token)
+        false
+      end
+
+      def highlight_city_assignment?(_city)
         false
       end
 

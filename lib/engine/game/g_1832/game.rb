@@ -20,20 +20,40 @@ module Engine
         include G1832::Phases
         include G1832::Trains
 
-        attr_accessor :sell_queue, :reissued, :coal_token_counter, :coal_company_sold_or_closed
+        attr_accessor :sell_queue, :reissued, :coal_token_counter, :coal_company_sold_or_closed, :p4_invested_in,
+                      :miami_has_been_run
 
         CORPORATION_CLASS = G1832::Corporation
         CORPORATE_BUY_SHARE_ALLOW_BUY_FROM_PRESIDENT = true
         MULTIPLE_BUY_ONLY_FROM_MARKET = true
         MUST_SELL_IN_BLOCKS = true
         EBUY_FROM_OTHERS = :never
+        ALWAYS_SHOW_PAR_PRICE = true
 
         CLOSED_CORP_TRAINS_REMOVED = false
 
+        CURRENCY_FORMAT_STR = '$%s'
+        BANK_CASH = 12_000
+        CAPITALIZATION = :full
+        FLOAT_PERCENT = 60
+
+        SOUTHERN_BANK_STARTING_CASH = {
+          2 => 1200,
+          3 => 800,
+          4 => 600,
+          5 => 480,
+          6 => 400,
+          7 => 343,
+        }.freeze
+
+        STANDARD_GAME_END_CHECK = { bankrupt: :immediate, bank: :full_or }.freeze
+        FINISH_ON_400_GAME_END_CHECK = { bankrupt: :immediate, bank: :full_or, stock_market: :immediate }.freeze
+
         IPO_RESERVED_NAME = 'Treasury'
 
-        BOOMTOWN_HEXES = %w[D8 F14 G9 G9 H6 L14].freeze
-        MIAMI_HEX = 'N16'
+        BOOMTOWN_HEXES = %w[D8 F14 G9 G11 H6 L14].freeze
+        MIAMI_HEX_ID = 'N16'
+        FECR_COMPANY_ID = 'FECR'
 
         TILE_LAYS = [{ lay: true, upgrade: true }, { lay: :not_if_upgraded, upgrade: false }].freeze
         SYSTEM_TILE_LAYS = [{ lay: true, upgrade: true },
@@ -57,20 +77,19 @@ module Engine
           self.class::TILE_LAYS
         end
 
-        def system?(corporation)
-          return false unless corporation
-
-          corporation.type == :system
+        def system?(entity)
+          entity.corporation? && entity.type == :system
         end
 
         ASSIGNMENT_TOKENS = {
           'boomtown' => '/icons/1832/boomtown_token.svg',
-          'P2' => '/icons/1846/sc_token.svg',
-          'P3' => '/icons/1832/cotton_token.svg',
+          'P2' => '/icons/1832/cotton_token.svg',
+          'P3' => '/icons/1832/port_token.svg',
         }.freeze
 
         EVENTS_TEXT = Base::EVENTS_TEXT.merge(
           'companies_buyable' => ['Companies become buyable', 'All companies may now be bought in by corporation'],
+          'final_merger_chance' => ['Final Merger Chance', 'Last opportunity for mergers and takeovers'],
           'remove_tokens' => ['Remove Tokens', 'Remove private company tokens'],
           'remove_key_west_token' => ['Remove Key West Token', 'FECR loses the Key West']
         ).freeze
@@ -84,8 +103,7 @@ module Engine
                                                      'Companies can be bought between players',
                                                      'The West Virginia Coalfields private company can be bought in for '\
                                                      'up to face value from the owning player'],
-        ).merge(
-          'companies_buyable' => ['Companies become buyable', 'All companies may now be bought in by corporation'],
+          'can_buy_companies' => ['Companies become buyable', 'All companies may now be bought in by corporations'],
         )
 
         def new_auction_round
@@ -98,6 +116,7 @@ module Engine
         def stock_round
           G1870::Round::Stock.new(self, [
             Engine::Step::DiscardTrain,
+            G1832::Step::Exchange,
             G1832::Step::BuySellParShares,
             G1850::Step::PriceProtection,
           ])
@@ -106,14 +125,14 @@ module Engine
         def operating_round(round_num)
           Engine::Round::Operating.new(self, [
             Engine::Step::Bankrupt,
-            Engine::Step::Exchange,
+            G1832::Step::Exchange,
             G1832::Step::BuyCompany,
-            G1870::Step::Assign,
+            G1832::Step::Assign,
             G1870::Step::SpecialTrack,
             G1832::Step::Track,
             G1832::Step::Token,
             Engine::Step::Route,
-            G1870::Step::Dividend,
+            G1832::Step::Dividend,
             Engine::Step::DiscardTrain,
             G1870::Step::BuyTrain,
             [G1832::Step::BuyCompany, { blocks: true }],
@@ -122,7 +141,7 @@ module Engine
         end
 
         def init_stock_market
-          G1870::StockMarket.new(self.class::MARKET, self.class::CERT_LIMIT_TYPES,
+          G1870::StockMarket.new(game_market, self.class::CERT_LIMIT_TYPES,
                                  multiple_buy_types: self.class::MULTIPLE_BUY_TYPES)
         end
 
@@ -134,6 +153,8 @@ module Engine
           @sell_queue = []
           @reissued = {}
           @coal_token_counter = 5
+          @miami_has_been_run = false
+          @p4_invested_in = nil
 
           coal_company.max_price = coal_company.value
 
@@ -145,6 +166,51 @@ module Engine
           @tile_142 ||= @all_tiles.find { |t| t.name == '142' }
           @tile_143 ||= @all_tiles.find { |t| t.name == '143' }
           @tile_144 ||= @all_tiles.find { |t| t.name == '144' }
+        end
+
+        def option_diesels?
+          @optional_rules&.include?(:diesels)
+        end
+
+        def option_southern_bank?
+          @optional_rules&.include?(:southern_bank)
+        end
+
+        def option_finish_on_400?
+          @optional_rules&.include?(:finish_on_400)
+        end
+
+        def game_trains
+          self.class::EARLY_TRAINS + (option_diesels? ? DIESEL_LATE_TRAINS : STANDARD_LATE_TRAINS)
+        end
+
+        def game_phases
+          self.class::EARLY_PHASES + (option_diesels? ? DIESEL_LATE_PHASES : STANDARD_LATE_PHASES)
+        end
+
+        def game_companies
+          return self.class::STANDARD_COMPANIES unless option_southern_bank?
+
+          companies = self.class::STANDARD_COMPANIES.dup
+          companies.insert(4, self.class::SOUTHERN_BANK_COMPANY)
+          companies
+        end
+
+        def game_market
+          if option_finish_on_400?
+            [FINISH_ON_400_TOP_LINE] + REST_OF_MARKET
+          else
+            [STANDARD_TOP_LINE] + REST_OF_MARKET
+          end
+        end
+
+        def game_end_check_values
+          option_finish_on_400? ? FINISH_ON_400_GAME_END_CHECK : STANDARD_GAME_END_CHECK
+        end
+
+        # §11.6.7: Systems hold twice the normal train limit.
+        def train_limit(entity)
+          super * (system?(entity) ? 2 : 1)
         end
 
         def available_programmed_actions
@@ -211,11 +277,18 @@ module Engine
         end
 
         def port_company
-          @port_company ||= company_by_id('P2')
+          @port_company ||= company_by_id('P3')
         end
 
         def cotton_company
-          @cotton_company ||= company_by_id('P3')
+          @cotton_company ||= company_by_id('P2')
+        end
+
+        def highlight_city_assignment?(city)
+          hex = city.hex
+          return false unless hex.assigned?('P2')
+
+          hex.assignments['P2'] == hex.tile.cities.index(city)
         end
 
         def can_hold_above_corp_limit?(_entity)
@@ -228,6 +301,10 @@ module Engine
           super
         end
 
+        def london_company
+          @london_company ||= company_by_id('P4')
+        end
+
         def coal_company
           @coal_company ||= company_by_id('P5')
         end
@@ -236,15 +313,79 @@ module Engine
           @coal_hex ||= hex_by_id('B14')
         end
 
-        def revenue_for(route, stops)
-          revenue = super
+        def miami_hex
+          @miami_hex ||= hex_by_id(MIAMI_HEX_ID)
+        end
 
+        def fecr_corp
+          @fecr_corp ||= corporation_by_id(FECR_COMPANY_ID)
+        end
+
+        def cotton_bonus(route, stops)
           cotton = 'P2'
-          revenue += 10 if route.corporation.assigned?(cotton) && stops.any? { |stop| stop.hex.assigned?(cotton) }
 
-          revenue += (route.corporation.assigned?('P3') ? 20 : 10) if stops.any? { |stop| stop.hex.assigned?('P3') }
+          return 0 unless route.corporation.assigned?(cotton)
+
+          stops.each do |stop|
+            next unless stop.hex.assigned?(cotton)
+
+            city_index = stop.hex.assignments[cotton]
+            next unless stop.hex.tile.cities.index(stop) == city_index
+
+            return 10
+          end
+
+          0
+        end
+
+        def atlantic_shipping_bonus(route, stops)
+          revenue = route.corporation.assigned?('P3') ? 20 : 10
+
+          found = stops.any? do |stop|
+            stop.hex.assigned?('P3')
+          end
+
+          found ? revenue : 0
+        end
+
+        # Miami first-run rule: worth $0 the first time any corporation runs there prior to phase 5
+        def miami_scores_zero?
+          phase.status.include?('first_miami_run_is_zero') && !@miami_has_been_run
+        end
+
+        def miami_revenue(route, stops)
+          revenue = 0
+
+          miami_stop = stops.find { |stop| stop.hex == miami_hex }
+          revenue -= miami_stop.route_revenue(route.phase, route.train) if miami_stop && miami_scores_zero?
+
+          # Key West bonus: FECR earns +$50 when running to Miami with token placed (phases 3-7)
+          revenue += 50 if route.corporation == fecr_corp && miami_token_placed? && miami_stop
 
           revenue
+        end
+
+        def revenue_for(route, stops)
+          super +
+            cotton_bonus(route, stops) +
+            atlantic_shipping_bonus(route, stops) +
+            miami_revenue(route, stops)
+        end
+
+        def miami_token_placed?
+          miami_hex.assigned?(fecr_corp)
+        end
+
+        def place_miami_token
+          miami_hex.tile.icons.reject! { |icon| icon.name == 'FECR_key_west' }
+          miami_hex.assign!(fecr_corp)
+        end
+
+        def event_remove_key_west_token!
+          return unless miami_token_placed?
+
+          miami_hex.remove_assignment!(fecr_corp)
+          @log << "-- Event: #{fecr_corp.name} loses Key West token --"
         end
 
         def sell_shares_and_change_price(bundle, allow_president_change: true, swap: nil, movement: nil)

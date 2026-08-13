@@ -15,21 +15,11 @@ module Engine
         include Entities
         include CompanyPriceUpToFace
 
-        register_colors(red: '#d1232a',
-                        orange: '#f58121',
-                        black: '#110a0c',
-                        blue: '#025aaa',
-                        purple: '#A79ECD',
-                        lightBlue: '#8dd7f6',
-                        yellow: '#ffe600',
-                        green: '#32763f',
-                        brightGreen: '#6ec037')
-
         TRACK_RESTRICTION = :permissive
         SELL_BUY_ORDER = :sell_buy
         CURRENCY_FORMAT_STR = '%s'
 
-        BANK_CASH = 99_999
+        BANK_CASH = :unlimited
 
         CERT_LIMIT = { 2 => 18, 3 => 16, 4 => 14, 5 => 13, 6 => 12 }.freeze
 
@@ -54,6 +44,8 @@ module Engine
         GAME_END_CHECK = { fixed_round: :current_round }.freeze
 
         NEXT_SR_PLAYER_ORDER = :most_cash
+
+        MARKET_SHARE_LIMIT = 100
 
         MARKET_TEXT = {
           par: 'City Corporation Par',

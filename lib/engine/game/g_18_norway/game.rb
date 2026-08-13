@@ -21,15 +21,6 @@ module Engine
         include Trains
         include Phases
 
-        register_colors(red: '#d1232a',
-                        orange: '#f58121',
-                        black: '#110a0c',
-                        blue: '#025aaa',
-                        lightBlue: '#8dd7f6',
-                        yellow: '#ffe600',
-                        green: '#32763f',
-                        brightGreen: '#6ec037')
-
         TRACK_RESTRICTION = :permissive
         SELL_BUY_ORDER = :sell_buy
         TILE_RESERVATION_BLOCKS_OTHERS = :always
@@ -48,7 +39,7 @@ module Engine
 
         BANKRUPTCY_ENDS_GAME_AFTER = :one
 
-        BANK_CASH = 999_000
+        BANK_CASH = :unlimited
 
         CLOSED_CORP_RESERVATIONS_REMOVED = false
 
@@ -190,6 +181,8 @@ module Engine
           corporation_by_id('V').add_ability(Engine::Ability::Base.new(
             type: 'free_ship',
             description: 'Free S3 ship before phase 4',
+            count: 1,
+            remove_when_used_up: true,
           ))
 
           switcher.add_ability(Engine::Ability::Base.new(
