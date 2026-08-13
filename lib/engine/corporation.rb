@@ -12,7 +12,7 @@ require_relative 'spender'
 require_relative 'token'
 
 module Engine
-  class Corporation
+    class Corporation
     include Abilities
     include Assignable
     include Entity
@@ -22,19 +22,20 @@ module Engine
     include ShareHolder
     include Spender
 
-    attr_accessor :ipoed, :floated, :par_via_exchange, :max_ownership_percent, :float_percent, :capitalization, :second_share,
+      attr_accessor :ipoed, :floated, :par_via_exchange, :max_ownership_percent, :float_percent, :capitalization, :second_share,
                   :type, :floatable, :original_par_price, :reservation_color, :min_price, :ipo_owner,
                   :always_market_price, :full_name
-    attr_reader :companies, :name, :fraction_shares, :id, :needs_token_to_par,
-                :presidents_share, :price_multiplier, :treasury_as_holding
-    attr_writer :par_price, :share_price, :forced_share_percent
+      attr_reader :companies, :name, :fraction_shares, :id, :needs_token_to_par,
+                :presidents_share, :price_multiplier, :treasury_as_holding, :sym
+      attr_writer :par_price, :share_price, :forced_share_percent
 
     SHARES = ([20] + Array.new(8, 10)).freeze
 
-    def initialize(sym:, name:, **opts)
-      @name = sym
-      @id = sym
-      @full_name = name
+      def initialize(sym:, name:, **opts)
+        @name = sym
+        @id = sym
+        @sym = sym
+        @full_name = name
 
       @ipo_owner = opts[:ipo_owner] || self
       corp_shares = (opts[:shares] || SHARES).map.with_index do |percent, index|

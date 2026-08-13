@@ -2,8 +2,8 @@
 
 require 'fileutils'
 
-OUTPUT_DIR = File.expand_path('../public/logos/1872/shells', __dir__)
-SHELL_COUNT = 24
+OUTPUT_DIR = File.expand_path('../public/logos/1872/branches', __dir__)
+BRANCH_COUNT = 24
 FAMILIES = {
   'CNW' => ['#E2E071', '#000'],
   'CBQ' => ['#8C8C7E', '#000'],
@@ -27,12 +27,12 @@ end
 
 FileUtils.mkdir_p(OUTPUT_DIR)
 
-(1..SHELL_COUNT).each do |number|
+(1..BRANCH_COUNT).each do |number|
   File.write(File.join(OUTPUT_DIR, format('S%02d.svg', number)), logo(format('S%02d', number), '#000'))
 end
 
 FAMILIES.each do |family, (color, text_color)|
-  (1..SHELL_COUNT).each do |number|
+  (1..BRANCH_COUNT).each do |number|
     File.write(File.join(OUTPUT_DIR, "#{family}-#{number}.svg"), logo(number.to_s, color, text_color))
   end
 end

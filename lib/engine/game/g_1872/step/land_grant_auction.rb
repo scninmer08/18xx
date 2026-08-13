@@ -299,7 +299,7 @@ module Engine
             grant = grants.first
             territory = @game.land_grant_territory(grant)
             presidential_floated_corporations(entity).any? do |corporation|
-              root = @game.shell_root[corporation] || corporation
+              root = @game.branch_root[corporation] || corporation
               next false if territory && used_territories_by_root[root].include?(territory)
               next false unless @game.genealogy_land_grant_territory_available?(corporation, grant)
 

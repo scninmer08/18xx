@@ -64,7 +64,7 @@ module Engine
             @game.remove_connected_unauctioned_land_grants!
 
             place_upgrade_token!(corporation, action.hex) if needs_upgrade_token
-            @game.assimilate_connected_shells!
+            @game.assimilate_connected_branches!
 
             return unless palmer_greenwood
 
@@ -76,7 +76,24 @@ module Engine
             reserved_company = private_reservation_company(action.entity, action.city)
             super
             close_private_reservation_company!(reserved_company) if reserved_company
-            @game.assimilate_connected_shells!
+            @game.assimilate_connected_branches!
+          end
+
+          def process_remove_token(action)
+            token = token_at_slot(action.city, action.slot)
+            raise GameError, 'That station is not abandoned' unless can_replace_token?(action.entity, token)
+
+            cost = @game.class::ABANDONED_STATION_REMOVAL_COST
+            action.entity.spend(cost, @game.bank)
+            @log << "#{action.entity.name} removes #{token.corporation.name}'s abandoned station from "\
+                    "#{action.city.hex.name} for #{@game.format_currency(cost)}"
+            @game.remove_abandoned_station!(token)
+            @game.graph.clear_graph_for_all
+            @game.assimilate_connected_branches!
+          end
+
+          def can_replace_token?(entity, token)
+            abandoned_station_removal_available?(entity) && @game.abandoned_station?(token)
           end
 
           def legal_tile_rotation?(entity_or_entities, hex, tile)
@@ -100,15 +117,22 @@ module Engine
           end
 
           def can_lay_tile?(entity)
-            return false if shell?(entity) && !isolated_shell?(entity)
+            return false if isolated_branch?(entity) && @round.num_laid_track.positive?
+            return false if branch?(entity) && !isolated_branch?(entity)
 
             super
           end
 
+          def process_lay_tile(action)
+            super
+            pass! if isolated_branch?(action.entity)
+          end
+
           def available_hex(entity, hex)
             return false unless entity == current_entity
+            return true if abandoned_station_removal_available?(entity) && abandoned_station_in_hex?(hex)
             return true if can_lay_tile?(entity) && tracker_available_hex(entity, hex)
-            return false if isolated_shell?(entity)
+            return false if isolated_branch?(entity)
             return false unless oo_home_token_placed?(hex)
             return true if can_place_token?(entity) && tokener_available_hex(entity, hex)
 
@@ -116,7 +140,15 @@ module Engine
           end
 
           def actions(entity)
-            return super unless isolated_shell?(entity)
+            unless isolated_branch?(entity)
+              actions = super
+              if abandoned_station_removal_available?(entity)
+                pass_index = actions.index('pass')
+                pass_index ? actions.insert(pass_index, 'remove_token') : actions.concat(%w[remove_token pass])
+              end
+              return actions
+            end
+
             return [] unless entity == current_entity
             return [] unless can_lay_tile?(entity)
 
@@ -125,17 +157,37 @@ module Engine
 
           private
 
+          def abandoned_station_removal_available?(entity)
+              entity&.corporation? &&
+              entity == current_entity &&
+              buying_power(entity) >= @game.class::ABANDONED_STATION_REMOVAL_COST &&
+              @game.abandoned_stations.any?
+          end
+
+          def abandoned_station_in_hex?(hex)
+            hex.tile.cities.any? do |city|
+              (city.tokens + city.extra_tokens).compact.any? { |token| @game.abandoned_station?(token) }
+            end
+          end
+
+          def token_at_slot(city, slot)
+            normal_slots = city.tokens.size
+            return city.tokens[slot] if slot < normal_slots
+
+            city.extra_tokens[slot - normal_slots]
+          end
+
           def palmer_greenwood_available?(corporation)
             palmer_greenwood = @game.company_by_id('PGS')
             palmer_greenwood && !palmer_greenwood.closed? && palmer_greenwood.owner == corporation
           end
 
-          def isolated_shell?(corporation)
-            corporation&.corporation? && @game.isolated_shell?(corporation)
+          def isolated_branch?(corporation)
+            corporation&.corporation? && @game.isolated_branch?(corporation)
           end
 
-          def shell?(corporation)
-            corporation&.corporation? && corporation.type == :shell
+          def branch?(corporation)
+            corporation&.corporation? && corporation.type == :branch
           end
 
           def private_reservation_company(entity, city)
@@ -206,7 +258,7 @@ module Engine
 
           def upgrade_token_available?(corporation, hex)
             return false unless corporation
-            return false if shell?(corporation)
+            return false if branch?(corporation)
             return true if corporation_tokened_in_hex?(corporation, hex)
             return false if @tokened
             return false if (tokens = available_tokens(corporation)).empty?

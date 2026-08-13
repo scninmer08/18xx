@@ -8,7 +8,7 @@ module Engine
       module Step
         class BuyTrain < Engine::Step::BuyTrain
           def actions(entity)
-            return [] if isolated_shell?(entity)
+            return [] if isolated_branch?(entity)
 
             if entity == @game.acting_for_entity(current_entity) && president_may_contribute?(current_entity) &&
                president_needs_to_sell_shares?(current_entity, entity) && sellable_bundles(entity, nil).any?
@@ -35,10 +35,10 @@ module Engine
           alias real_owner corp_owner
 
           def can_entity_buy_train?(entity)
-            !isolated_shell?(entity) && super
+            !isolated_branch?(entity) && super
           end
 
-          def president_may_contribute?(corporation, _shell = nil)
+          def president_may_contribute?(corporation, _branch = nil)
             return false unless must_buy_train?(corporation)
             return false unless @game.emergency_issuable_bundles(corporation).empty?
 
@@ -165,8 +165,8 @@ module Engine
 
           private
 
-          def isolated_shell?(entity)
-            entity&.corporation? && @game.isolated_shell?(entity)
+          def isolated_branch?(entity)
+            entity&.corporation? && @game.isolated_branch?(entity)
           end
 
           def emr_chain_cash(corporation)

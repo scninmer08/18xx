@@ -8,7 +8,7 @@ module Engine
       module Step
         class SpecialToken < Engine::Step::SpecialToken
           def actions(entity)
-            return [] if entity&.company? && entity.owner&.corporation? && @game.isolated_shell?(entity.owner)
+            return [] if entity&.company? && entity.owner&.corporation? && @game.isolated_branch?(entity.owner)
             return [] if entity.id == 'BCLC' && !hays_laid?
 
             super

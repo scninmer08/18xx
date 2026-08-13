@@ -8,7 +8,7 @@ module Engine
       module Step
         class Bankrupt < Engine::Step::Bankrupt
           def actions(entity)
-            return [] if entity&.corporation? && @game.isolated_shell?(entity)
+            return [] if entity&.corporation? && @game.isolated_branch?(entity)
 
             super
           end
@@ -97,7 +97,7 @@ module Engine
           end
 
           def liquidate_corporation_family(corporation, bankrupt_player:)
-            @game.shell_children(corporation).dup.each do |child|
+            @game.branch_children(corporation).dup.each do |child|
               liquidate_corporation_family(child, bankrupt_player: bankrupt_player)
             end
 
@@ -147,7 +147,7 @@ module Engine
           def closing_family(corporation)
             return [] unless corporation && @game.corporations.include?(corporation)
 
-            [corporation] + @game.shell_children(corporation).flat_map { |child| closing_family(child) }
+            [corporation] + @game.branch_children(corporation).flat_map { |child| closing_family(child) }
           end
 
           def bankruptcy_receivership?(corporation)

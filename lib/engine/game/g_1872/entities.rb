@@ -4,7 +4,7 @@ module Engine
   module Game
     module G1872
       module Entities
-        SHELL_COUNT = 24
+        BRANCH_COUNT = 24
 
         COMPANIES = [
           {
@@ -233,17 +233,17 @@ module Engine
             always_market_price: true,
           },
         ].concat(
-          (1..SHELL_COUNT).map do |number|
+          (1..BRANCH_COUNT).map do |number|
             id = format('S%02d', number)
             {
               sym: id,
-              name: "Unassigned Shell #{number}",
-              logo: "1872/shells/#{id}",
-              simple_logo: "1872/shells/#{id}",
+              name: "Branch #{number}",
+              logo: "1872/branches/#{id}",
+              simple_logo: "1872/branches/#{id}",
               coordinates: nil,
               tokens: [0],
               color: '#000000',
-              type: :shell,
+              type: :branch,
               float_percent: 20,
               always_market_price: true,
             }

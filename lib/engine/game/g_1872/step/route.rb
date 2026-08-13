@@ -8,23 +8,21 @@ module Engine
       module Step
         class Route < Engine::Step::Route
           def actions(entity)
-            return [] if entity&.corporation? && @game.isolated_shell?(entity)
+            return [] if entity&.corporation? && @game.isolated_branch?(entity)
 
             super
           end
 
-          def process_run_routes(action)
-            first_route = !action.entity.operated? && action.routes.any?
+        def process_run_routes(action)
+          first_route = !action.entity.operated? && action.routes.any?
 
-            super
+          super
 
-            return unless first_route
-
-            action.entity.mark_operated!
+          return unless first_route
             @game.pay_land_grant_subsidy_for_first_route!(action.entity)
-          end
         end
       end
     end
+  end
   end
 end

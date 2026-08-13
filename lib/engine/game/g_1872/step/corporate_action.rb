@@ -27,9 +27,9 @@ module Engine
           end
 
           def description
-            return 'Buy a Share' if @corporate_action == ACTION_BUY_SHARE
+            return 'Sell/Buy Shares' if @corporate_action == ACTION_BUY_SHARE
             return 'Sell Shares' if @corporate_action == ACTION_SELL_SHARES
-            return 'Start a New Corporation' if @corporate_action == ACTION_START_CORPORATION
+            return 'Start a Branch Railroad' if @corporate_action == ACTION_START_CORPORATION
             return 'Acquire a Corporation' if @corporate_action == ACTION_ACQUIRE_CORPORATION
             return 'Merge Corporations' if @corporate_action == ACTION_MERGE_CORPORATION
 
@@ -42,7 +42,7 @@ module Engine
 
           def actions(entity)
             return [] if entity != current_entity || !entity.corporation?
-            return [] unless corporate_actions_available?(entity) || @corporate_action
+            return [] if !corporate_actions_available?(entity) && !@corporate_action
 
             if @corporate_action == ACTION_SELL_SHARES
               actions = []
@@ -51,7 +51,13 @@ module Engine
               return actions
             end
 
-            return ['buy_shares'] if @corporate_action == ACTION_BUY_SHARE && can_buy_one_share?(entity)
+            if @corporate_action == ACTION_BUY_SHARE
+              actions = []
+              actions << 'sell_shares' if !bought? && !sellable_bundles(entity, nil).empty?
+              actions << 'buy_shares' if can_buy_one_share?(entity)
+              actions << 'pass'
+              return actions
+            end
 
             if @corporate_action == ACTION_START_CORPORATION
               return ['choose'] if @start_stage == :land_grant
@@ -74,11 +80,13 @@ module Engine
           def auto_actions(entity)
             programmed = super
             return programmed if programmed&.any?
-            return [] unless corporate_actions_available?(entity) || @corporate_action
+            return [] if !corporate_actions_available?(entity) && !@corporate_action
 
-            if @corporate_action == ACTION_START_CORPORATION && @start_stage == :shares && entity == @sponsor
-              return [Engine::Action::Pass.new(entity)] unless child_share_buy_available?(entity)
-            end
+            return [Engine::Action::Pass.new(entity)] if
+              @corporate_action == ACTION_START_CORPORATION &&
+              @start_stage == :shares &&
+              entity == @sponsor &&
+              !child_share_buy_available?(entity)
 
             return super if @corporate_action || @start_stage
 
@@ -153,10 +161,11 @@ module Engine
               allow_president_change: false,
               movement: movement,
             )
+            @round.current_actions << action
           end
 
           def process_par(action)
-            raise GameError, 'That shell cannot be parred' unless can_par_shell?(action.corporation, action.entity)
+            raise GameError, 'That branch railroad cannot be parred' unless can_par_branch?(action.corporation, action.entity)
             raise GameError, 'That par price is unavailable' unless get_par_prices(action.entity, action.corporation)
               .include?(action.share_price)
 
@@ -234,35 +243,32 @@ module Engine
           def pass_description
             return 'Done (Buy)' if @start_stage == :shares
             return 'Done (Sell Shares)' if @corporate_action == ACTION_SELL_SHARES
+            return bought? ? 'Done (Buy)' : 'Done (Sell/Buy)' if @corporate_action == ACTION_BUY_SHARE
 
             'Pass'
           end
 
           def issuable_shares(entity)
+            return sellable_corporate_share_bundles(entity) if @corporate_action == ACTION_BUY_SHARE && !bought?
             return sellable_corporate_share_bundles(entity) if @corporate_action == ACTION_SELL_SHARES
 
             @game.issuable_shares(entity)
           end
 
           def sellable_bundles(entity, corporation)
-            return [] unless @corporate_action == ACTION_SELL_SHARES
+            return [] unless [ACTION_BUY_SHARE, ACTION_SELL_SHARES].include?(@corporate_action)
             return [] unless entity == current_entity
+            return [] if @corporate_action == ACTION_BUY_SHARE && bought?
 
             bundles = sellable_corporate_share_bundles(entity)
             corporation ? bundles.select { |bundle| bundle.corporation == corporation } : bundles
           end
 
           def visible_corporations
-            if @corporate_action == ACTION_BUY_SHARE
-              return buyable_one_share_bundles
-                .select { |bundle| can_buy_one_share_bundle?(current_entity, bundle) }
-                .map(&:corporation)
-                .uniq
-                .sort
-            end
-
-            if @corporate_action == ACTION_SELL_SHARES
-              return sellable_corporate_share_bundles(current_entity).map(&:corporation).uniq.sort
+            if [ACTION_BUY_SHARE, ACTION_SELL_SHARES].include?(@corporate_action)
+              buyable_corporations = @corporate_action == ACTION_BUY_SHARE ? buyable_one_share_bundles.map(&:corporation) : []
+              sellable_corporations = sellable_corporate_share_bundles(current_entity).map(&:corporation)
+              return (buyable_corporations + sellable_corporations).uniq.sort
             end
 
             [@new_corporation].compact
@@ -284,14 +290,14 @@ module Engine
           end
 
           def get_par_prices(entity, corporation)
-            return [] unless can_par_shell?(corporation, entity)
+            return [] unless can_par_branch?(corporation, entity)
 
             @game.stock_market.par_prices
               .reject { |price| @game.par_price_gated_until_phase_3?(price) }
               .select { |price| entity.cash >= price.price * 2 }
           end
 
-          def can_par_shell?(corporation, entity)
+          def can_par_branch?(corporation, entity)
             @corporate_action == ACTION_START_CORPORATION && @start_stage == :par &&
               corporation == @new_corporation && entity == @sponsor && !corporation.ipoed
           end
@@ -308,7 +314,8 @@ module Engine
           end
 
           def can_sell?(entity, bundle)
-            return can_sell_corporate_share_bundle?(entity, bundle) if @corporate_action == ACTION_SELL_SHARES
+            return can_sell_corporate_share_bundle?(entity, bundle) if
+              [ACTION_BUY_SHARE, ACTION_SELL_SHARES].include?(@corporate_action)
 
             false
           end
@@ -316,9 +323,8 @@ module Engine
           def available_hex(entity, hex)
             return false unless entity == current_entity
 
-            if @corporate_action == ACTION_START_CORPORATION && @start_stage == :land_grant
-              return land_grant_choices.key?(hex.id)
-            end
+            return land_grant_choices.key?(hex.id) if
+              @corporate_action == ACTION_START_CORPORATION && @start_stage == :land_grant
 
             if @corporate_action == ACTION_START_CORPORATION && @start_stage == :land_grant_upgrade
               return hex == selected_land_grant_hex && potential_tiles(entity, hex).any?
@@ -365,9 +371,9 @@ module Engine
             return {} unless corporate_actions_available?(current_entity)
 
             choices = {}
-            choices[ACTION_BUY_SHARE] = 'Buy a Share' if can_buy_one_share?(current_entity)
-            choices[ACTION_SELL_SHARES] = 'Sell Shares' unless sellable_corporate_share_bundles(current_entity).empty?
-            choices[ACTION_START_CORPORATION] = 'Start a New Corporation' if can_start_corporation?(current_entity)
+            if can_buy_one_share?(current_entity) || !sellable_corporate_share_bundles(current_entity).empty?
+              choices[ACTION_BUY_SHARE] = 'Sell/Buy Shares'
+            end
             choices[ACTION_MERGE_CORPORATION] = 'Merge' unless merger_targets(current_entity).empty?
             choices[ACTION_ACQUIRE_CORPORATION] = 'Acquire a Corporation' if @game.hostile_takeover_variant? &&
               !acquisition_targets(current_entity).empty?
@@ -385,7 +391,7 @@ module Engine
             @corporate_action = action.choice
             case action.choice
             when ACTION_BUY_SHARE
-              @log << "#{action.entity.name} chooses to buy one share"
+              @log << "#{action.entity.name} chooses to sell and/or buy shares"
             when ACTION_SELL_SHARES
               @log << "#{action.entity.name} chooses to sell shares"
             when ACTION_ACQUIRE_CORPORATION
@@ -395,19 +401,19 @@ module Engine
               @start_stage = :merger_target
               @log << "#{action.entity.name} chooses to merge corporations"
             else
-              raise GameError, "#{action.entity.name} already has an isolated shell" if
-                @game.has_isolated_shell_descendant?(action.entity)
+              raise GameError, "#{action.entity.name} already has an unassimilated branch railroad" if
+                @game.isolated_branch_descendant?(action.entity)
 
               @sponsor = action.entity
               @new_corporation = unused_corporations.first
-              @game.assign_shell_identity(@new_corporation, @sponsor)
+            @game.assign_branch_identity(@new_corporation, @sponsor, branch_city: @game.land_grant_city_name(@selected_land_grant))
               @start_stage = :land_grant
               @log << "#{action.entity.name} chooses to start #{@new_corporation.name}"
             end
           end
 
           def unused_corporations
-            @game.available_shells.select { |corporation| corporation.presidents_share.buyable }
+            @game.available_branches.select { |corporation| corporation.presidents_share.buyable }
           end
 
           def can_buy_one_share?(entity)
@@ -418,18 +424,30 @@ module Engine
           end
 
           def buyable_one_share_bundles
-            market = @game.share_pool.shares.select { |share| buyable_one_share_corporation?(share.corporation) }.map(&:to_bundle)
-            market
+            market_bundles = @game.share_pool.shares
+              .select { |share| buyable_one_share_corporation?(share.corporation) }
+              .map(&:to_bundle)
+            treasury_bundles = @game.corporations.flat_map do |corporation|
+              next [] unless @game.direct_child?(current_entity, corporation)
+
+              corporation.shares
+                .select { |share| share.owner == corporation && !share.president && share.percent == 10 }
+                .map(&:to_bundle)
+            end
+
+            (market_bundles + treasury_bundles).select { |bundle| can_buy_one_share_bundle?(current_entity, bundle) }
           end
 
           def buyable_one_share_corporation?(corporation)
-            corporation&.ipoed && corporation.floated? && !corporation.closed? && corporation.share_price
+            corporation&.ipoed && corporation&.floated? && !corporation&.closed? && corporation&.share_price
           end
 
           def can_buy_one_share_bundle?(entity, bundle)
             return false if !bundle&.buyable || bundle.percent != 10
-            return false unless bundle.owner == @game.share_pool
-            return false unless @game.corporation_may_own_shares?(entity, bundle.corporation)
+            return false if bundle.corporation == entity
+            return false unless buyable_one_share_corporation?(bundle.corporation)
+            return false unless [@game.share_pool, bundle.corporation].include?(bundle.owner)
+            return false if bundle.owner == bundle.corporation && !@game.direct_child?(entity, bundle.corporation)
             return false if entity.cash < bundle.price
 
             can_gain?(entity, bundle)
@@ -438,31 +456,32 @@ module Engine
           def sellable_corporate_share_bundles(entity)
             return [] unless entity&.corporation?
 
-            entity.shares
+            shares = entity.shares
               .reject(&:president)
               .select do |share|
                 share.percent == 10 &&
                   share.buyable &&
-                  @game.corporation_may_own_shares?(entity, share.corporation) &&
                   buyable_one_share_corporation?(share.corporation) &&
                   @game.corporation_share_sellable?(share.corporation)
               end
-              .group_by(&:corporation)
-              .flat_map do |corporation, shares|
-                (1..shares.size).map do |count|
-                  ShareBundle.new(shares.take(count)).tap { |bundle| bundle.share_price = corporation.share_price.price }
+
+            bundles = shares.group_by(&:corporation).flat_map do |corporation, corporation_shares|
+              (1..corporation_shares.size).map do |count|
+                ShareBundle.new(corporation_shares.take(count)).tap do |bundle|
+                  bundle.share_price = corporation.share_price.price
                 end
               end
-              .select { |bundle| can_sell_corporate_share_bundle?(entity, bundle) }
+            end
+
+            bundles.select { |bundle| can_sell_corporate_share_bundle?(entity, bundle) }
           end
 
           def can_sell_corporate_share_bundle?(entity, bundle)
             return false if !bundle || bundle.owner != entity
             return false if bundle.shares.empty? || bundle.shares.any?(&:president)
             return false unless bundle.shares.all?(&:buyable)
-            return false unless bundle.percent.positive? && (bundle.percent % 10).zero?
+            return false if !bundle.percent.positive? || (bundle.percent % 10).nonzero?
             return false unless buyable_one_share_corporation?(bundle.corporation)
-            return false unless @game.corporation_may_own_shares?(entity, bundle.corporation)
             return false unless @game.corporation_share_sellable?(bundle.corporation)
             return false unless @game.share_pool.fit_in_bank?(bundle)
 
@@ -507,9 +526,12 @@ module Engine
             available_child_shares.any? { |share| can_buy?(entity, share.to_bundle) }
           end
 
-          def can_start_corporation?(sponsor)
-            return false unless corporate_actions_available?(sponsor)
-            return false if @game.has_isolated_shell_descendant?(sponsor)
+        def can_start_corporation?(sponsor)
+          # Only root starting corporations (not existing branches) may start a new branch railroad.
+          return false unless corporate_actions_available?(sponsor)
+          return false if @game.isolated_branch_descendant?(sponsor)
+          return false unless @game.starting_corporation?(sponsor)
+          return false if @game.isolated_branch?(sponsor)
 
             minimum_par = @game.stock_market.par_prices.map(&:price).min
             controller = @game.acting_for_entity(sponsor)
@@ -590,7 +612,7 @@ module Engine
           end
 
           def place_land_grant_home_and_continue_to_par!
-            @game.place_shell_land_grant_home(
+            @game.place_branch_land_grant_home(
               @new_corporation,
               @sponsor,
               @selected_land_grant,
@@ -600,7 +622,7 @@ module Engine
 
           def acquisition_targets(acquirer)
             @game.corporations.select do |target|
-              target != acquirer && target.type != :shell && target.floated? && acquisition_eligible?(acquirer, target)
+              target != acquirer && target.type != :branch && target.floated? && acquisition_eligible?(acquirer, target)
             end
           end
 
@@ -633,7 +655,11 @@ module Engine
           end
 
           def corporate_actions_available?(entity)
-            entity&.corporation? && !@game.isolated_shell?(entity) && @game.phase.available?('3') && entity.operated?
+            # Corporations can only do corporate actions after they have completed a full operating turn,
+            # and not while they still have an unassimilated branch.
+            entity&.corporation? &&
+              !@game.isolated_branch?(entity) &&
+              entity&.operated?
           end
 
           def begin_merger(entity, corporation_id)
@@ -668,7 +694,7 @@ module Engine
           end
 
           def acquisition_eligible?(acquirer, target)
-            return false if target.type == :shell
+            return false if target.type == :branch
 
             player = @game.acting_for_entity(acquirer)
             return false unless player&.player?
@@ -805,7 +831,7 @@ module Engine
             move_acquisition_share_price(acquirer, new_price)
             exchange_acquisition_shares(acquirer, target, new_price, hostile: hostile)
             transfer_acquisition_assets(acquirer, target)
-            @game.reparent_shell_family(target, acquirer)
+            @game.reparent_branch_family(target, acquirer)
             sell_illegal_corporate_holdings(acquirer)
             @game.close_corporation(target)
             @game.graph.clear_graph_for_all
@@ -832,7 +858,9 @@ module Engine
             target_price = target.share_price
 
             if acquirer_price.price > 250 && target_price.price > 250
-              return acquirer_price.price == target_price.price ? [acquirer_price] : [acquirer_price, target_price].sort_by(&:price)
+              return [acquirer_price] if acquirer_price.price == target_price.price
+
+              return [acquirer_price, target_price].sort_by(&:price)
             end
 
             return [acquirer_price] if acquirer_price.price > 250
@@ -855,7 +883,7 @@ module Engine
                 row_col = col
                 row_best = share_price
               end
-              next unless row_best && row_col > best_col
+              next if !row_best || row_col <= best_col
 
               best_col = row_col
               best_price = row_best

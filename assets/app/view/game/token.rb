@@ -14,15 +14,23 @@ module View
 
       RED_WIDTH = 7
       WHITE_WIDTH = 2
+      ISOLATED_COLOR = '#f2a900'
+      ISOLATED_RING_WIDTH = 3
 
       def render
-        if @token.status != :flipped
-          render_token
-        else
-          children = [render_token]
-          children.concat(render_stroke)
-          h(:g, children)
-        end
+        overlay =
+          case @token.status
+          when :flipped
+            render_flipped_stroke
+          when :isolated
+            render_isolated_overlay
+          else
+            []
+          end
+
+        return render_token if overlay.empty?
+
+        h(:g, [render_token, *overlay])
       end
 
       def render_token
@@ -37,7 +45,7 @@ module View
         )
       end
 
-      def render_stroke
+      def render_flipped_stroke
         s = (@radius / Math.sqrt(2)).round(2)
         d = ((RED_WIDTH + WHITE_WIDTH) / 2.0 / Math.sqrt(2)).round(2)
         [
@@ -63,6 +71,63 @@ module View
               stroke: 'white',
               'stroke-width': WHITE_WIDTH,
               'stroke-opacity': '1.0',
+            },
+          ),
+        ]
+      end
+
+      def render_isolated_overlay
+        ring_radius = (@radius - (ISOLATED_RING_WIDTH / 2.0)).round(2)
+        badge_x = (@radius * 0.55).round(2)
+        badge_y = -badge_x
+        badge_radius = (@radius * 0.28).round(2)
+        icon_outer = (badge_radius * 0.58).round(2)
+        icon_gap = (badge_radius * 0.18).round(2)
+        icon_width = (badge_radius * 0.3).round(2)
+
+        [
+          h(
+            :circle, attrs: {
+              cx: 0,
+              cy: 0,
+              r: ring_radius,
+              fill: 'none',
+              stroke: 'white',
+              'stroke-width': ISOLATED_RING_WIDTH + 2,
+              'stroke-opacity': 0.85,
+            },
+          ),
+          h(
+            :circle, attrs: {
+              cx: 0,
+              cy: 0,
+              r: ring_radius,
+              fill: 'none',
+              stroke: ISOLATED_COLOR,
+              'stroke-width': ISOLATED_RING_WIDTH,
+              'stroke-dasharray': '4 3',
+            },
+          ),
+          h(
+            :circle, attrs: {
+              cx: badge_x,
+              cy: badge_y,
+              r: badge_radius,
+              fill: ISOLATED_COLOR,
+              stroke: 'white',
+              'stroke-width': 1.5,
+            },
+          ),
+          h(
+            :path, attrs: {
+              d: "M #{badge_x - icon_outer} #{badge_y + icon_outer} "\
+                 "L #{badge_x - icon_gap} #{badge_y + icon_gap} "\
+                 "M #{badge_x + icon_gap} #{badge_y - icon_gap} "\
+                 "L #{badge_x + icon_outer} #{badge_y - icon_outer}",
+              fill: 'none',
+              stroke: '#332400',
+              'stroke-width': icon_width,
+              'stroke-linecap': 'round',
             },
           ),
         ]

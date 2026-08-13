@@ -16,7 +16,6 @@ require_relative 'step/buy_train'
 require_relative 'step/buy_tokens'
 require_relative 'step/company_pending_par'
 require_relative 'step/corporate_action'
-require_relative 'step/land_grant_auction'
 require_relative 'step/route'
 require_relative 'step/special_token'
 require_relative 'step/special_track'
@@ -39,6 +38,7 @@ module Engine
         MUST_BUY_TRAIN = :always
         SELL_BUY_ORDER = :sell_buy
         MUST_EMERGENCY_ISSUE_BEFORE_EBUY = true
+        CLOSED_CORP_TOKENS_REMOVED = false
         BANKRUPTCY_ENDS_GAME_AFTER = :all_but_one
         GAME_END_CHECK = { bankrupt: :immediate, stock_market: :immediate, mines_connection: :one_more_full_or_set }.freeze
         GAME_END_REASONS_TEXT = Base::GAME_END_REASONS_TEXT.merge(
@@ -50,10 +50,10 @@ module Engine
         EVENTS_TEXT = Base::EVENTS_TEXT.merge(
           'remove_territory_borders' => ['Territory Borders Removed', 'The territory borders are removed from the map'],
         ).freeze
-        TOKEN_PRICE = 100
+        TOKEN_PRICE = 0
+        ABANDONED_STATION_REMOVAL_COST = 40
 
         EW_BONUS = 100
-        LAND_GRANT_BID_MARKERS = 2
         EXCLUDED_LAND_GRANT_HEXES = %w[B38 C35 F4 F36 F40 H26 H38 H42 J36 K33].freeze
         COLORADO_MINES_HEX = 'E3'
         EASTERN_CONNECTION_HEXES = %w[B42 H44].freeze
@@ -164,7 +164,7 @@ module Engine
               { 'nodes' => ['town'], 'pay' => 99, 'visit' => 99 },
               { 'nodes' => %w[city offboard], 'pay' => 8, 'visit' => 8 },
             ],
-            price: 1080,
+            price: 1350,
             num: 99,
           },
         ].freeze
@@ -184,8 +184,8 @@ module Engine
                                  multiple_buy_types: self.class::MULTIPLE_BUY_TYPES, game: self)
         end
 
-        attr_reader :corporations, :land_grants, :pending_token_buys, :shell_parent, :shell_path, :shell_root,
-                    :isolated_shell_homes, :land_grant_child
+        attr_reader :corporations, :land_grants, :pending_token_buys, :branch_parent, :branch_path, :branch_root,
+                    :isolated_branch_homes, :land_grant_child, :abandoned_stations
 
         def setup_preround
           @land_grants = build_land_grants
@@ -195,11 +195,12 @@ module Engine
 
         def setup
           @pending_token_buys = []
-          @shell_parent = {}
-          @shell_path = {}
-          @shell_root = {}
-          @shell_child_count = Hash.new(0)
-          @isolated_shell_homes = {}
+          @branch_parent = {}
+          @branch_path = {}
+          @branch_root = {}
+          @branch_child_count = Hash.new(0)
+          @isolated_branch_homes = {}
+          @abandoned_stations = []
           @land_grant_child = {}
           @mines_connection_needs_update = true
           @mines_connection_reached = false
@@ -209,12 +210,40 @@ module Engine
 
         def place_starting_home_tokens
           @corporations.each do |corporation|
-            next if corporation.type == :shell || corporation.tokens.first&.used
+            next if corporation.type == :branch || corporation.tokens.first&.used
 
             hex = hex_by_id(corporation.coordinates)
             city = hex.tile.cities.find { |candidate| candidate.reserved_by?(corporation) } || hex.tile.cities.first
             city.place_token(corporation, corporation.find_token_by_type)
           end
+        end
+
+        def close_corporation(corporation, quiet: false)
+          hexes.each do |hex|
+            hex.tile.cities.each do |city|
+              (city.tokens + city.extra_tokens).compact.each do |token|
+                next unless token.corporation == corporation
+
+                token.status = :flipped
+                @abandoned_stations << token unless @abandoned_stations.include?(token)
+              end
+            end
+          end
+          @isolated_branch_homes.delete(corporation)
+
+          super
+        end
+
+        def abandoned_station?(token)
+          @abandoned_stations.include?(token) &&
+            token.used &&
+            token.status == :flipped &&
+            token.corporation&.closed?
+        end
+
+        def remove_abandoned_station!(token)
+          @abandoned_stations.delete(token)
+          token.destroy!
         end
 
         def add_territory_borders
@@ -293,10 +322,6 @@ module Engine
         def next_round!
           @round =
             case @round
-            when G1872::Round::Auction
-              clear_programmed_actions
-              @players.each(&:unpass!)
-              new_stock_round
             when Engine::Round::Auction
               init_round_finished
               new_stock_round
@@ -311,32 +336,17 @@ module Engine
               else
                 @turn += 1
                 or_set_finished
-                land_grant_auction_available? ? new_land_grant_auction_round : new_stock_round
+                new_stock_round
               end
             end
-        end
-
-        def land_grant_auction_available?
-          %w[3 4 5].include?(@phase.name) && @land_grants.any? { |company| company.owner == @bank }
-        end
-
-        def bidding_token_per_player
-          self.class::LAND_GRANT_BID_MARKERS
         end
 
         def initial_auction_companies
           @companies.reject { |company| company.type == :land_grant }
         end
 
-        def new_land_grant_auction_round
-          @players.each(&:unpass!)
-          @log << "-- #{round_description('Auction', 1)} --"
-          @round_counter += 1
-          G1872::Round::Auction.new(self, [G1872::Step::LandGrantAuction])
-        end
-
         def show_ipo_rows?
-          @round.is_a?(G1872::Round::Auction)
+          @round.is_a?(Engine::Round::Stock) && grant_cards_available?
         end
 
         def show_entities_ipo_rows?
@@ -353,13 +363,23 @@ module Engine
 
         def ipo_rows
           rows = land_grant_ipo_rows
-          return rows unless @round.is_a?(G1872::Round::Auction)
+          return rows if @round.is_a?(Engine::Round::Stock) && grant_cards_available?
 
-          rows.reject { |row| row.size == 1 }
+          []
         end
 
         def land_grant_ipo_rows
           @ipo_rows || []
+        end
+
+        def grant_cards_available?
+          available_bank_land_grants.any? && all_corporations.any? { |corporation| branch_grant_eligible?(corporation) }
+        end
+
+        def available_bank_land_grants
+          @land_grants.select do |land_grant|
+            land_grant.owner == @bank && !land_grant.closed?
+          end
         end
 
         def buyable_bank_owned_companies
@@ -387,19 +407,9 @@ module Engine
         end
 
         def company_status_str(company)
-          statuses = Array(land_grant_bid_status(company) || super)
+          statuses = Array(super)
           statuses << 'Used' if land_grant_used?(company)
           statuses.empty? ? nil : statuses
-        end
-
-        def land_grant_bid_status(company)
-          return if company.type != :land_grant || !@round.is_a?(G1872::Round::Auction)
-
-          step = @round&.steps&.find { |candidate| candidate.is_a?(G1872::Step::LandGrantAuction) }
-          bids = step&.bids&.[](company)
-          return if bids.nil? || bids.empty?
-
-          bids.map { |bid| "#{bid.entity.name}: #{format_currency(bid.price)}" }
         end
 
         def remove_land_grant(company)
@@ -464,44 +474,44 @@ module Engine
         def deal_land_grant_columns(deck)
           base_size, spare_count = deck.size.divmod(land_grant_column_count)
 
-          land_grant_column_count.times.map do |index|
+          Array.new(land_grant_column_count) do |index|
             deck.shift(base_size + (index < spare_count ? 1 : 0))
           end
         end
 
-        def available_shells
-          @corporations.select { |corporation| corporation.type == :shell && !corporation.ipoed }
+        def available_branches
+          @corporations.select { |corporation| corporation.type == :branch && !corporation.ipoed }
         end
 
-        def assign_shell_identity(shell, parent)
-          raise GameError, 'That corporation is not an available shell' unless available_shells.include?(shell)
+        def assign_branch_identity(branch, parent, branch_city: nil)
+          raise GameError, 'That corporation is not an available branch railroad' unless available_branches.include?(branch)
 
-          root = @shell_root[parent] || parent
-          number = @shell_child_count[parent] += 1
-          path = Array(@shell_path[parent]) + [number]
-          @shell_parent[shell] = parent
-          @shell_path[shell] = path
-          @shell_root[shell] = root
-          shell.assign_shell_identity!(root, path)
+          root = @branch_root[parent] || parent
+          number = @branch_child_count[parent] += 1
+          path = Array(@branch_path[parent]) + [number]
+          @branch_parent[branch] = parent
+          @branch_path[branch] = path
+          @branch_root[branch] = root
+          branch.assign_branch_identity!(root, path, branch_city: branch_city)
           update_cache(:corporations)
         end
 
         def corporation_ancestor?(descendant, corporation)
-          parent = @shell_parent[descendant]
+          parent = @branch_parent[descendant]
           while parent
             return true if parent == corporation
 
-            parent = @shell_parent[parent]
+            parent = @branch_parent[parent]
           end
           false
         end
 
         def direct_child?(parent, corporation)
-          @shell_parent[corporation] == parent
+          @branch_parent[corporation] == parent
         end
 
         def same_genealogy?(corporation, other)
-          (@shell_root[corporation] || corporation) == (@shell_root[other] || other)
+          (@branch_root[corporation] || corporation) == (@branch_root[other] || other)
         end
 
         def corporation_may_own_shares?(owner, corporation)
@@ -511,22 +521,26 @@ module Engine
         end
 
         def token_corporation(corporation)
-          return corporation unless corporation&.type == :shell
-          return corporation if isolated_shell?(corporation)
+          return corporation unless corporation&.type == :branch
+          return corporation if isolated_branch?(corporation)
 
-          @shell_root[corporation] || corporation
+          @branch_root[corporation] || corporation
         end
 
-        def isolated_shell?(corporation)
-          @isolated_shell_homes.key?(corporation)
+        def isolated_branch?(corporation)
+          @isolated_branch_homes.key?(corporation)
         end
 
-        def has_isolated_shell_descendant?(corporation)
-          @isolated_shell_homes.keys.any? { |shell| corporation_ancestor?(shell, corporation) }
+        def isolated_branch_descendant?(corporation)
+          @isolated_branch_homes.keys.any? { |branch| corporation_ancestor?(branch, corporation) }
         end
 
         def land_grant_hex_id(land_grant)
           land_grant.sym.delete_prefix('LG-')
+        end
+
+        def land_grant_city_name(land_grant)
+          self.class::LOCATION_NAMES[land_grant_hex_id(land_grant)] || land_grant_hex_id(land_grant)
         end
 
         def land_grant_territory(land_grant)
@@ -561,48 +575,23 @@ module Engine
         end
 
         def genealogy_has_land_grant_territory?(corporation, territory)
-          root = @shell_root[corporation] || corporation
+          root = @branch_root[corporation] || corporation
 
-          shell_in_territory = @corporations.any? do |candidate|
-            next false unless candidate.type == :shell
+          branch_in_territory = @corporations.any? do |candidate|
+            next false unless candidate.type == :branch
             next false unless candidate.ipoed
-            next false unless (@shell_root[candidate] || candidate) == root
+            next false unless (@branch_root[candidate] || candidate) == root
 
             territory_for_hex(candidate.coordinates) == territory
           end
-          return true if shell_in_territory
+          return true if branch_in_territory
 
           @land_grants.any? do |land_grant|
             next false if land_grant.closed?
             next false unless land_grant_territory(land_grant) == territory
 
             owner = land_grant.owner
-            owner&.corporation? && (@shell_root[owner] || owner) == root
-          end
-        end
-
-        def land_grant_bid_marker_owner(company)
-          return unless company&.type == :land_grant
-
-          company.instance_variable_get(:@g1872_bid_marker_owner)
-        end
-
-        def assign_land_grant_bid_marker!(company, player)
-          return unless company&.type == :land_grant
-
-          company.instance_variable_set(:@g1872_bid_marker_owner, player)
-        end
-
-        def return_land_grant_bid_marker!(company)
-          return unless company&.type == :land_grant
-
-          company.remove_instance_variable(:@g1872_bid_marker_owner) if
-            company.instance_variable_defined?(:@g1872_bid_marker_owner)
-        end
-
-        def retained_land_grant_bid_marker_count(player)
-          @land_grants.count do |land_grant|
-            !land_grant.closed? && land_grant_bid_marker_owner(land_grant) == player
+            owner&.corporation? && (@branch_root[owner] || owner) == root
           end
         end
 
@@ -617,28 +606,28 @@ module Engine
           land_grant_home_city_available?(hex) || land_grant_home_upgrade_tiles(hex).any?
         end
 
-        def place_shell_land_grant_home(shell, sponsor, land_grant, connected: nil)
+        def place_branch_land_grant_home(branch, sponsor, land_grant, connected: nil)
           hex = hex_by_id(land_grant_hex_id(land_grant))
-          city = land_grant_home_city(shell, hex)
+          city = land_grant_home_city(branch, hex)
           graph.clear_graph_for_all
           connected = land_grant_connected_to_sponsor_network?(sponsor, hex) if connected.nil?
-          token = shell_home_token(shell)
+          token = branch_home_token(branch)
 
-          shell.coordinates = hex.id
+          branch.coordinates = hex.id
           land_grant.owner.companies.delete(land_grant) if land_grant.owner.respond_to?(:companies)
           sponsor.companies << land_grant unless sponsor.companies.include?(land_grant)
           land_grant.owner = sponsor
-          @land_grant_child[land_grant] = shell
+          remove_land_grant(land_grant)
+          @land_grant_child[land_grant] = branch
           mark_land_grant_used!(land_grant)
-          city.place_token(shell, token, free: true, check_tokenable: false)
+          city.place_token(branch, token, free: true, check_tokenable: false)
 
           if connected
-            assimilate_shell_home!(shell, sponsor)
+            assimilate_branch_home!(branch, sponsor)
           else
-            token.status = :flipped
-            @isolated_shell_homes[shell] = token
-            @log << "#{shell.name}'s home station is placed at #{hex.id} and flipped because it is not connected to "\
-                    "#{sponsor.name}'s network"
+            token.status = :isolated
+            @isolated_branch_homes[branch] = token
+            @log << "#{branch.name}'s home station is placed at #{hex.id}"
           end
 
           graph.clear_graph_for_all
@@ -649,18 +638,18 @@ module Engine
           graph_for_entity(sponsor_token_corporation).reachable_hexes(sponsor_token_corporation).key?(hex)
         end
 
-        def shell_home_token(shell)
-          # Shells normally use their root corporation's token array. An isolated land-grant home is the exception:
-          # until it connects, it must be a real shell token so flipping it does not also flip the parent's marker.
-          root = @shell_root[shell]
-          if root && shell.tokens.equal?(root.tokens)
-            shell.instance_variable_set(:@tokens, [])
+        def branch_home_token(branch)
+          # Branches normally use their root corporation's token array. An isolated land-grant home is the exception:
+          # until it connects, it must be a real branch token so its status does not affect the parent's marker.
+          root = @branch_root[branch]
+          if root && branch.tokens.equal?(root.tokens)
+            branch.instance_variable_set(:@tokens, [])
           else
-            shell.tokens.delete_if { |token| !token.used && token.corporation != shell }
+            branch.tokens.delete_if { |token| !token.used && token.corporation != branch }
           end
 
-          shell.tokens.find { |token| !token.used && token.corporation == shell } ||
-            Token.new(shell, price: 0).tap { |token| shell.tokens << token }
+          branch.tokens.find { |token| !token.used && token.corporation == branch } ||
+            Token.new(branch, price: 0).tap { |token| branch.tokens << token }
         end
 
         def land_grant_home_city(_corporation, hex)
@@ -712,26 +701,26 @@ module Engine
           old_tile.paths.all? { |path| new_tile.paths.any? { |new_path| path <= new_path } }
         end
 
-        def assimilate_connected_shells!
-          @isolated_shell_homes.keys.each do |shell|
-            parent = @shell_parent[shell]
+        def assimilate_connected_branches!
+          @isolated_branch_homes.keys.each do |branch|
+            parent = @branch_parent[branch]
             next unless parent
-            next unless shell_home_connected_to_parent?(shell, parent)
+            next unless branch_home_connected_to_parent?(branch, parent)
 
-            assimilate_shell_home!(shell, parent)
+            assimilate_branch_home!(branch, parent)
           end
         end
 
-        def shell_home_connected_to_parent?(shell, parent = @shell_parent[shell])
-          token = @isolated_shell_homes[shell]
+        def branch_home_connected_to_parent?(branch, parent = @branch_parent[branch])
+          token = @isolated_branch_homes[branch]
           return false unless token&.city
           return false unless parent
 
           token_graph_for_entity(token_corporation(parent)).connected_nodes(token_corporation(parent)).key?(token.city)
         end
 
-        def assimilate_shell_home!(shell, parent = @shell_parent[shell])
-          token = @isolated_shell_homes.delete(shell) || shell.tokens.find(&:used)
+        def assimilate_branch_home!(branch, parent = @branch_parent[branch])
+          token = @isolated_branch_homes.delete(branch) || branch.tokens.find(&:used)
           return unless token&.city&.hex
           return unless parent
 
@@ -739,61 +728,63 @@ module Engine
           parent_token_corporation = token_corporation(parent)
           token.corporation = parent_token_corporation
           parent_token_corporation.tokens << token unless parent_token_corporation.tokens.include?(token)
-          shell.instance_variable_set(:@tokens, parent_token_corporation.tokens)
-          @log << "#{shell.name}'s home station at #{token.hex.id} is connected and assimilated into "\
+          branch.instance_variable_set(:@tokens, parent_token_corporation.tokens)
+          @log << "#{branch.name}'s home station at #{token.hex.id} is connected and assimilated into "\
                   "#{parent.name}'s network"
           graph.clear_graph_for_all
         end
 
         def city_tokened_by?(city, entity)
-          super(city, entity) || (entity.respond_to?(:type) && entity.type == :shell && super(city, token_corporation(entity)))
+          super(city, entity) || (entity.respond_to?(:type) && entity.type == :branch && super(city, token_corporation(entity)))
         end
 
-        def reparent_shell_family(target, acquirer)
-          direct_children = shell_children(target)
+        def reparent_branch_family(target, acquirer)
+          direct_children = branch_children(target)
           return if direct_children.empty?
 
-          new_root = @shell_root[acquirer] || acquirer
-          direct_children.each { |shell| reassign_shell_subtree(shell, acquirer, new_root) }
+          new_root = @branch_root[acquirer] || acquirer
+          direct_children.each { |branch| reassign_branch_subtree(branch, acquirer, new_root) }
 
-          @shell_parent.delete(target)
-          @shell_path.delete(target)
-          @shell_root.delete(target)
-          @shell_child_count.delete(target)
+          @branch_parent.delete(target)
+          @branch_path.delete(target)
+          @branch_root.delete(target)
+          @branch_child_count.delete(target)
         end
 
-        def shell_children(parent)
-          @shell_parent
-            .select { |_shell, shell_parent| shell_parent == parent }
+        def branch_children(parent)
+          @branch_parent
+            .select { |_branch, branch_parent| branch_parent == parent }
             .keys
-            .sort_by { |shell| @corporations.index(shell) || Float::INFINITY }
+            .sort_by { |branch| @corporations.index(branch) || Float::INFINITY }
         end
 
-        def shell_descendants(parent)
-          shell_children(parent).flat_map { |child| [child, *shell_descendants(child)] }
+        def branch_descendants(parent)
+          branch_children(parent).flat_map { |child| [child, *branch_descendants(child)] }
         end
 
-        def reassign_shell_subtree(shell, parent, root)
-          children = shell_children(shell)
-          old_name = shell.name
-          number = @shell_child_count[parent] += 1
-          path = Array(@shell_path[parent]) + [number]
+        def reassign_branch_subtree(branch, parent, root)
+          children = branch_children(branch)
+          old_name = branch.name
+          number = @branch_child_count[parent] += 1
+          path = Array(@branch_path[parent]) + [number]
 
-          @shell_parent[shell] = parent
-          @shell_path[shell] = path
-          @shell_root[shell] = root
-          @shell_child_count[shell] = [@shell_child_count[shell], children.size].compact.max || 0
-          shell.owner = parent
-          shell.assign_shell_identity!(root, path)
-          @log << "#{old_name} becomes #{shell.name} under #{parent.name}" unless old_name == shell.name
+          @branch_parent[branch] = parent
+          @branch_path[branch] = path
+          @branch_root[branch] = root
+          @branch_child_count[branch] = [@branch_child_count[branch], children.size].compact.max || 0
+          branch.owner = parent
+          branch.assign_branch_identity!(root, path)
+          @log << "#{old_name} becomes #{branch.name} under #{parent.name}" unless old_name == branch.name
 
-          children.each { |child| reassign_shell_subtree(child, shell, root) }
+          children.each { |child| reassign_branch_subtree(child, branch, root) }
         end
 
         def can_par?(corporation, entity)
-          if corporation.type == :shell
-            step = @round&.steps&.find { |candidate| candidate.is_a?(G1872::Step::CorporateAction) }
-            return step&.can_par_shell?(corporation, entity) || false
+          if corporation.type == :branch
+            return @round&.steps&.any? do |step|
+              (step.respond_to?(:can_par_branch?) && step.can_par_branch?(corporation, entity)) ||
+                (step.respond_to?(:can_par_branch?) && step.can_par_branch?(corporation, entity))
+            end || false
           end
 
           super
@@ -815,19 +806,36 @@ module Engine
         end
 
         def all_corporations
-          @corporations.reject { |corporation| corporation.type == :shell && !@shell_parent.key?(corporation) }
+          @corporations.reject { |corporation| corporation.type == :branch && !@branch_parent.key?(corporation) }
+        end
+
+        # Starting/root corporations are the non-branch, non-assigned parents that can sponsor a branch railroad.
+        def starting_corporation?(corporation)
+          return false unless corporation&.corporation?
+
+          corporation.type == :parent && !@branch_parent.key?(corporation)
+        end
+
+        def branch_grant_eligible?(corporation)
+          return false unless corporation&.corporation?
+          return false unless corporation.floated?
+          return false unless corporation.operated?
+          return false unless starting_corporation?(corporation)
+          return false if isolated_branch_descendant?(corporation)
+
+          true
         end
 
         def bank_sort(corporations)
           corporations.sort_by do |corporation|
-            [corporation.type == :shell ? 1 : 0, @corporations.index(corporation) || Float::INFINITY]
+            [corporation.type == :branch ? 1 : 0, @corporations.index(corporation) || Float::INFINITY]
           end
         end
 
         def player_sort(entities)
           sorted = entities.sort_by do |corporation|
-            root = @shell_root[corporation] || corporation
-            path = Array(@shell_path[corporation]).map { |number| number || Float::INFINITY }
+            root = @branch_root[corporation] || corporation
+            path = Array(@branch_path[corporation]).map { |number| number || Float::INFINITY }
             [operating_order.index(root) || Float::INFINITY, path.empty? ? 0 : 1, path, corporation.name]
           end
           sorted.group_by { |corporation| acting_for_entity(corporation) }
@@ -870,6 +878,10 @@ module Engine
           ], round_num: round_num)
         end
 
+        def after_end_of_operating_turn(operator)
+          operator.mark_operated! if operator&.corporation?
+        end
+
         def ew_bonus(stops)
           east = stops.find { |stop| stop.groups.include?('East') }
           west = stops.find { |stop| stop.groups.include?('West') }
@@ -888,7 +900,7 @@ module Engine
         end
 
         def can_run_route?(entity)
-          return false if entity&.corporation? && isolated_shell?(entity)
+          return false if entity&.corporation? && isolated_branch?(entity)
 
           super
         end
@@ -903,7 +915,6 @@ module Engine
             @bank.spend(value, receiver) if value.positive?
             @log << "#{receiver.name} receives #{format_currency(value)} from #{land_grant.name}" if value.positive?
             land_grant.value = 0
-            return_land_grant_bid_marker!(land_grant)
             land_grant.close!
             land_grant.owner.companies.delete(land_grant) if land_grant.owner.respond_to?(:companies)
             @land_grant_child.delete(land_grant)
@@ -995,14 +1006,14 @@ module Engine
         end
 
         def must_buy_train?(entity)
-          return false if entity&.corporation? && isolated_shell?(entity)
+          return false if entity&.corporation? && isolated_branch?(entity)
 
           super
         end
 
         def use_big_creek_land_company!(corporation, city: nil)
           company = company_by_id('BCLC')
-          raise GameError, 'Big Creek Land Company is not available' unless company && !company.closed?
+          raise GameError, 'Big Creek Land Company is not available' if !company || company.closed?
           raise GameError, "#{corporation.name} does not own Big Creek Land Company" unless company.owner == corporation
 
           hex = hex_by_id('H26')
@@ -1019,7 +1030,7 @@ module Engine
           @log << "#{corporation.name} places a new Big Creek station marker in #{hex.name}"
           company_closing_after_using_ability(company)
           company.close!
-          assimilate_connected_shells!
+          assimilate_connected_branches!
         end
 
         def issuable_shares(entity)
@@ -1049,7 +1060,7 @@ module Engine
 
         def purchasable_companies(entity = nil)
           buyer = entity || current_entity
-          return [] if @round&.operating? && buyer&.corporation? && isolated_shell?(buyer)
+          return [] if @round&.operating? && buyer&.corporation? && isolated_branch?(buyer)
 
           sellers = if buyer&.corporation?
                       [acting_for_entity(buyer), *genealogy_company_purchase_sellers(buyer)]
@@ -1167,7 +1178,7 @@ module Engine
           return false unless @share_pool.fit_in_bank?(bundle)
           return false if sponsored_corporation?(bundle.corporation) && bundle.presidents_share
           return false if bundle.corporation == active_corporation && causes_presidency_change?(player, bundle)
-          return false if active_corporation&.type == :shell &&
+          return false if active_corporation&.type == :branch &&
                           corporation_ancestor?(active_corporation, bundle.corporation) &&
                           causes_presidency_change?(player, bundle)
 
@@ -1242,7 +1253,7 @@ module Engine
 
         def float_corporation(corporation)
           super
-          return if corporation.type == :shell
+          return if corporation.type == :branch
 
           issue_parent_float_shares(corporation)
           purchase_starting_tokens(corporation)
@@ -1274,15 +1285,20 @@ module Engine
             corporation.tokens.clear
             (count + 1).times { corporation.tokens << Token.new(corporation, price: 0) }
           end
-          corporation.spend(cost, @bank)
+          corporation.spend(cost, @bank) if cost.positive?
 
           place_home_token(corporation) unless home_city
 
-          message = if home_city
-                      "#{corporation.name} pays #{format_currency(cost)} for its home station marker"
-                    else
-                      "#{corporation.name} buys one additional token for #{format_currency(cost)}"
-                    end
+          message =
+            if home_city && cost.positive?
+              "#{corporation.name} pays #{format_currency(cost)} for its home station marker"
+            elsif home_city
+              "#{corporation.name} receives its home station marker"
+            elsif cost.positive?
+              "#{corporation.name} buys one additional token for #{format_currency(cost)}"
+            else
+              "#{corporation.name} receives one additional token"
+            end
           @log << message
         end
 

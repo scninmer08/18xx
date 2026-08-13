@@ -14,6 +14,9 @@ module Engine
         GAME_TITLE = '1872'
         GAME_SUBTITLE = 'The High Plains'
         GAME_DESIGNER = 'Scott Ninmer'
+        GAME_RULES_URL = 'https://www.dropbox.com/scl/fi/ebqf8acw4q2qlvdqxrz8g/'\
+                         '1872_The_High_Plains_Rulebook_v.0.1.0.pdf?'\
+                         'rlkey=vyy7qhsdtwfgoyabd5k1f3qe9&dl=0'
 
         PLAYER_RANGE = [3, 5].freeze
 

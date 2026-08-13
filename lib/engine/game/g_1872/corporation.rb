@@ -14,25 +14,36 @@ module Engine
           !!@g1872_operated
         end
 
-        def assign_shell_identity!(root, path)
+        def assign_branch_identity!(root, path, branch_city: nil)
           label = path.join('.')
-          @name = "#{root.name}-#{label}"
-          self.full_name = "#{root.full_name} - Shell #{label}"
-          assign_shell_logo!(root, path)
+          root_name = root.full_name || root.name
+          root_sym = root.id
+          branch_sym = root_sym ? "#{root_sym} #{label}" : "Branch #{label}"
+          @id = branch_sym
+          @sym = branch_sym
+          @name = branch_sym
+
+          if branch_city
+            city_label = branch_city.to_s.strip
+            self.full_name = "#{root_name} – #{city_label} Branch"
+          else
+            self.full_name = "#{root_name} – Branch #{label}"
+          end
+          assign_branch_logo!(root, path)
           self.color = root.color
           self.text_color = root.text_color
           @tokens = root.tokens
         end
 
         def token_proxy_corporation
-          return nil unless type == :shell
+          return nil unless type == :branch
 
           tokens.first&.corporation
         end
 
         private
 
-        def assign_shell_logo!(root, _path)
+        def assign_branch_logo!(root, _path)
           @logo_filename = root.logo_filename
           @logo = root.logo
           @simple_logo = root.simple_logo
